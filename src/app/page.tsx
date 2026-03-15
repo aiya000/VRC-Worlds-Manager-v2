@@ -2,9 +2,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { commands } from '@/lib/bindings';
+import { commands } from '@/lib/commands';
 import { useLocalization } from '@/hooks/use-localization';
-import { info, error } from '@tauri-apps/plugin-log';
+import { info, error } from '@/lib/services/logger';
 
 export default function Home() {
   const router = useRouter();

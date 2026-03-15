@@ -7,9 +7,9 @@ import {
   FolderData,
   FolderRemovalPreference,
   WorldDisplayData,
-} from '@/lib/bindings';
+} from '@/lib/commands';
 import { FolderType, isUserFolder, SpecialFolders } from '@/types/folders';
-import { error, info } from '@tauri-apps/plugin-log';
+import { error, info } from '@/lib/services/logger';
 import { mutate as mutateFoldersCache } from 'swr';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';

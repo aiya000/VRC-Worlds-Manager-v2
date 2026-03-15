@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Command, CommandGroup, CommandItem } from '@/components/ui/command';
-import { commands, FolderData } from '@/lib/bindings';
+import { commands, FolderData } from '@/lib/commands';
 import { Checkbox } from '../../../../../components/ui/checkbox';
 import {
   Select,

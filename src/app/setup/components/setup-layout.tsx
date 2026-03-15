@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { info } from '@tauri-apps/plugin-log';
+import { info } from '@/lib/services/logger';
 
 interface SetupLayoutProps {
   title: string;

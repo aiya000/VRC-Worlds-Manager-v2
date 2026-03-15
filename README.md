@@ -1,12 +1,8 @@
-# VRC Worlds Manager v2
+# VRChat Worlds Manager Web
 
 [日本語はこちら / 日本語のREADMEはREADME_JP.mdを参照してください。](./README_JP.md)
 
-![GitHub deployments](https://img.shields.io/github/deployments/Raifa21/VRC-Worlds-Manager-v2/release?style=flat)
-![GitHub Release](https://img.shields.io/github/v/release/Raifa21/VRC-Worlds-Manager-v2?label=Stable)
-![GitHub Release](https://img.shields.io/github/v/release/Raifa21/VRC-Worlds-Manager-v2?include_prereleases&label=Pre-Release)
-
-VRC Worlds Manager is a Windows application designed to help VRChat users organize and store their favorite worlds more easily.
+VRChat Worlds Manager Web is a web application (PWA) that helps VRChat users organize and store their favorite worlds. Based on the original [VRC Worlds Manager v2](https://github.com/Raifa21/VRC-Worlds-Manager-v2) desktop application.
 
 ---
 
@@ -43,38 +39,38 @@ VRC Worlds Manager is a Windows application designed to help VRChat users organi
 
 ---
 
-## Screenshots
+## Tech Stack
 
-![image](https://github.com/user-attachments/assets/13e36a5b-0ea4-4d80-ba9d-ed7dde811abd)
-
-![image](https://github.com/user-attachments/assets/5b30cca7-b62c-4f11-b342-2ebbabcf0089)
-
-![image](https://github.com/user-attachments/assets/94a6ed0e-2828-484e-99d4-17fc9039fc44)
-
-![image](https://github.com/user-attachments/assets/8f567d9d-49eb-4e6b-a6d2-f65bf08cda84)
-
-![image](https://github.com/user-attachments/assets/d45f8363-b5d7-4a3b-8a94-d4cd39fdb372)
-
+- **Frontend**: Next.js 16 + React 19 + Tailwind CSS 4
+- **Service Layer**: Effect-TS
+- **Data Storage**: IndexedDB (Dexie.js) + localStorage
+- **API Proxy**: Cloudflare Worker (CORS proxy)
+- **Package Manager**: Bun
+- **Deployment**: Static Generation (PWA)
 
 ---
 
-## Installation
+## Getting Started
 
-Download the latest release from the [Releases page](https://github.com/Raifa21/VRC-Worlds-Manager-v2/releases) and run the `.exe` file.  
-No additional setup is required.
+```bash
+# Install dependencies
+bun install
 
----
+# Start development server
+bun run dev
 
-## Build/Release
+# Type check
+bun run typecheck
 
-This project uses [Tauri](https://tauri.app/) and [Next.js](https://nextjs.org/).  
-To build from source, clone the repository and follow the instructions in the [Tauri documentation](https://tauri.app/v1/guides/getting-started/prerequisites/) and [Next.js documentation](https://nextjs.org/docs).
+# Build for production
+bun run build
+```
 
 ---
 
 ## Contributing
 
-Contributions are welcome!  
+Contributions are welcome!
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
@@ -89,6 +85,7 @@ Some components are licensed under [CC-BY-NC-4.0](https://creativecommons.org/li
 
 ## Credits
 
+- Original application: [VRC Worlds Manager v2](https://github.com/Raifa21/VRC-Worlds-Manager-v2) by Raifa and siloneco
 - Special thanks to VRChat and the VRChat API Community for providing API documentation.
 - VRChat-like sidebar icons provided by 黒音キト, licensed under CC-BY-NC-4.0.
 - Application icon uses Ciel-chan, with thanks to ArmoireLepus for approval to use.

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Heart } from 'lucide-react';
-import { CardSize, WorldDisplayData } from '@/lib/bindings';
+import { CardSize, WorldDisplayData } from '@/lib/commands';
 import { useLocalization } from '@/hooks/use-localization';
 import { usePatreonContext } from '@/contexts/patreon-context';
 import { PlatformIndicator } from './platform-indicator';

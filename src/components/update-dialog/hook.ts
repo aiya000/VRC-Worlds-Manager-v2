@@ -1,7 +1,6 @@
 import { useLocalization } from '@/hooks/use-localization';
 import { toast } from 'sonner';
-import { events, commands, LocalizedChanges } from '@/lib/bindings';
-import { UnlistenFn } from '@tauri-apps/api/event';
+import { events, commands, LocalizedChanges } from '@/lib/commands';
 import { useCallback, useEffect, useState } from 'react';
 
 type Props = {
@@ -70,8 +69,8 @@ export const useUpdateDialog = ({
   useEffect(() => {
     let isCancelled = false;
     let callbackExecuted = false;
-    let unlistenProgressFn: UnlistenFn | undefined = undefined;
-    let unlistenCompleteFn: UnlistenFn | undefined = undefined;
+    let unlistenProgressFn: (() => void) | undefined = undefined;
+    let unlistenCompleteFn: (() => void) | undefined = undefined;
 
     const setupListener = async () => {
       try {

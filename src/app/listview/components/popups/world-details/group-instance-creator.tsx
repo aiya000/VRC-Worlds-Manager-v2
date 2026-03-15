@@ -8,9 +8,9 @@ import {
   GroupRole,
   GroupInstancePermissionInfo,
   commands,
-} from '@/lib/bindings';
+} from '@/lib/commands';
 import { GroupInstanceType } from '@/types/instances';
-import { InstanceRegion } from '@/lib/bindings';
+import { InstanceRegion } from '@/lib/commands';
 import { useState, useEffect } from 'react';
 import { Label } from '../../../../../components/ui/label';
 import {
@@ -20,7 +20,7 @@ import {
 import { ChevronRight } from 'lucide-react';
 import { Separator } from '../../../../../components/ui/separator';
 import { useLocalization } from '@/hooks/use-localization';
-import { info, error } from '@tauri-apps/plugin-log'; // Add this import
+import { info, error } from '@/lib/services/logger'; // Add this import
 
 interface GroupInstanceCreatorProps {
   groups: UserGroup[];

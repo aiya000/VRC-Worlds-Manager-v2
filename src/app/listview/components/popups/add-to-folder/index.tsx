@@ -10,13 +10,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Check, Info, Loader2, Minus, AlertCircle } from 'lucide-react';
-import { commands, WorldDisplayData } from '@/lib/bindings';
+import { commands, WorldDisplayData } from '@/lib/commands';
 import { useLocalization } from '@/hooks/use-localization';
 import { Alert, AlertDescription } from '../../../../../components/ui/alert';
 import { Input } from '../../../../../components/ui/input';
-import { error, info } from '@tauri-apps/plugin-log';
+import { error, info } from '@/lib/services/logger';
 import { Checkbox } from '../../../../../components/ui/checkbox';
-import { FolderRemovalPreference } from '@/lib/bindings';
+import { FolderRemovalPreference } from '@/lib/commands';
 import { useFolders } from '@/app/listview/hook/use-folders';
 
 import { usePathname } from 'next/navigation';

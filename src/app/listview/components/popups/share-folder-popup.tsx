@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocalization } from '@/hooks/use-localization';
-import { commands } from '@/lib/bindings';
-import { info, error } from '@tauri-apps/plugin-log';
-import { open as openUrl } from '@tauri-apps/plugin-shell';
+import { commands } from '@/lib/commands';
+import { info, error } from '@/lib/services/logger';
 import {
   FolderOpen,
   Loader2,
@@ -168,7 +167,7 @@ export function ShareFolderPopup({
   const handleTweetShare = async () => {
     if (!tweetIntentUrl) return;
     try {
-      await openUrl(tweetIntentUrl);
+      window.open(tweetIntentUrl, '_blank');
       toast.success(t('share-folder:toast-twitter-opened', folderName));
       onOpenChange(false);
     } catch (e) {
@@ -180,7 +179,7 @@ export function ShareFolderPopup({
   const handlePreviewFolder = async () => {
     if (shareLink) {
       try {
-        await openUrl(shareLink);
+        window.open(shareLink, '_blank');
         info('Opened folder preview in browser');
       } catch (e) {
         error(`Failed to open browser: ${e}`);

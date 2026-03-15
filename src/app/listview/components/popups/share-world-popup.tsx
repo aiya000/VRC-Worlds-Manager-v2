@@ -1,8 +1,7 @@
 import React from 'react';
 import { useLocalization } from '@/hooks/use-localization';
-import { info, error } from '@tauri-apps/plugin-log';
+import { info, error } from '@/lib/services/logger';
 import { Copy, Twitter } from 'lucide-react';
-import { open as openUrl } from '@tauri-apps/plugin-shell';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,7 +62,7 @@ export function ShareWorldPopup({
   const handleTweetShare = async () => {
     if (!tweetIntentUrl) return;
     try {
-      await openUrl(tweetIntentUrl);
+      window.open(tweetIntentUrl, '_blank');
       toast.success(t('share-world:toast-twitter-opened', worldName));
       onOpenChange(false);
     } catch (e) {

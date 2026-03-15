@@ -1,11 +1,11 @@
 import { useLocalization } from '@/hooks/use-localization';
-import { commands } from '@/lib/bindings';
-import { InstanceRegion } from '@/lib/bindings';
+import { commands } from '@/lib/commands';
+import { InstanceRegion } from '@/lib/commands';
 import { GroupInstanceType, InstanceType } from '@/types/instances';
 import { toast } from 'sonner';
-import { error } from '@tauri-apps/plugin-log';
+import { error } from '@/lib/services/logger';
 import { useWorldFiltersStore } from '@/app/listview/hook/use-filters';
-import { UserGroup, GroupInstancePermissionInfo } from '@/lib/bindings';
+import { UserGroup, GroupInstancePermissionInfo } from '@/lib/commands';
 
 export function useWorldDetailsActions(onOpenChange: (open: boolean) => void) {
   const { t } = useLocalization();

@@ -5,7 +5,7 @@ import { SearchBar } from './searchbar';
 import { WorldGrid } from './world-grid';
 import { WorldGridSkeleton } from './world-grid/skeleton';
 import { useWorldFolderPage } from '../hook/use-world-folder-page';
-import { WorldDisplayData } from '@/lib/bindings';
+import { WorldDisplayData } from '@/lib/commands';
 
 type RenderActionsArgs = {
   openAddWorld: () => void;

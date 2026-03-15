@@ -1,4 +1,4 @@
-import { LocalizedChanges } from '@/lib/bindings';
+import { LocalizedChanges } from '@/lib/commands';
 import { FC } from 'react';
 import { ChangelogVersionSection } from './ChangelogVersionSection';
 import { Separator } from '@/components/ui/separator';

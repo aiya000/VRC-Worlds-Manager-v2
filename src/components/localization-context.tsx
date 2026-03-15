@@ -4,7 +4,7 @@ import { createContext, FC, useEffect, useState } from 'react';
 
 import jaJP from '../../locales/ja-JP.json';
 import enUS from '../../locales/en-US.json';
-import { commands } from '@/lib/bindings';
+import { commands } from '@/lib/commands';
 
 export type LocalizationContextType = {
   language: string;

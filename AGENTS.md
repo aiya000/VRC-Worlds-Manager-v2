@@ -1,4 +1,4 @@
-# Agent Guidelines for vrchat-photos-fovfix
+# Agent Guidelines for VRChat Worlds Manager Web
 
 This document provides guidelines for AI agents (GitHub Copilot, etc.) working on this project.
 

@@ -7,7 +7,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { WorldDisplayData } from '@/lib/bindings';
+import { WorldDisplayData } from '@/lib/commands';
 import { WorldGrid } from '../world-grid';
 import { useLocalization } from '@/hooks/use-localization';
 import { useSelectedWorldsStore } from '../../hook/use-selected-worlds';

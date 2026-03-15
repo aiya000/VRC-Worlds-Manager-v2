@@ -1,4 +1,4 @@
-# Architecture Diagram: Sort Preferences Feature
+# Architecture Diagram: VRChat Worlds Manager Web
 
 ## System Overview
 
@@ -6,204 +6,96 @@
 ┌──────────────────────────────────────────────────────────────────┐
 │                         User Interface                            │
 │  ┌────────────────────────────────────────────────────────────┐  │
-│  │  SearchBar Component                                        │  │
-│  │  ┌───────────────┐  ┌──────────────┐  ┌────────────────┐  │  │
-│  │  │ Sort Field    │  │ Sort         │  │ Selection      │  │  │
-│  │  │ Dropdown      │  │ Direction    │  │ Mode Toggle    │  │  │
-│  │  └───────┬───────┘  └──────┬───────┘  └────────────────┘  │  │
-│  │          │                  │                               │  │
-│  │          └─────────┬────────┘                               │  │
-│  └────────────────────┼────────────────────────────────────────┘  │
-│                       │                                            │
-│  ┌────────────────────▼────────────────────────────────────────┐  │
-│  │  World Grid/List Display (sorted & filtered)                │  │
-│  └─────────────────────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────────────────────┘
-                         │
-                         ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                    Frontend State Layer                           │
-│  ┌────────────────────────────────────────────────────────────┐  │
-│  │  useWorldFiltersStore (Zustand)                            │  │
-│  │  ┌──────────────────────────────────────────────────────┐  │  │
-│  │  │  State:                                              │  │  │
-│  │  │  - sortField: SortField                              │  │  │
-│  │  │  - sortDirection: 'asc' | 'desc'                     │  │  │
-│  │  │  - filteredWorlds: WorldDisplayData[]                │  │  │
-│  │  │  - ... other filter state                            │  │  │
-│  │  └──────────────────────────────────────────────────────┘  │  │
-│  │                                                              │  │
-│  │  Actions:                                                    │  │
-│  │  - setSortField(field) → saves to backend                   │  │
-│  │  - setSortDirection(dir) → saves to backend                 │  │
-│  │  - setFilteredWorlds(worlds)                                │  │
-│  └──────────────────────┬───────────────────────────────────────┘  │
-│                         │                                          │
-│  ┌──────────────────────▼───────────────────────────────────────┐ │
-│  │  useWorldFilters Hook                                        │ │
-│  │  - Loads preferences on mount                                │ │
-│  │  - Applies filters & sorting                                 │ │
-│  │  - Updates filteredWorlds                                    │ │
-│  └──────────────────────┬───────────────────────────────────────┘ │
-└─────────────────────────┼──────────────────────────────────────────┘
-                          │
-                          ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                  TypeScript Bindings                              │
-│  ┌────────────────────────────────────────────────────────────┐  │
-│  │  commands.getSortPreferences()                             │  │
-│  │    → Result<[string, string], string>                      │  │
-│  │                                                              │  │
-│  │  commands.setSortPreferences(field, direction)             │  │
-│  │    → Result<null, string>                                  │  │
-│  └──────────────────────┬───────────────────────────────────────┘  │
-└─────────────────────────┼──────────────────────────────────────────┘
-                          │
-                          ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                      Tauri IPC Layer                              │
-│            (Message passing between Frontend ↔ Backend)           │
-└──────────────────────────┬───────────────────────────────────────┘
-                          │
-                          ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                    Rust Backend (Tauri)                           │
-│  ┌────────────────────────────────────────────────────────────┐  │
-│  │  Tauri Commands (preferences_commands.rs)                  │  │
-│  │  ┌──────────────────────────────────────────────────────┐  │  │
-│  │  │  #[tauri::command]                                   │  │  │
-│  │  │  get_sort_preferences()                              │  │  │
-│  │  │    → reads PREFERENCES.get().read()                  │  │  │
-│  │  │    → returns (sort_field, sort_direction)            │  │  │
-│  │  │                                                       │  │  │
-│  │  │  #[tauri::command]                                   │  │  │
-│  │  │  set_sort_preferences(field, direction)              │  │  │
-│  │  │    → updates PREFERENCES.get().write()               │  │  │
-│  │  │    → calls FileService::write_preferences()          │  │  │
-│  │  └──────────────────────────────────────────────────────┘  │  │
-│  └────────────────────────┬───────────────────────────────────────┘│
-│                           │                                         │
-│  ┌────────────────────────▼───────────────────────────────────────┐│
-│  │  Static State: PREFERENCES                                     ││
-│  │  (RwLock<PreferenceModel>)                                     ││
-│  │  ┌──────────────────────────────────────────────────────────┐ ││
-│  │  │  PreferenceModel {                                       │ ││
-│  │  │    theme: String,                                        │ ││
-│  │  │    language: String,                                     │ ││
-│  │  │    card_size: CardSize,                                  │ ││
-│  │  │    region: InstanceRegion,                               │ ││
-│  │  │    sort_field: String,         ← NEW                     │ ││
-│  │  │    sort_direction: String,     ← NEW                     │ ││
-│  │  │    ... other preferences                                 │ ││
-│  │  │  }                                                        │ ││
-│  │  └──────────────────────────────────────────────────────────┘ ││
-│  └────────────────────────┬───────────────────────────────────────┘│
+│  │  React Components (Next.js 16 + React 19)                  │  │
+│  │  - Pages: Setup, Login, Listview, Settings, About          │  │
+│  │  - Hooks: useWorlds, useFolders, useWorldFilters, etc.     │  │
+│  │  - UI: Shadcn/UI + Tailwind CSS 4                          │  │
+│  └────────────────────────┬───────────────────────────────────┘  │
 └───────────────────────────┼──────────────────────────────────────┘
                             │
                             ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│                    FileService                                    │
+│                  Commands Facade (src/lib/commands.ts)            │
 │  ┌────────────────────────────────────────────────────────────┐  │
-│  │  write_preferences(preferences: &PreferenceModel)          │  │
-│  │    → serializes to JSON                                    │  │
-│  │    → writes to preferences.json                            │  │
+│  │  commands.getAllWorlds()    → Promise<Result<T, E>>        │  │
+│  │  commands.getFolders()     → Promise<Result<T, E>>        │  │
+│  │  commands.createBackup()   → Promise<Result<T, E>>        │  │
+│  │  ... (same API as old bindings.ts)                         │  │
 │  │                                                              │  │
-│  │  load_data()                                                 │  │
-│  │    → reads from preferences.json                            │  │
-│  │    → deserializes to PreferenceModel                        │  │
-│  └──────────────────────┬───────────────────────────────────────┘  │
-└─────────────────────────┼──────────────────────────────────────────┘
-                          │
-                          ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                    File System                                    │
-│  ┌────────────────────────────────────────────────────────────┐  │
-│  │  AppData/Local/VRC_Worlds_Manager_new/                    │  │
-│  │  └─ preferences.json                                       │  │
-│  │     {                                                        │  │
-│  │       "theme": "dark",                                       │  │
-│  │       "language": "en-US",                                   │  │
-│  │       "cardSize": "Normal",                                  │  │
-│  │       "sortField": "name",          ← Persisted             │  │
-│  │       "sortDirection": "asc",       ← Persisted             │  │
-│  │       ...                                                    │  │
-│  │     }                                                        │  │
+│  │  Internally: Effect.runPromise(                             │  │
+│  │    effect.pipe(Effect.provide(AppLayer))                    │  │
+│  │  )                                                          │  │
+│  └────────────────────────┬───────────────────────────────────┘  │
+│                            │                                      │
+│  ┌────────────────────────▼───────────────────────────────────┐  │
+│  │  events (EventTarget-based)                                 │  │
+│  │  - taskStatusChanged                                        │  │
+│  │  - updateProgress                                           │  │
+│  │  - worldsUpdated                                            │  │
 │  └──────────────────────────────────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────────────┘
-```
-
-## Export Flow
-
-```
+                            │
+                            ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│                    User Triggers Export                           │
-│  Settings Page → Export Button → Select Folders → Confirm        │
-└──────────────────────┬───────────────────────────────────────────┘
-                       │
-                       ▼
-┌──────────────────────────────────────────────────────────────────┐
-│  commands.exportToPortalLibrarySystem(                          │
-│    folders: string[], sortField: string, sortDirection: string  │
-│  )                                                              │
-└──────────────────────┬───────────────────────────────────────────┘
-                       │
-                       ▼
-┌──────────────────────────────────────────────────────────────────┐
-│              Backend: export_service.rs                           │
-│  ┌────────────────────────────────────────────────────────────┐  │
-│  │  export_to_portal_library_system(                          │  │
-│  │    folders, FOLDERS, WORLDS, sort_field, sort_direction    │  │
-│  │  )                                                         │  │
-│  │    1. Use sort_field and sort_direction parameters         │  │
-│  │       passed from export popup                             │  │
-│  │    2. For each folder:                                     │  │
-│  │       a. Get all worlds in folder                          │  │
-│  │       b. Call sort_worlds(worlds, sort_field, direction)   │  │
-│  │       c. Add sorted worlds to export data                  │  │
-│  │    3. Serialize to JSON                                    │  │
-│  │    4. Write to exports/portal_library_system_*.json        │  │
-│  └──────────────────────┬───────────────────────────────────────┘  │
-└─────────────────────────┼──────────────────────────────────────────┘
-                          │
-                          ▼
-┌──────────────────────────────────────────────────────────────────┐
-│              sort_worlds() Helper Function                        │
-│  ┌────────────────────────────────────────────────────────────┐  │
-│  │  Matches on sort_field:                                    │  │
-│  │  - "name" → compare world_name                             │  │
-│  │  - "authorName" → compare author_name                      │  │
-│  │  - "visits" → compare visits count                         │  │
-│  │  - "favorites" → compare favorites count                   │  │
-│  │  - "capacity" → compare capacity                           │  │
-│  │  - "dateAdded" → compare date_added                        │  │
-│  │  - "lastUpdated" → compare last_update                     │  │
-│  │                                                              │  │
-│  │  Applies direction:                                          │  │
-│  │  - "asc" → ascending order                                   │  │
-│  │  - "desc" → descending order (reversed)                      │  │
-│  └──────────────────────────────────────────────────────────────┘  │
+│                Effect-TS Service Layer                            │
+│  ┌─────────────────────┐  ┌─────────────────────────────────┐  │
+│  │  PreferencesService │  │  WorldService                    │  │
+│  │  (localStorage)      │  │  (IndexedDB + CF Worker)        │  │
+│  └─────────────────────┘  └─────────────────────────────────┘  │
+│  ┌─────────────────────┐  ┌─────────────────────────────────┐  │
+│  │  FolderService      │  │  AuthService                     │  │
+│  │  (IndexedDB)         │  │  (IndexedDB + CF Worker)        │  │
+│  └─────────────────────┘  └─────────────────────────────────┘  │
+│  ┌─────────────────────┐  ┌─────────────────────────────────┐  │
+│  │  BackupService      │  │  MigrationService                │  │
+│  │  (File API / Blob)   │  │  (File Upload → IndexedDB)     │  │
+│  └─────────────────────┘  └─────────────────────────────────┘  │
+│  ┌─────────────────────┐  ┌─────────────────────────────────┐  │
+│  │  MemoService        │  │  CustomTagsService               │  │
+│  │  (IndexedDB)         │  │  (IndexedDB)                    │  │
+│  └─────────────────────┘  └─────────────────────────────────┘  │
+│  ┌─────────────────────┐  ┌─────────────────────────────────┐  │
+│  │  ShareService       │  │  ExternalDataService             │  │
+│  │  (Fetch API)         │  │  (Fetch API)                    │  │
+│  └─────────────────────┘  └─────────────────────────────────┘  │
+│  ┌─────────────────────┐  ┌─────────────────────────────────┐  │
+│  │  TaskService        │  │  QuotaService                    │  │
+│  │  (EventTarget)       │  │  (localStorage + headers)       │  │
+│  └─────────────────────┘  └─────────────────────────────────┘  │
+│  ┌─────────────────────┐  ┌─────────────────────────────────┐  │
+│  │  VRChatApiService   │  │  InitService                     │  │
+│  │  (CF Worker proxy)   │  │  (IndexedDB + localStorage)    │  │
+│  └─────────────────────┘  └─────────────────────────────────┘  │
+│                                                                  │
+│  All services: Context.Tag + Layer (dependency injection)       │
+│  All composed via AppLayer (src/lib/services/layers.ts)         │
 └──────────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                  Exported JSON File                               │
-│  {                                                                │
-│    "Categorys": [                                                 │
-│      {                                                            │
-│        "Category": "Favorite Worlds",                             │
-│        "Worlds": [                                                │
-│          { "ID": "wrld_xxx", "Name": "A World", ... },           │
-│          { "ID": "wrld_yyy", "Name": "B World", ... },           │
-│          { "ID": "wrld_zzz", "Name": "C World", ... }            │
-│          ↑ Sorted according to current UI preferences             │
-│        ]                                                          │
-│      }                                                            │
-│    ]                                                              │
-│  }                                                                │
-└──────────────────────────────────────────────────────────────────┘
+                     │                    │
+                     ▼                    ▼
+┌──────────────────────────┐  ┌────────────────────────────────┐
+│   Browser Storage         │  │   External Services             │
+│  ┌─────────────────────┐ │  │  ┌─────────────────────────┐  │
+│  │  IndexedDB (Dexie)  │ │  │  │  Cloudflare Worker      │  │
+│  │  - worlds           │ │  │  │  (CORS Proxy)            │  │
+│  │  - worldDetails     │ │  │  │  ┌───────────────────┐  │  │
+│  │  - folders          │ │  │  │  │ VRChat API         │  │  │
+│  │  - hiddenWorlds     │ │  │  │  │ api.vrchat.cloud   │  │  │
+│  │  - memos            │ │  │  │  └───────────────────┘  │  │
+│  │  - customTags       │ │  │  │  KV: Quota tracking     │  │
+│  │  - authState        │ │  │  └─────────────────────────┘  │
+│  └─────────────────────┘ │  │  ┌─────────────────────────┐  │
+│  ┌─────────────────────┐ │  │  │  raifaworks API         │  │
+│  │  localStorage       │ │  │  │  - Patreon data          │  │
+│  │  - theme            │ │  │  │  - Folder sharing        │  │
+│  │  - language         │ │  │  │  - Blacklist              │  │
+│  │  - cardSize         │ │  │  └─────────────────────────┘  │
+│  │  - sortPreferences  │ │  └────────────────────────────────┘
+│  │  - quota tracking   │ │
+│  └─────────────────────┘ │
+└──────────────────────────┘
 ```
 
-## Data Flow Summary
+## Data Flow: Sort Preferences
 
 ### On App Startup:
 ```
@@ -211,7 +103,7 @@ App Start
   → Frontend initializes
   → useWorldFilters hook runs
   → useEffect calls getSortPreferences()
-  → Backend reads preferences.json
+  → PreferencesService reads localStorage
   → Returns (sortField, sortDirection)
   → Frontend updates store state
   → Worlds are filtered & sorted
@@ -223,8 +115,7 @@ App Start
 User clicks sort option
   → Frontend calls setSortField() or setSortDirection()
   → Action calls commands.setSortPreferences()
-  → Backend updates PREFERENCES in memory
-  → Backend writes to preferences.json
+  → PreferencesService writes to localStorage
   → Frontend store updates
   → UI re-renders with new sort
 ```
@@ -233,37 +124,25 @@ User clicks sort option
 ```
 User triggers export
   → Frontend calls exportToPortalLibrarySystem()
-  → Backend reads current sort preferences
+  → BackupService reads worlds from IndexedDB
   → For each folder:
       Get worlds → Apply sort → Add to export
-  → Write JSON file
-  → Open exports folder
-  → User sees sorted data matching UI
+  → Generate Blob download
+  → User saves sorted data matching UI
 ```
 
 ## Key Design Decisions
 
-1. **Global Sort State**: Sort preferences are global, not per-folder
-   - Simpler implementation
-   - Consistent user experience
-   - Easier to maintain
+1. **Effect-TS Service Layer**: All logic uses Effect-TS Context.Tag for
+   dependency injection, making services testable and composable.
 
-2. **Immediate Persistence**: Sort changes are saved immediately
-   - No "Save" button needed
-   - Prevents data loss
-   - Better UX
+2. **Commands Facade**: Same API as the old Tauri bindings.ts, so UI components
+   needed only import path changes.
 
-3. **Shared Sort Logic**: Same sorting algorithm in frontend and backend
-   - Export matches UI exactly
-   - Reduces bugs
-   - Easier to maintain
+3. **IndexedDB via Dexie**: Structured data in browser storage, supporting
+   complex queries needed for world filtering and folder management.
 
-4. **Default Values**: Sensible defaults ("dateAdded", "desc")
-   - Backward compatible
-   - Works out of the box
-   - Matches previous behavior
+4. **Cloudflare Worker**: CORS proxy with quota management for VRChat API
+   access from the browser.
 
-5. **Minimal Changes**: Small, focused modifications
-   - Easier to review
-   - Reduces risk
-   - Follows existing patterns
+5. **PWA**: Service Worker for offline caching and installability.

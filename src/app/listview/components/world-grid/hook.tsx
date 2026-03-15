@@ -1,9 +1,9 @@
-import { CardSize, commands, WorldDisplayData } from '@/lib/bindings';
+import { CardSize, commands, WorldDisplayData } from '@/lib/commands';
 import { usePopupStore } from '../../hook/usePopups/store';
 import { toast } from 'sonner';
 import { useLocalization } from '@/hooks/use-localization';
 import { use, useEffect, useState } from 'react';
-import { error } from '@tauri-apps/plugin-log';
+import { error } from '@/lib/services/logger';
 import { useSelectedWorldsStore } from '../../hook/use-selected-worlds';
 import { useFolders } from '../../hook/use-folders';
 import { useWorlds } from '../../hook/use-worlds';

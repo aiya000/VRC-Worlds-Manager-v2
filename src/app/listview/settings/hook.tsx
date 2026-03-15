@@ -3,27 +3,21 @@ import {
   CardSize,
   commands,
   FolderRemovalPreference,
-  UpdateChannel,
-} from '@/lib/bindings';
-import { error, info } from '@tauri-apps/plugin-log';
+} from '@/lib/commands';
+import { error, info } from '@/lib/services/logger';
 import { useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { open } from '@tauri-apps/plugin-dialog';
 import { ExportType } from './components/popups/export';
 import { useRouter } from 'next/navigation';
 import { LocalizationContext } from '../../../components/localization-context';
 import { useFolders } from '../hook/use-folders';
 import { useTheme } from 'next-themes';
-import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
 
 export const useSettingsPage = () => {
   const [cardSize, setCardSize] = useState<CardSize>('Normal');
   const [language, setLanguage] = useState<string>('en-US');
   const [folderRemovalPreference, setFolderRemovalPreference] =
     useState<FolderRemovalPreference | null>(null);
-  const [updateChannel, setUpdateChannel] = useState<UpdateChannel | null>(
-    null,
-  );
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showMigrateDialog, setShowMigrateDialog] = useState(false);
@@ -88,7 +82,6 @@ export const useSettingsPage = () => {
         const themeResult = await commands.getTheme();
         const languageResult = await commands.getLanguage();
         const cardSizeResult = await commands.getCardSize();
-        const updateChannelResult = await commands.getUpdateChannel();
         const folderRemovalPreferenceResult =
           await commands.getFolderRemovalPreference();
         const theme = themeResult.status === 'ok' ? themeResult.data : 'system';
@@ -96,10 +89,6 @@ export const useSettingsPage = () => {
           languageResult.status === 'ok' ? languageResult.data : 'en-US';
         const cardSize =
           cardSizeResult.status === 'ok' ? cardSizeResult.data : 'Normal';
-        const updateChannel =
-          updateChannelResult.status === 'ok'
-            ? updateChannelResult.data
-            : 'stable';
 
         const folderRemovalPreference =
           folderRemovalPreferenceResult.status === 'ok'
@@ -109,13 +98,11 @@ export const useSettingsPage = () => {
         setLanguage(language);
         setCardSize(cardSize);
         setFolderRemovalPreference(folderRemovalPreference);
-        setUpdateChannel(updateChannel);
         // put a toast if commands fail
         if (
           themeResult.status === 'error' ||
           languageResult.status === 'error' ||
           cardSizeResult.status === 'error' ||
-          updateChannelResult.status === 'error' ||
           folderRemovalPreferenceResult.status === 'error'
         ) {
           toast(t('general:error-title'), {
@@ -125,9 +112,6 @@ export const useSettingsPage = () => {
               (themeResult.status === 'error' ? themeResult.error : '') +
               (languageResult.status === 'error' ? languageResult.error : '') +
               (cardSizeResult.status === 'error' ? cardSizeResult.error : '') +
-              (updateChannelResult.status === 'error'
-                ? updateChannelResult.error
-                : '') +
               (folderRemovalPreferenceResult.status === 'error'
                 ? folderRemovalPreferenceResult.error
                 : ''),
@@ -149,24 +133,7 @@ export const useSettingsPage = () => {
   const handleBackup = async () => {
     try {
       info('Creating backup...');
-
-      // Ask user to select a directory for backup
-      const selectedDir = await open({
-        directory: true,
-        multiple: false,
-        title: t('settings-page:select-backup-directory'),
-      });
-
-      // If user cancelled the selection
-      if (selectedDir === null) {
-        info('Backup cancelled: No directory selected');
-        return;
-      }
-
-      const backupPath = selectedDir as string;
-      info(`Selected backup directory: ${backupPath}`);
-
-      const result = await commands.createBackup(backupPath);
+      const result = await commands.createBackup();
 
       if (result.status === 'error') {
         error(`Backup creation failed: ${result.error}`);
@@ -176,7 +143,7 @@ export const useSettingsPage = () => {
         return;
       }
 
-      info(`Backup created successfully at: ${backupPath}`);
+      info('Backup created successfully');
       toast(t('settings-page:backup-success-title'), {
         description: t('settings-page:backup-success-description'),
       });
@@ -188,10 +155,10 @@ export const useSettingsPage = () => {
     }
   };
 
-  const handleRestoreConfirm = async (path: string) => {
+  const handleRestoreConfirm = async (file: File) => {
     try {
-      info(`Restoring from backup: ${path}`);
-      const result = await commands.restoreFromBackup(path);
+      info(`Restoring from backup: ${file.name}`);
+      const result = await commands.restoreFromBackupFile(file);
 
       if (result.status === 'error') {
         error(`Restore failed: ${result.error}`);
@@ -215,12 +182,12 @@ export const useSettingsPage = () => {
   };
 
   const handleMigrationConfirm = async (
-    worldsPath: string,
-    foldersPath: string,
+    worldsFile: File,
+    foldersFile: File,
   ) => {
     try {
-      info(`Migrating data from ${worldsPath} and ${foldersPath}`);
-      const result = await commands.migrateOldData(worldsPath, foldersPath);
+      info(`Migrating data from ${worldsFile.name} and ${foldersFile.name}`);
+      const result = await commands.migrateOldDataFromFiles(worldsFile, foldersFile);
 
       if (result.status === 'error') {
         error(`Migration failed: ${result.error}`);
@@ -288,23 +255,6 @@ export const useSettingsPage = () => {
       error(`Logout error: ${e}`);
       toast(t('general:error-title'), {
         description: t('settings-page:error-logout'),
-      });
-    }
-  };
-
-  const handleOpenLogs = async () => {
-    try {
-      const result = await commands.openLogsDirectory();
-
-      if (result.status === 'ok') {
-        info('Opened logs directory');
-      } else {
-        error(`Failed to open logs directory: ${result.error}`);
-      }
-    } catch (e) {
-      error(`Failed to open logs directory: ${e}`);
-      toast(t('general:error-title'), {
-        description: t('general:error-open-logs'),
       });
     }
   };
@@ -402,28 +352,6 @@ export const useSettingsPage = () => {
     }
   };
 
-  const handleUpdateChannelChange = async (value: UpdateChannel) => {
-    try {
-      info(`Setting update channel to: ${value}`);
-      const result = await commands.setUpdateChannel(value);
-      if (result.status === 'ok') {
-        setUpdateChannel(value);
-        info(`Update channel set to: ${value}`);
-      } else {
-        error(`Failed to set update channel: ${result.error}`);
-        toast(t('general:error-title'), {
-          description:
-            t('settings-page:error-save-preferences') + ': ' + result.error,
-        });
-      }
-    } catch (e) {
-      error(`Failed to save update channel: ${e}`);
-      toast(t('general:error-title'), {
-        description: t('settings-page:error-save-preferences'),
-      });
-    }
-  };
-
   const openHiddenFolder = () => {
     router.push('/listview/folders/hidden');
   };
@@ -432,7 +360,6 @@ export const useSettingsPage = () => {
     cardSize,
     language,
     folderRemovalPreference,
-    updateChannel,
     showDeleteConfirm,
     setShowDeleteConfirm,
     showMigrateDialog,
@@ -447,12 +374,10 @@ export const useSettingsPage = () => {
     handleMigrationConfirm,
     handleDeleteConfirm,
     handleLogout,
-    handleOpenLogs,
     handleThemeChange,
     handleLanguageChange,
     handleCardSizeChange,
     handleFolderRemovalPreferenceChange,
-    handleUpdateChannelChange,
     openHiddenFolder,
     t,
   };

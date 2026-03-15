@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { Button } from '@/components/ui/button';
-import { invoke } from '@tauri-apps/api/core';
 import { useTheme } from 'next-themes';
-import { open } from '@tauri-apps/plugin-dialog';
 import { useRouter } from 'next/navigation';
 import {
   Select,
@@ -18,7 +16,7 @@ import { WorldCardPreview } from '@/components/world-card';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Loader2, Globe } from 'lucide-react';
-import { commands, CardSize } from '@/lib/bindings';
+import { commands, CardSize } from '@/lib/commands';
 import { SetupLayout } from '@/app/setup/components/setup-layout';
 import { useLocalization } from '@/hooks/use-localization';
 import { LocalizationContext } from '@/components/localization-context';
@@ -28,7 +26,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { info, error } from '@tauri-apps/plugin-log';
+import { info, error } from '@/lib/services/logger';
 import { SaturnIcon } from '@/components/icons/saturn-icon';
 import { FolderOpen, Info } from 'lucide-react';
 import { MigrationConfirmationPopup } from '@/app/listview/settings/components/popups/migration-confirmation-popup';
@@ -45,10 +43,9 @@ const WelcomePage: React.FC = () => {
     language: 'en-US',
     card_size: 'Normal' as CardSize,
   });
-  const [defaultPath, setDefaultPath] = useState<string>('');
-  const [migrationPaths, setMigrationPaths] = useState<[string, string]>([
-    '',
-    '',
+  const [migrationFiles, setMigrationFiles] = useState<[File | null, File | null]>([
+    null,
+    null,
   ]);
   const [pathValidation, setPathValidation] = useState<[boolean, boolean]>([
     false,
@@ -75,9 +72,12 @@ const WelcomePage: React.FC = () => {
   }, [preferences.theme]);
 
   const migrate = async () => {
-    const result = await commands.migrateOldData(
-      migrationPaths[0],
-      migrationPaths[1],
+    if (!migrationFiles[0] || !migrationFiles[1]) {
+      return;
+    }
+    const result = await commands.migrateOldDataFromFiles(
+      migrationFiles[0],
+      migrationFiles[1],
     );
     if (result.status === 'error') {
       toast(t('general:error-title'), {
@@ -102,24 +102,11 @@ const WelcomePage: React.FC = () => {
           error(`Failed to fetch existing data: ${hasDataResult.error}`);
         }
 
-        const [worldsPath, foldersPath] = await invoke<[string, string]>(
-          'detect_old_installation',
-        );
-
-        info(
-          `Detected old installation - Worlds: ${worldsPath}, Folders: ${foldersPath}`,
-        );
-        info(`Using default path: ${defaultPath}`);
-        setMigrationPaths([worldsPath, foldersPath]);
-        setPathValidation([true, true]);
+        // Web version: no auto-detection of old installation paths.
+        // User must manually select files.
+        setPathValidation([false, false]);
       } catch (e) {
-        try {
-          const defPath = await invoke<string>('pass_paths');
-          setDefaultPath(defPath);
-        } catch (e) {
-          error(`Failed to get paths: ${e}`);
-        }
-        error(`Failed to detect old installation: ${e}`);
+        error(`Failed to check existing data: ${e}`);
         setPathValidation([false, false]);
       }
     }
@@ -188,53 +175,54 @@ const WelcomePage: React.FC = () => {
     setPage(page - 1);
   };
 
-  const handleFilePick = async (index: number) => {
-    const startPath = migrationPaths[index] || defaultPath || '/';
-    info(`Opening file picker at: ${startPath}`);
-    const selected = await open({
-      directory: false,
-      multiple: false,
-      defaultPath: startPath,
-      filters: [{ name: 'JSON', extensions: ['json'] }],
-    });
+  const handleFilePick = (index: number) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) {
+        info('File selection cancelled');
+        return;
+      }
 
-    if (selected) {
-      const newPaths: [string, string] = [...migrationPaths];
-      newPaths[index] = selected as string;
-      setMigrationPaths(newPaths);
+      const newFiles: [File | null, File | null] = [...migrationFiles];
+      newFiles[index] = file;
+      setMigrationFiles(newFiles);
 
       const newValidation: [boolean, boolean] = [...pathValidation];
       newValidation[index] = true;
       setPathValidation(newValidation);
 
-      info(`Selected path: ${selected}`);
-    }
+      info(`Selected file: ${file.name}`);
+    };
+    input.click();
   };
 
-  // Fetch migration metadata when both paths are valid
+  // Fetch migration metadata when both files are selected
   useEffect(() => {
     const fetchMeta = async () => {
       if (
         pathValidation[0] &&
         pathValidation[1] &&
-        migrationPaths[0] &&
-        migrationPaths[1]
+        migrationFiles[0] &&
+        migrationFiles[1]
       ) {
         setMigrationMetaLoading(true);
         setMigrationMetaError(null);
         setMigrationMeta(null);
         try {
-          const result = await commands.getMigrationMetadata(
-            migrationPaths[0],
-            migrationPaths[1],
+          const result = await commands.getMigrationMetadataFromFiles(
+            migrationFiles[0],
+            migrationFiles[1],
           );
           if (result.status === 'ok') {
             setMigrationMeta(result.data);
           } else {
             setMigrationMetaError(result.error);
           }
-        } catch (e: any) {
-          setMigrationMetaError(e?.message || 'Unknown error');
+        } catch (e: unknown) {
+          setMigrationMetaError(e instanceof Error ? e.message : 'Unknown error');
         } finally {
           setMigrationMetaLoading(false);
         }
@@ -247,8 +235,8 @@ const WelcomePage: React.FC = () => {
     fetchMeta();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    migrationPaths[0],
-    migrationPaths[1],
+    migrationFiles[0],
+    migrationFiles[1],
     pathValidation[0],
     pathValidation[1],
   ]);
@@ -370,12 +358,9 @@ const WelcomePage: React.FC = () => {
                     <Label>{t('general:worlds-data')}</Label>
                     <div className="flex space-x-2 items-center">
                       <Input
-                        value={migrationPaths[0]}
-                        onChange={(e) =>
-                          setMigrationPaths([e.target.value, migrationPaths[1]])
-                        }
-                        placeholder={defaultPath}
-                        disabled={true}
+                        value={migrationFiles[0]?.name ?? ''}
+                        readOnly
+                        placeholder={t('settings-page:select-worlds-file-placeholder')}
                         className={
                           pathValidation[0]
                             ? 'text-foreground'
@@ -403,12 +388,9 @@ const WelcomePage: React.FC = () => {
                     <Label>{t('general:folders-data')}</Label>
                     <div className="flex space-x-2 items-center">
                       <Input
-                        value={migrationPaths[1]}
-                        onChange={(e) =>
-                          setMigrationPaths([migrationPaths[0], e.target.value])
-                        }
-                        placeholder={defaultPath}
-                        disabled={true}
+                        value={migrationFiles[1]?.name ?? ''}
+                        readOnly
+                        placeholder={t('settings-page:select-folders-file-placeholder')}
                         className={
                           pathValidation[1]
                             ? 'text-foreground'

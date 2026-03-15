@@ -11,16 +11,13 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.config({
-    extends: [
-      'next/core-web-vitals',
-      'next/typescript',
-    ],
+    extends: ['next/core-web-vitals', 'next/typescript'],
     plugins: ['unused-imports', '@typescript-eslint'],
     rules: {
       'react/no-unescaped-entities': 'off',
       '@next/next/no-page-custom-font': 'off',
       'unused-imports/no-unused-imports': 'warn',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
@@ -29,8 +26,10 @@ const eslintConfig = [
           ignoreRestSiblings: true,
         },
       ],
+      'curly': ['error', 'all'],
+      'eqeqeq': ['error', 'always'],
     },
   }),
-]
+];
 
 export default eslintConfig;

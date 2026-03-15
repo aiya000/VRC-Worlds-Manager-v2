@@ -1,7 +1,7 @@
 import { WorldCardPreview } from '@/components/world-card';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { FolderType, SpecialFolders } from '@/types/folders';
-import { CardSize, WorldDisplayData } from '@/lib/bindings';
+import { CardSize, WorldDisplayData } from '@/lib/commands';
 import { useLocalization } from '@/hooks/use-localization';
 import {
   ContextMenu,
@@ -22,8 +22,8 @@ import {
   AlertDialogCancel,
 } from '@/components/ui/alert-dialog';
 import * as Portal from '@radix-ui/react-portal';
-import { info, error } from '@tauri-apps/plugin-log';
-import { commands } from '@/lib/bindings';
+import { info, error } from '@/lib/services/logger';
+import { commands } from '@/lib/commands';
 import { Badge } from '@/components/ui/badge';
 import { useFolders } from '../../hook/use-folders';
 import { useWorldGrid } from './hook';

@@ -5,11 +5,11 @@ import { useLocalization } from '@/hooks/use-localization';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { UserProfile } from '@/app/listview/about/components/user-profile';
-import { ExternalLink, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { SiGithub, SiDiscord } from '@icons-pack/react-simple-icons';
 import { toast } from 'sonner';
-import { commands } from '@/lib/bindings';
-import { info, error } from '@tauri-apps/plugin-log';
+import { commands } from '@/lib/commands';
+import { error } from '@/lib/services/logger';
 
 export default function AboutSection() {
   const { t } = useLocalization();
@@ -36,10 +36,10 @@ export default function AboutSection() {
     }
 
     fetchPatreonData();
-  }, [toast]);
+  }, []);
 
   // Helper function to sort supporters
-  const sortSupporters = (data: any) => {
+  const sortSupporters = (data: Record<string, string[]>) => {
     const platinumNames = (data.platinumSupporter || []).sort();
     const goldNames = (data.goldSupporter || []).sort();
     const silverNames = (data.silverSupporter || []).sort();
@@ -57,20 +57,41 @@ export default function AboutSection() {
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">
-      <div className="flex-1 container mx-auto p-6">
-        {/* Development Team and Special Thanks Section */}
-        <div className="flex flex-row mb-2">
-          {/* Development Team Section */}
-          <div>
-            <CardHeader>
-              <CardTitle>{t('about-section:development-team')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-8">
+      <div className="flex-1 container mx-auto p-6 space-y-6">
+        {/* Web Version Header with aiya000 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('about-section:web-version-title')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              {t('about-section:web-version-description')}
+            </p>
+            <UserProfile
+              name="aiya000"
+              iconUrl="/icons/aiya000.jpg"
+              xUsername="public_ai000ya"
+              githubUsername="aiya000"
+            />
+          </CardContent>
+        </Card>
+
+        {/* Original (VRC Worlds Manager v2) Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('about-section:original-title')}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Development Team */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">
+                {t('about-section:development-team')}
+              </h3>
+              <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-4">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-4">
                     {t('about-section:developers')}
-                  </h3>
+                  </h4>
                   <div className="space-x-4 flex flex-row">
                     <UserProfile
                       name="Raifa"
@@ -87,9 +108,9 @@ export default function AboutSection() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-4">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-4">
                     {t('about-section:media-design')}
-                  </h3>
+                  </h4>
                   <div className="space-x-4 flex flex-row">
                     <UserProfile
                       name="じゃんくま"
@@ -99,14 +120,13 @@ export default function AboutSection() {
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </div>
-          {/* Special Thanks Section */}
-          <div>
-            <CardHeader>
-              <CardTitle>{t('about-section:special-thanks')}</CardTitle>
-            </CardHeader>
-            <CardContent>
+            </div>
+
+            {/* Special Thanks */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">
+                {t('about-section:special-thanks')}
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="flex items-start gap-3">
                   <div>
@@ -157,12 +177,12 @@ export default function AboutSection() {
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </div>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Supporters Section */}
-        <div>
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Heart className="h-5 w-5 text-pink-500" />
@@ -203,14 +223,14 @@ export default function AboutSection() {
               )}
             </div>
           </CardContent>
-        </div>
+        </Card>
       </div>
 
       {/* Footer */}
       <div className="w-full border-t bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
           <div className="text-sm text-muted-foreground">
-            VRC Worlds Manager v2 1.3.1
+            VRChat Worlds Manager Web 2.0.0
           </div>
 
           <div className="flex gap-4">

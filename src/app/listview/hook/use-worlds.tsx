@@ -1,7 +1,7 @@
-import { commands, WorldDisplayData } from '@/lib/bindings';
+import { commands, WorldDisplayData } from '@/lib/commands';
 import { FolderType, isUserFolder, SpecialFolders } from '@/types/folders';
 import { create } from 'zustand';
-import { error, info } from '@tauri-apps/plugin-log';
+import { error, info } from '@/lib/services/logger';
 import { useEffect } from 'react';
 import { useLocalization } from '@/hooks/use-localization';
 import { toast } from 'sonner';

@@ -1,4 +1,4 @@
-import { WorldDisplayData } from '@/lib/bindings';
+import { WorldDisplayData } from '@/lib/commands';
 import { create } from 'zustand';
 
 interface PopupState {

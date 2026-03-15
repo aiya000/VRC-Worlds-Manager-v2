@@ -5,9 +5,9 @@ import { useLocalization } from '@/hooks/use-localization';
 import { Button } from '@/components/ui/button';
 import { SiDiscord } from '@icons-pack/react-simple-icons';
 import { FolderOpen, Globe } from 'lucide-react';
-import { commands } from '@/lib/bindings';
+import { commands } from '@/lib/commands';
 import { toast } from 'sonner';
-import { info, error } from '@tauri-apps/plugin-log';
+import { info, error } from '@/lib/services/logger';
 import { useState, useContext } from 'react';
 import { LocalizationContext } from '@/components/localization-context';
 import {

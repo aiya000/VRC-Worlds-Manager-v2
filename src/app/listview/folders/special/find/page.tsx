@@ -12,9 +12,9 @@ import {
   Square,
   CheckSquare,
 } from 'lucide-react';
-import { commands, WorldDisplayData } from '@/lib/bindings';
+import { commands, WorldDisplayData } from '@/lib/commands';
 import { SpecialFolders } from '@/types/folders';
-import { info, error } from '@tauri-apps/plugin-log';
+import { info, error } from '@/lib/services/logger';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,7 +36,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
 import { useFolders } from '@/app/listview/hook/use-folders';
 
 export default function FindWorldsPage() {
@@ -128,31 +127,19 @@ export default function FindWorldsPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeTab, fetchRecentlyVisitedWorlds]);
 
-  // subscribe to deep link events
+  // Check for import parameter in URL query string (web deep-link replacement)
   useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
-
-    (async () => {
-      unsubscribe = await onOpenUrl((urls) => {
-        info(`deep link: ${JSON.stringify(urls)}`);
-        //vrc-worlds-manager://vrcwm.raifaworks.com/folder/import/${uuid}
-        //call handleImportFolder with the uuid
-        const importRegex =
-          /vrc-worlds-manager:\/\/vrcwm\.raifaworks\.com\/folder\/import\/([a-zA-Z0-9-]+)/;
-        const match = urls[0].match(importRegex);
-        if (match && match[1]) {
-          const uuid = match[1];
-          importFolder(uuid);
-        }
-      });
-    })();
-
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  }, []);
+    const params = new URLSearchParams(window.location.search);
+    const importId = params.get('import');
+    if (importId) {
+      info(`[DeepLink] Detected import parameter: ${importId}`);
+      importFolder(importId);
+      // Clean up the URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete('import');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [importFolder]);
 
   // Add this state variable to track if a search has been performed
   const [hasSearched, setHasSearched] = useState(false);

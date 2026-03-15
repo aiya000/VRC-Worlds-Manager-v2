@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { info } from '@tauri-apps/plugin-log';
+import { info } from '@/lib/services/logger';
 
 interface DeleteDataConfirmationDialogProps {
   open: boolean;

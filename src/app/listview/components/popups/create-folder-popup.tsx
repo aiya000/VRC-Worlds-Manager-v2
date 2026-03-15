@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { info, error } from '@tauri-apps/plugin-log';
+import { info, error } from '@/lib/services/logger';
 import {
   Dialog,
   DialogContent,

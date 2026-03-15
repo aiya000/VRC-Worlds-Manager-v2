@@ -16,7 +16,7 @@ import {
   WorldDetails,
   CardSize,
   WorldDisplayData,
-} from '@/lib/bindings';
+} from '@/lib/commands';
 import {
   Card,
   CardContent,
@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/card';
 import { WorldCardPreview } from '@/components/world-card';
 import { useLocalization } from '@/hooks/use-localization';
-import { info, error as logError } from '@tauri-apps/plugin-log';
+import { info, error as logError } from '@/lib/services/logger';
 import { useWorlds } from '../../hook/use-worlds';
 import { FolderType } from '@/types/folders';
 
@@ -120,7 +120,6 @@ export function AddWorldPopup({ onClose, currentFolder }: AddWorldPopupProps) {
     }
 
     try {
-      // Invoke the Tauri command to fetch world details
       const worldDetails = await commands.checkWorldInfo(parsedWorldId);
       if (!worldDetails) {
         setError('World not found. Please check the ID or URL.');

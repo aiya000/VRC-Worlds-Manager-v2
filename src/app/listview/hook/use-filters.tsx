@@ -1,8 +1,8 @@
-import { commands, WorldDisplayData } from '@/lib/bindings';
+import { commands, WorldDisplayData } from '@/lib/commands';
 import { create } from 'zustand';
 import { useEffect, useRef } from 'react';
 import { toRomaji } from 'wanakana';
-import { error, info } from '@tauri-apps/plugin-log';
+import { error, info } from '@/lib/services/logger';
 import { toast } from 'sonner';
 import { useLocalization } from '@/hooks/use-localization';
 

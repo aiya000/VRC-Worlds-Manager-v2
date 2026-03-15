@@ -3,7 +3,7 @@ import PIos from '@/../public/icons/Platform_iOS.svg';
 import PWindows from '@/../public/icons/Platform_Windows.svg';
 import Image from 'next/image';
 import { useLocalization } from '@/hooks/use-localization';
-import { Platform } from '@/lib/bindings';
+import { Platform } from '@/lib/commands';
 
 export function PlatformIndicator({ platform }: { platform: Platform[] }) {
   const { t } = useLocalization();

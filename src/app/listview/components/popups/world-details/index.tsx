@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, Fragment } from 'react';
-import { info, error } from '@tauri-apps/plugin-log';
+import { info, error } from '@/lib/services/logger';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { mutate as mutateFoldersCache } from 'swr';
@@ -26,13 +26,13 @@ import {
   GroupRole,
   commands,
   FolderData,
-} from '@/lib/bindings';
-import { WorldDisplayData } from '@/lib/bindings';
-import { WorldDetails } from '@/lib/bindings';
+} from '@/lib/commands';
+import { WorldDisplayData } from '@/lib/commands';
+import { WorldDetails } from '@/lib/commands';
 import { WorldCardPreview } from '@/components/world-card';
 import { GroupInstanceCreator } from './group-instance-creator';
 import { GroupInstanceType, InstanceType } from '@/types/instances';
-import { InstanceRegion } from '@/lib/bindings';
+import { InstanceRegion } from '@/lib/commands';
 import { useLocalization } from '@/hooks/use-localization';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';

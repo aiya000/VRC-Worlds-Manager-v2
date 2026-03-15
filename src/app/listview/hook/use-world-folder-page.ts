@@ -1,15 +1,14 @@
-import { useContext, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
-import { UpdateDialogContext } from '@/components/UpdateDialogContext';
 import { useLocalization } from '@/hooks/use-localization';
 import { useFolders } from './use-folders';
 import { usePopupStore } from './usePopups/store';
 import { useWorldFilters } from './use-filters';
 import { useSelectedWorldsStore } from './use-selected-worlds';
 import { useWorlds } from './use-worlds';
-import { commands, WorldDisplayData } from '@/lib/bindings';
+import { commands, WorldDisplayData } from '@/lib/commands';
 import { toast } from 'sonner';
-import { error } from '@tauri-apps/plugin-log';
+import { error } from '@/lib/services/logger';
 
 export type UseWorldFolderPageOptions = {
   folderId: string;
@@ -44,7 +43,6 @@ export const useWorldFolderPage = (
 
   const gridScrollRef = useRef<HTMLDivElement>(null!);
   const { t } = useLocalization();
-  const { checkForUpdate } = useContext(UpdateDialogContext);
   const { refresh: refreshFolders } = useFolders();
   const { worlds, refresh, isLoading } = useWorlds(folderId);
   const { filteredWorlds } = useWorldFilters(worlds);
@@ -77,10 +75,6 @@ export const useWorldFolderPage = (
       setSelection(folderId, worldIds);
     }
   };
-
-  useEffect(() => {
-    checkForUpdate();
-  }, [checkForUpdate]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

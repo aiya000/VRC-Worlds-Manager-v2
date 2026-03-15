@@ -1,4 +1,4 @@
-import { commands } from '@/lib/bindings';
+import { commands } from '@/lib/commands';
 
 export const checkForUpdate = async (): Promise<boolean> => {
   const result = await commands.checkForUpdate();

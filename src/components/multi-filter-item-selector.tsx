@@ -8,7 +8,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { X, Star } from 'lucide-react';
-import { FilterItemSelectorStarredType } from '@/lib/bindings';
+import { FilterItemSelectorStarredType } from '@/lib/commands';
 import {
   Command,
   CommandEmpty,
@@ -25,7 +25,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/hooks/use-localization';
-import { commands } from '@/lib/bindings';
+import { commands } from '@/lib/commands';
 
 export type Option = {
   value: string;

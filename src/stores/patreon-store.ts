@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { commands } from '@/lib/bindings';
-import { error } from '@tauri-apps/plugin-log';
+import { commands } from '@/lib/commands';
+import { error } from '@/lib/services/logger';
 
 interface PatreonState {
   supporters: Set<string>;

@@ -1,4 +1,4 @@
-import { LocalizedChanges } from '@/lib/bindings';
+import { LocalizedChanges } from '@/lib/commands';
 import { FC } from 'react';
 import { ChangelogLineEntry } from './ChangelogLineEntry';
 import { Bug, Cog, Rocket } from 'lucide-react';

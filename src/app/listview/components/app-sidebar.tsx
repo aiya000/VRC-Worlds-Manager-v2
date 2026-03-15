@@ -5,14 +5,14 @@ import { GearIcon } from '../../../components/icons/gear-icon';
 import { Info, FileQuestion, History, Plus } from 'lucide-react';
 import { SpecialFolders } from '@/types/folders';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { FolderData } from '@/lib/bindings';
+import { FolderData } from '@/lib/commands';
 import { useState, useEffect, useRef } from 'react';
 import { useLocalization } from '@/hooks/use-localization';
 
 import { Separator } from '@/components/ui/separator';
 
 import { SidebarGroup } from '@/components/ui/sidebar';
-import { error } from '@tauri-apps/plugin-log';
+import { error } from '@/lib/services/logger';
 
 import {
   ContextMenu,

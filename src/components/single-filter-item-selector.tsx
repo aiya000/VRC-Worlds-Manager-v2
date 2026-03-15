@@ -24,9 +24,9 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/hooks/use-localization';
-import { commands } from '@/lib/bindings';
-import { FilterItemSelectorStarredType } from '@/lib/bindings';
-import { info } from '@tauri-apps/plugin-log';
+import { commands } from '@/lib/commands';
+import { FilterItemSelectorStarredType } from '@/lib/commands';
+import { info } from '@/lib/services/logger';
 
 export type Option = {
   value: string;

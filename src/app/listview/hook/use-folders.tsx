@@ -1,5 +1,5 @@
 import useSWR, { mutate } from 'swr';
-import { commands, FolderData } from '@/lib/bindings';
+import { commands, FolderData } from '@/lib/commands';
 import { toast } from 'sonner';
 import { useLocalization } from '../../../hooks/use-localization';
 import { usePathname, useRouter } from 'next/navigation';

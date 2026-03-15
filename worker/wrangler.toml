@@ -1,0 +1,11 @@
+name = "vrcwm-cors-proxy"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[vars]
+ALLOWED_ORIGIN = "https://vrcwm.raifaworks.com"
+VRCHAT_API_BASE = "https://api.vrchat.cloud/api/1"
+
+[[kv_namespaces]]
+binding = "QUOTA"
+id = "placeholder-kv-id"
