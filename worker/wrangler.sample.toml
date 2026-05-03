@@ -1,11 +1,11 @@
-name = "vrcwm-cors-proxy"
+name = "vrchat-worlds-manager-web-backend"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
 
 [vars]
-ALLOWED_ORIGIN = "https://vrcwm.raifaworks.com"
+ALLOWED_ORIGIN = "https://vrchat-worlds-manager-web.pages.dev"
 VRCHAT_API_BASE = "https://api.vrchat.cloud/api/1"
 
 [[kv_namespaces]]
 binding = "QUOTA"
-id = "placeholder-kv-id"
+id = "INPUT_HERE_KV_NAMESPACE_ID"
