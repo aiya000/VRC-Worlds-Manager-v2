@@ -7,19 +7,23 @@ This document provides guidelines for AI agents (GitHub Copilot, etc.) working o
 **IMPORTANT: This project uses Bun as the package manager.**
 
 ### ✅ DO:
+
 - Use `bun install` to install dependencies
 - Use `bun run <script>` to run scripts (e.g., `bun run dev`, `bun run build`)
 - Reference `bun.lock` for dependency resolution
 - Use Bun-specific commands when applicable
 
 ### ❌ DON'T:
+
 - **Never use `npm install`, `npm run`, or any npm commands**
 - **Never use `yarn` or `pnpm` commands**
 - Do not generate `package-lock.json` or `yarn.lock` files
 - Do not modify `bun.lock` manually
 
 ### Why Bun?
+
 This project has chosen Bun for its speed and modern features. Using other package managers may cause:
+
 - Lock file conflicts (`package-lock.json` vs `bun.lock`)
 - Dependency resolution inconsistencies
 - Unnecessary files being tracked in git
@@ -27,6 +31,7 @@ This project has chosen Bun for its speed and modern features. Using other packa
 ## Code Style
 
 ### Comments
+
 - **Avoid obvious comments**: Don't add comments that merely restate what the code does
 - **Good**: `// Workaround for Safari's viewport height bug`
 - **Bad**: `// Update the document's lang attribute to match the detected locale` (when the code itself is `document.documentElement.lang = locale`)
@@ -36,14 +41,17 @@ This project has chosen Bun for its speed and modern features. Using other packa
   - Documenting a workaround or edge case
 
 ### Code Clarity
+
 - Write self-documenting code with clear variable and function names
 - Prefer code clarity over brevity
 - Let the code speak for itself when possible
 
 ### Null/Undefined and Falsy Value Handling
+
 When dealing with types that can be both falsy and null/undefined, use explicit checks to avoid unnecessary type narrowing:
 
 **Good examples:**
+
 ```ts
 const foo: string | null = something;
 if (foo === null) {
@@ -63,6 +71,7 @@ if (bar === undefined) {
 **The principle:** Don't over-narrow types unnecessarily. If you mean to check only for `null`, use `foo === null`, not `!foo`.
 
 **Exception:** You may use `!foo` when you explicitly want to check for all falsy values including null/undefined:
+
 ```ts
 // OK: Intentionally checking for empty string OR null
 if (!foo) {
@@ -72,6 +81,7 @@ if (!foo) {
 
 **Special case for null and undefined together:**
 Always handle `null` and `undefined` separately with explicit checks:
+
 ```ts
 // Required pattern
 if (foo === null || foo === undefined) { ... }
@@ -84,9 +94,11 @@ if (foo !== null && foo !== undefined) { ... }
 For types like `SomePrimitive | null | undefined`, separate all conditions with logical operators.
 
 ### Control Flow Braces
+
 Always use braces with control flow statements, even for single-line bodies:
 
 **Required:**
+
 ```ts
 if (hoge) {
   ...
@@ -94,29 +106,35 @@ if (hoge) {
 ```
 
 **Not allowed:**
+
 ```ts
 if (hoge) ...
 ```
 
 ### Zod Schema Naming
+
 Use lowerCamelCase for Zod schema variable names:
 
 **Required:**
+
 ```ts
 const fovSchema = z.number().int().min(1).max(179)
 const userProfileSchema = z.object({ ... })
 ```
 
 **Not allowed:**
+
 ```ts
 const FovSchema = z.number().int().min(1).max(179)  // ❌ PascalCase
 const UserProfileSchema = z.object({ ... })  // ❌ PascalCase
 ```
 
 ### Export Style
+
 Use `export` prefix on declarations instead of separate export statements:
 
 **Required:**
+
 ```ts
 export const fovSchema = z.number().int().min(1).max(179)
 export type Locale = z.infer<typeof localeSchema>
@@ -125,6 +143,7 @@ export function detectLocale(): Locale { ... }
 ```
 
 **Not allowed:**
+
 ```ts
 const fovSchema = z.number().int().min(1).max(179)
 type Locale = z.infer<typeof localeSchema>
@@ -136,12 +155,14 @@ export type { Locale, Translations }
 
 **Exception for `export default`:**
 `export default` cannot be used as a prefix for `const`, so it must be on a separate line:
+
 ```ts
 const config = { ... }
 export default config
 ```
 
 ### ESLint Rules
+
 **IMPORTANT: Do not disable ESLint rules without a very strong justification.**
 
 - In principle, do not disable ESLint rules (using `eslint-disable` comments)
@@ -154,6 +175,7 @@ export default config
 ## Project Context
 
 ### Technology Stack
+
 - **Framework**: Next.js 16 (with Turbopack)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS 4
@@ -161,36 +183,71 @@ export default config
 - **Deployment**: Static Generation (`output: "export"`)
 
 ### i18n Strategy
+
 - Default language: Japanese (`ja`)
 - English support via client-side detection
 - Dynamic `lang` attribute updates based on `navigator.language`
 
 ### SEO Considerations
+
 - This is a static site (Static Generation)
 - All metadata should be optimized for static export
 - Use `export const dynamic = "force-static"` for route handlers when using `output: "export"`
 
 ## Testing Changes
 
+### When Resolving Issues
+
+When resolving an issue, **always write tests** that verify the fix unless there is a clear reason not to.
+The test must demonstrate that the issue is resolved.
+
+### Test Directory Structure
+
+All tests live under a single `tests/` directory. Do not split by type (unit/integration/E2E) at the top level.
+Organize by feature or module using subdirectories as needed.
+
+```
+tests/
+  unit/          # unit tests
+  integration/   # integration tests
+  e2e/           # end-to-end tests
+```
+
+### File Naming Conventions
+
+- Unit and integration tests: `*.test.ts` / `*.test.tsx`
+- E2E tests: `*.spec.ts`
+
 ### When Implementing Features
-- When you implement a new feature, **basically always add tests** for it:
-  - **Use case / scenario tests** (E2E tests): Add in `test/e2e/` and run with `bun run test:e2e`
-  - **Unit tests**: Add in `test/unit/` and run with `bun run test:ut`
+
+- When you implement a new feature, **basically always add tests** for it
 
 ### Before Committing
+
 1. Run `bun run typecheck` to verify TypeScript types
 2. Run `bun run build` to ensure the build succeeds
 3. Check for any warnings in the build output
 4. Test the generated static files in the `out/` directory
 
 ### Don't Skip
+
 - Always validate changes compile and build successfully
 - Ensure no new TypeScript errors are introduced
 - Verify that static generation completes without errors
 
+## Language
+
+- All development-facing text must be written in **English**: code comments, AGENTS.md, and other internal documentation
+- Exception: Issue titles/bodies, PR titles/bodies, and commit messages must be written in **Japanese** (see below)
+
+## GitHub Issues / Pull Requests
+
+Issue names, issue bodies, PR names, and PR bodies must be written in **Japanese**.
+
 ## Commit Messages
 
 Follow Conventional Commits format:
+
 - `feat:` for new features
 - `fix:` for bug fixes
 - `docs:` for documentation changes
