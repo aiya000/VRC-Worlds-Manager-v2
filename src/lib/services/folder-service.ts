@@ -74,9 +74,7 @@ export const FolderServiceLive = Layer.succeed(FolderService, {
     Effect.tryPromise({
       try: async () => {
         const allFolders = await db.folders.orderBy('order').toArray();
-        const currentIndex = allFolders.findIndex(
-          (f) => f.name === folderName,
-        );
+        const currentIndex = allFolders.findIndex((f) => f.name === folderName);
         if (currentIndex === -1) {
           throw new Error(`Folder "${folderName}" not found`);
         }
@@ -98,24 +96,18 @@ export const FolderServiceLive = Layer.succeed(FolderService, {
         if (!existing) {
           throw new Error(`Folder "${oldName}" not found`);
         }
-        await db.transaction(
-          'rw',
-          [db.folders, db.worlds],
-          async () => {
-            await db.folders.delete(oldName);
-            await db.folders.add({ name: newName, order: existing.order });
-            const worldsInFolder = await db.worlds
-              .filter((w) => w.folders.includes(oldName))
-              .toArray();
-            for (const world of worldsInFolder) {
-              await db.worlds.update(world.worldId, {
-                folders: world.folders.map((f) =>
-                  f === oldName ? newName : f,
-                ),
-              });
-            }
-          },
-        );
+        await db.transaction('rw', [db.folders, db.worlds], async () => {
+          await db.folders.delete(oldName);
+          await db.folders.add({ name: newName, order: existing.order });
+          const worldsInFolder = await db.worlds
+            .filter((w) => w.folders.includes(oldName))
+            .toArray();
+          for (const world of worldsInFolder) {
+            await db.worlds.update(world.worldId, {
+              folders: world.folders.map((f) => (f === oldName ? newName : f)),
+            });
+          }
+        });
       },
       catch: (e) => new Error(`Failed to rename folder: ${e}`),
     }),

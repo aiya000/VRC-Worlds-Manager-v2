@@ -69,7 +69,8 @@ export class AppDatabase extends Dexie {
   constructor() {
     super('VRChatWorldsManager');
     this.version(1).stores({
-      worlds: 'worldId, name, authorName, favorites, lastUpdated, visits, dateAdded, capacity',
+      worlds:
+        'worldId, name, authorName, favorites, lastUpdated, visits, dateAdded, capacity',
       worldDetails: 'worldId',
       folders: 'name, order',
       hiddenWorlds: 'worldId',

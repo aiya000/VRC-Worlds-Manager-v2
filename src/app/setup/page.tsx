@@ -43,10 +43,9 @@ const WelcomePage: React.FC = () => {
     language: 'en-US',
     card_size: 'Normal' as CardSize,
   });
-  const [migrationFiles, setMigrationFiles] = useState<[File | null, File | null]>([
-    null,
-    null,
-  ]);
+  const [migrationFiles, setMigrationFiles] = useState<
+    [File | null, File | null]
+  >([null, null]);
   const [pathValidation, setPathValidation] = useState<[boolean, boolean]>([
     false,
     false,
@@ -222,7 +221,9 @@ const WelcomePage: React.FC = () => {
             setMigrationMetaError(result.error);
           }
         } catch (e: unknown) {
-          setMigrationMetaError(e instanceof Error ? e.message : 'Unknown error');
+          setMigrationMetaError(
+            e instanceof Error ? e.message : 'Unknown error',
+          );
         } finally {
           setMigrationMetaLoading(false);
         }
@@ -360,7 +361,9 @@ const WelcomePage: React.FC = () => {
                       <Input
                         value={migrationFiles[0]?.name ?? ''}
                         readOnly
-                        placeholder={t('settings-page:select-worlds-file-placeholder')}
+                        placeholder={t(
+                          'settings-page:select-worlds-file-placeholder',
+                        )}
                         className={
                           pathValidation[0]
                             ? 'text-foreground'
@@ -390,7 +393,9 @@ const WelcomePage: React.FC = () => {
                       <Input
                         value={migrationFiles[1]?.name ?? ''}
                         readOnly
-                        placeholder={t('settings-page:select-folders-file-placeholder')}
+                        placeholder={t(
+                          'settings-page:select-folders-file-placeholder',
+                        )}
                         className={
                           pathValidation[1]
                             ? 'text-foreground'

@@ -1,8 +1,8 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 ::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
 @theme inline {

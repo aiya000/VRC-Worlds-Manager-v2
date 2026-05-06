@@ -39,14 +39,11 @@ export const ExternalDataServiceLive = Layer.succeed(ExternalDataService, {
       try: async () => {
         const res = await fetch(`${DATA_BASE_URL}/api/supporters/vrchat`);
         if (!res.ok) {
-          throw new Error(
-            `Failed to fetch VRChat names: ${res.status}`,
-          );
+          throw new Error(`Failed to fetch VRChat names: ${res.status}`);
         }
         return (await res.json()) as PatreonVRChatNames;
       },
-      catch: (e) =>
-        new Error(`Failed to fetch Patreon VRChat names: ${e}`),
+      catch: (e) => new Error(`Failed to fetch Patreon VRChat names: ${e}`),
     }),
 
   fetchBlacklist: () =>

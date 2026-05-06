@@ -12,15 +12,11 @@ const taskEventTarget = new EventTarget();
 export class TaskService extends Context.Tag('TaskService')<
   TaskService,
   {
-    readonly getTaskStatus: (
-      id: string,
-    ) => Effect.Effect<TaskStatus, Error>;
+    readonly getTaskStatus: (id: string) => Effect.Effect<TaskStatus, Error>;
     readonly cancelTaskRequest: (
       id: string,
     ) => Effect.Effect<TaskStatus, Error>;
-    readonly getTaskError: (
-      id: string,
-    ) => Effect.Effect<string | null, Error>;
+    readonly getTaskError: (id: string) => Effect.Effect<string | null, Error>;
     readonly setTaskStatus: (
       id: string,
       status: TaskStatus,

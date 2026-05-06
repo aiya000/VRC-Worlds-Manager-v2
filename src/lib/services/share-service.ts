@@ -7,9 +7,7 @@ const SHARE_API_URL = 'https://data.raifaworks.com/api';
 export class ShareService extends Context.Tag('ShareService')<
   ShareService,
   {
-    readonly shareFolder: (
-      folderName: string,
-    ) => Effect.Effect<string, Error>;
+    readonly shareFolder: (folderName: string) => Effect.Effect<string, Error>;
     readonly updateFolderShare: (
       folderName: string,
     ) => Effect.Effect<string | null, Error>;
@@ -91,9 +89,7 @@ export const ShareServiceLive = Layer.succeed(ShareService, {
   downloadFolder: (shareId) =>
     Effect.tryPromise({
       try: async () => {
-        const res = await fetch(
-          `${SHARE_API_URL}/folders/${shareId}`,
-        );
+        const res = await fetch(`${SHARE_API_URL}/folders/${shareId}`);
         if (!res.ok) {
           throw new Error(`Download failed: ${res.status}`);
         }
@@ -148,10 +144,7 @@ export const ShareServiceLive = Layer.succeed(ShareService, {
           }
         }
 
-        return [folderName, hiddenInImport] as [
-          string,
-          WorldDisplayData[],
-        ];
+        return [folderName, hiddenInImport] as [string, WorldDisplayData[]];
       },
       catch: (e) => new Error(`Failed to download folder: ${e}`),
     }),

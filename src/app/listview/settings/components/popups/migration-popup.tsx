@@ -42,10 +42,9 @@ export function MigrationPopup({
   onConfirm,
 }: MigrationPopupProps) {
   const { t } = useLocalization();
-  const [migrationFiles, setMigrationFiles] = useState<[File | null, File | null]>([
-    null,
-    null,
-  ]);
+  const [migrationFiles, setMigrationFiles] = useState<
+    [File | null, File | null]
+  >([null, null]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [migrationData, setMigrationData] = useState<MigrationData | null>(

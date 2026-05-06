@@ -9,9 +9,7 @@ export class AuthService extends Context.Tag('AuthService')<
       key: string,
       value: string,
     ) => Effect.Effect<void, Error>;
-    readonly getAuthToken: (
-      key: string,
-    ) => Effect.Effect<string | null, Error>;
+    readonly getAuthToken: (key: string) => Effect.Effect<string | null, Error>;
     readonly clearAuth: () => Effect.Effect<void, Error>;
   }
 >() {}

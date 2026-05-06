@@ -4,9 +4,7 @@ import { db } from './db';
 export class CustomTagsService extends Context.Tag('CustomTagsService')<
   CustomTagsService,
   {
-    readonly getCustomTags: (
-      worldId: string,
-    ) => Effect.Effect<string[], Error>;
+    readonly getCustomTags: (worldId: string) => Effect.Effect<string[], Error>;
     readonly setCustomTags: (
       worldId: string,
       tags: string[],

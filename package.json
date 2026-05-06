@@ -3,13 +3,14 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
+    "prepare": "husky",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "deploy": "wrangler pages deploy out/ --project-name vrchat-worlds-manager-web"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

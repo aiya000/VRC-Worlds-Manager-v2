@@ -29,9 +29,7 @@ export class WorldService extends Context.Tag('WorldService')<
       worldId: string,
       dontSaveToLocal: boolean | null,
     ) => Effect.Effect<WorldDetails, Error>;
-    readonly putWorld: (
-      world: WorldDisplayData,
-    ) => Effect.Effect<void, Error>;
+    readonly putWorld: (world: WorldDisplayData) => Effect.Effect<void, Error>;
     readonly sortWorldsDisplay: (
       worlds: WorldDisplayData[],
       sortField: string,
@@ -40,9 +38,7 @@ export class WorldService extends Context.Tag('WorldService')<
   }
 >() {}
 
-function toDisplayData(
-  record: WorldDisplayData,
-): WorldDisplayData {
+function toDisplayData(record: WorldDisplayData): WorldDisplayData {
   return {
     worldId: record.worldId,
     name: record.name,
@@ -67,9 +63,7 @@ export const WorldServiceLive = Layer.succeed(WorldService, {
           (await db.hiddenWorlds.toArray()).map((h) => h.worldId),
         );
         const worlds = await db.worlds.toArray();
-        return worlds
-          .filter((w) => !hidden.has(w.worldId))
-          .map(toDisplayData);
+        return worlds.filter((w) => !hidden.has(w.worldId)).map(toDisplayData);
       },
       catch: (e) => new Error(`Failed to get all worlds: ${e}`),
     }),
@@ -97,9 +91,7 @@ export const WorldServiceLive = Layer.succeed(WorldService, {
           (await db.hiddenWorlds.toArray()).map((h) => h.worldId),
         );
         const worlds = await db.worlds
-          .filter(
-            (w) => w.folders.length === 0 && !hidden.has(w.worldId),
-          )
+          .filter((w) => w.folders.length === 0 && !hidden.has(w.worldId))
           .toArray();
         return worlds.map(toDisplayData);
       },

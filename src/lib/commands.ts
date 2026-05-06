@@ -39,7 +39,11 @@ import type {
 function run<A>(
   effect: Effect.Effect<A, any, any>,
 ): Promise<Result<A, string>> {
-  const provided = Effect.provide(effect, AppLayer) as Effect.Effect<A, unknown, never>;
+  const provided = Effect.provide(effect, AppLayer) as Effect.Effect<
+    A,
+    unknown,
+    never
+  >;
   return Effect.runPromise(
     provided.pipe(
       Effect.map((data): Result<A, string> => ({ status: 'ok', data })),
@@ -57,7 +61,11 @@ function run<A>(
 function runVoid(
   effect: Effect.Effect<void, any, any>,
 ): Promise<Result<null, string>> {
-  const provided = Effect.provide(effect, AppLayer) as Effect.Effect<void, unknown, never>;
+  const provided = Effect.provide(effect, AppLayer) as Effect.Effect<
+    void,
+    unknown,
+    never
+  >;
   return Effect.runPromise(
     provided.pipe(
       Effect.map((): Result<null, string> => ({ status: 'ok', data: null })),
@@ -810,9 +818,7 @@ export const commands = {
     };
   },
 
-  async restoreFromBackupFile(
-    file: File,
-  ): Promise<Result<null, string>> {
+  async restoreFromBackupFile(file: File): Promise<Result<null, string>> {
     return runVoid(
       Effect.gen(function* () {
         const svc = yield* BackupService;

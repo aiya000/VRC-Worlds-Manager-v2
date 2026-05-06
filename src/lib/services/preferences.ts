@@ -63,11 +63,9 @@ export const PreferencesServiceLive = Layer.succeed(PreferencesService, {
   setTheme: (theme) => Effect.sync(() => setItem('theme', theme)),
   getLanguage: () => Effect.succeed(getItem<string>('language', 'ja-JP')),
   setLanguage: (language) => Effect.sync(() => setItem('language', language)),
-  getCardSize: () =>
-    Effect.succeed(getItem<CardSize>('cardSize', 'Normal')),
+  getCardSize: () => Effect.succeed(getItem<CardSize>('cardSize', 'Normal')),
   setCardSize: (cardSize) => Effect.sync(() => setItem('cardSize', cardSize)),
-  getRegion: () =>
-    Effect.succeed(getItem<InstanceRegion>('region', 'us')),
+  getRegion: () => Effect.succeed(getItem<InstanceRegion>('region', 'us')),
   setRegion: (region) => Effect.sync(() => setItem('region', region)),
   getStarredFilterItems: (id) =>
     Effect.succeed(getItem<string[]>(`starredFilterItems_${id}`, [])),

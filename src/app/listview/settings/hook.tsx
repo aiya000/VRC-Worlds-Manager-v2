@@ -1,9 +1,5 @@
 import { useLocalization } from '@/hooks/use-localization';
-import {
-  CardSize,
-  commands,
-  FolderRemovalPreference,
-} from '@/lib/commands';
+import { CardSize, commands, FolderRemovalPreference } from '@/lib/commands';
 import { error, info } from '@/lib/services/logger';
 import { useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -187,7 +183,10 @@ export const useSettingsPage = () => {
   ) => {
     try {
       info(`Migrating data from ${worldsFile.name} and ${foldersFile.name}`);
-      const result = await commands.migrateOldDataFromFiles(worldsFile, foldersFile);
+      const result = await commands.migrateOldDataFromFiles(
+        worldsFile,
+        foldersFile,
+      );
 
       if (result.status === 'error') {
         error(`Migration failed: ${result.error}`);

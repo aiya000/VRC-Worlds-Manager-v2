@@ -6,10 +6,7 @@ export class InitService extends Context.Tag('InitService')<
   {
     readonly requireInitialSetup: () => Effect.Effect<boolean, Error>;
     readonly checkFilesLoaded: () => Effect.Effect<boolean, Error>;
-    readonly checkExistingData: () => Effect.Effect<
-      [boolean, boolean],
-      Error
-    >;
+    readonly checkExistingData: () => Effect.Effect<[boolean, boolean], Error>;
     readonly createEmptyAuth: () => Effect.Effect<void, Error>;
     readonly createEmptyFiles: () => Effect.Effect<void, Error>;
     readonly deleteData: () => Effect.Effect<void, Error>;

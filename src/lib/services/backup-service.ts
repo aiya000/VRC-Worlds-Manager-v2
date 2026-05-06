@@ -15,9 +15,7 @@ export class BackupService extends Context.Tag('BackupService')<
   BackupService,
   {
     readonly createBackup: () => Effect.Effect<void, Error>;
-    readonly restoreFromBackup: (
-      file: File,
-    ) => Effect.Effect<void, Error>;
+    readonly restoreFromBackup: (file: File) => Effect.Effect<void, Error>;
     readonly getBackupMetadataFromFile: (
       file: File,
     ) => Effect.Effect<BackupMetaData, Error>;
@@ -109,13 +107,7 @@ export const BackupServiceLive = Layer.succeed(BackupService, {
 
         await db.transaction(
           'rw',
-          [
-            db.worlds,
-            db.folders,
-            db.hiddenWorlds,
-            db.memos,
-            db.customTags,
-          ],
+          [db.worlds, db.folders, db.hiddenWorlds, db.memos, db.customTags],
           async () => {
             await db.worlds.clear();
             await db.folders.clear();
@@ -155,9 +147,7 @@ export const BackupServiceLive = Layer.succeed(BackupService, {
               await db.memos.put({ worldId, memo });
             }
 
-            for (const [worldId, tags] of Object.entries(
-              backup.customTags,
-            )) {
+            for (const [worldId, tags] of Object.entries(backup.customTags)) {
               await db.customTags.put({ worldId, tags });
             }
           },

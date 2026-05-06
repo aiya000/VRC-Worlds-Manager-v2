@@ -72,51 +72,47 @@ export const MigrationServiceLive = Layer.succeed(MigrationService, {
           }
         }
 
-        await db.transaction(
-          'rw',
-          [db.worlds, db.folders],
-          async () => {
-            let folderOrder = 0;
-            for (const folderName of Object.keys(oldFolders)) {
-              await db.folders.put({
-                name: folderName,
-                order: folderOrder++,
-              });
-            }
+        await db.transaction('rw', [db.worlds, db.folders], async () => {
+          let folderOrder = 0;
+          for (const folderName of Object.keys(oldFolders)) {
+            await db.folders.put({
+              name: folderName,
+              order: folderOrder++,
+            });
+          }
 
-            for (const world of oldWorlds) {
-              const displayData: WorldDisplayData = {
-                worldId: world.worldId,
-                name: world.name,
-                thumbnailUrl: world.thumbnailUrl,
-                authorName: world.authorName,
-                favorites: world.favorites,
-                lastUpdated: world.lastUpdated,
-                visits: world.visits,
-                dateAdded: world.dateAdded ?? new Date().toISOString(),
-                platform: world.platform as WorldDisplayData['platform'],
-                folders: worldFolderMap.get(world.worldId) ?? [],
-                tags: world.tags ?? [],
-                capacity: world.capacity ?? 0,
-              };
+          for (const world of oldWorlds) {
+            const displayData: WorldDisplayData = {
+              worldId: world.worldId,
+              name: world.name,
+              thumbnailUrl: world.thumbnailUrl,
+              authorName: world.authorName,
+              favorites: world.favorites,
+              lastUpdated: world.lastUpdated,
+              visits: world.visits,
+              dateAdded: world.dateAdded ?? new Date().toISOString(),
+              platform: world.platform as WorldDisplayData['platform'],
+              folders: worldFolderMap.get(world.worldId) ?? [],
+              tags: world.tags ?? [],
+              capacity: world.capacity ?? 0,
+            };
 
-              await db.worlds.put({
-                worldId: displayData.worldId,
-                name: displayData.name,
-                thumbnailUrl: displayData.thumbnailUrl,
-                authorName: displayData.authorName,
-                favorites: displayData.favorites,
-                lastUpdated: displayData.lastUpdated,
-                visits: displayData.visits,
-                dateAdded: displayData.dateAdded,
-                platform: displayData.platform,
-                folders: displayData.folders,
-                tags: displayData.tags,
-                capacity: displayData.capacity,
-              });
-            }
-          },
-        );
+            await db.worlds.put({
+              worldId: displayData.worldId,
+              name: displayData.name,
+              thumbnailUrl: displayData.thumbnailUrl,
+              authorName: displayData.authorName,
+              favorites: displayData.favorites,
+              lastUpdated: displayData.lastUpdated,
+              visits: displayData.visits,
+              dateAdded: displayData.dateAdded,
+              platform: displayData.platform,
+              folders: displayData.folders,
+              tags: displayData.tags,
+              capacity: displayData.capacity,
+            });
+          }
+        });
       },
       catch: (e) => new Error(`Failed to migrate data: ${e}`),
     }),

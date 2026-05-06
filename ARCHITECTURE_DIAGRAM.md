@@ -98,6 +98,7 @@
 ## Data Flow: Sort Preferences
 
 ### On App Startup:
+
 ```
 App Start
   → Frontend initializes
@@ -111,6 +112,7 @@ App Start
 ```
 
 ### On Sort Change:
+
 ```
 User clicks sort option
   → Frontend calls setSortField() or setSortDirection()
@@ -121,6 +123,7 @@ User clicks sort option
 ```
 
 ### On Export:
+
 ```
 User triggers export
   → Frontend calls exportToPortalLibrarySystem()

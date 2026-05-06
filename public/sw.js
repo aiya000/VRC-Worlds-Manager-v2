@@ -12,10 +12,7 @@
 const CACHE_NAME = 'vrcwm-v1';
 
 /** @type {string[]} */
-const PRECACHE_URLS = [
-  '/',
-  '/icons/app-icon.PNG',
-];
+const PRECACHE_URLS = ['/', '/icons/app-icon.PNG'];
 
 /**
  * Install event: precache static assets
@@ -23,10 +20,12 @@ const PRECACHE_URLS = [
  */
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)),
   );
   // Activate immediately
-  /** @type {ServiceWorkerGlobalScope} */ (/** @type {unknown} */ (self)).skipWaiting();
+  /** @type {ServiceWorkerGlobalScope} */ (
+    /** @type {unknown} */ (self)
+  ).skipWaiting();
 });
 
 /**
@@ -35,15 +34,19 @@ self.addEventListener('install', (event) => {
  */
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) =>
-      Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
-      )
-    )
+    caches
+      .keys()
+      .then((cacheNames) =>
+        Promise.all(
+          cacheNames
+            .filter((name) => name !== CACHE_NAME)
+            .map((name) => caches.delete(name)),
+        ),
+      ),
   );
-  /** @type {ServiceWorkerGlobalScope} */ (/** @type {unknown} */ (self)).clients.claim();
+  /** @type {ServiceWorkerGlobalScope} */ (
+    /** @type {unknown} */ (self)
+  ).clients.claim();
 });
 
 /**
@@ -62,13 +65,18 @@ self.addEventListener('fetch', (event) => {
   // Network-first for navigations
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(() => caches.match('/') || new Response('Offline', { status: 503 }))
+      fetch(request).catch(
+        () => caches.match('/') || new Response('Offline', { status: 503 }),
+      ),
     );
     return;
   }
 
   // Network-first for API calls (stale-while-revalidate)
-  if (url.hostname.includes('api.vrchat.cloud') || url.hostname.includes('workers.dev')) {
+  if (
+    url.hostname.includes('api.vrchat.cloud') ||
+    url.hostname.includes('workers.dev')
+  ) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async (cache) => {
         try {
@@ -81,7 +89,7 @@ self.addEventListener('fetch', (event) => {
           const cached = await cache.match(request);
           return cached || new Response('Network error', { status: 503 });
         }
-      })
+      }),
     );
     return;
   }
@@ -99,6 +107,6 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       });
-    })
+    }),
   );
 });
