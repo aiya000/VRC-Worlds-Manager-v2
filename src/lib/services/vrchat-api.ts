@@ -12,6 +12,10 @@ const CF_WORKER_URL =
     ? (localStorage.getItem('cf_worker_url') ?? '')
     : '';
 
+const CF_ACCESS_CLIENT_ID = process.env.NEXT_PUBLIC_CF_ACCESS_CLIENT_ID ?? '';
+const CF_ACCESS_CLIENT_SECRET =
+  process.env.NEXT_PUBLIC_CF_ACCESS_CLIENT_SECRET ?? '';
+
 function apiUrl(path: string): string {
   return `${CF_WORKER_URL}/api/1${path}`;
 }
@@ -20,13 +24,18 @@ async function apiFetch(
   path: string,
   options?: RequestInit,
 ): Promise<Response> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options?.headers as Record<string, string>),
+  };
+  if (CF_ACCESS_CLIENT_ID) headers['CF-Access-Client-Id'] = CF_ACCESS_CLIENT_ID;
+  if (CF_ACCESS_CLIENT_SECRET)
+    headers['CF-Access-Client-Secret'] = CF_ACCESS_CLIENT_SECRET;
+
   const res = await fetch(apiUrl(path), {
     ...options,
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
+    headers,
   });
   if (!res.ok) {
     const text = await res.text();
@@ -49,9 +58,7 @@ export class VRChatApiService extends Context.Tag('VRChatApiService')<
     ) => Effect.Effect<void, Error>;
     readonly logout: () => Effect.Effect<void, Error>;
     readonly getFavoriteWorlds: () => Effect.Effect<void, Error>;
-    readonly getWorld: (
-      worldId: string,
-    ) => Effect.Effect<WorldDetails, Error>;
+    readonly getWorld: (worldId: string) => Effect.Effect<WorldDetails, Error>;
     readonly checkWorldInfo: (
       worldId: string,
     ) => Effect.Effect<WorldDetails, Error>;
