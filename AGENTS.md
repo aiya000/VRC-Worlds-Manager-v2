@@ -237,8 +237,8 @@ tests/
 
 ## Language
 
-- All development-facing text must be written in **English**: code comments, AGENTS.md, and other internal documentation
-- Exception: Issue titles/bodies, PR titles/bodies, and commit messages must be written in **Japanese** (see below)
+- All development-facing text must be written in **English**: code comments, commit messages, AGENTS.md, and other internal documentation
+- Exception: Issue titles/bodies, PR titles/bodies must be written in **Japanese** (see below)
 
 ## GitHub Issues / Pull Requests
 
@@ -255,7 +255,7 @@ Follow Conventional Commits format:
 - `refactor:` for code refactoring
 - `chore:` for maintenance tasks
 
-Use Japanese for commit messages if the PR conversation is in Japanese.
+Always write commit messages in English.
 
 ## Remember
 
