@@ -28,9 +28,12 @@ async function apiFetch(
     'Content-Type': 'application/json',
     ...(options?.headers as Record<string, string>),
   };
-  if (CF_ACCESS_CLIENT_ID) headers['CF-Access-Client-Id'] = CF_ACCESS_CLIENT_ID;
-  if (CF_ACCESS_CLIENT_SECRET)
+  if (CF_ACCESS_CLIENT_ID) {
+    headers['CF-Access-Client-Id'] = CF_ACCESS_CLIENT_ID;
+  }
+  if (CF_ACCESS_CLIENT_SECRET) {
     headers['CF-Access-Client-Secret'] = CF_ACCESS_CLIENT_SECRET;
+  }
 
   const res = await fetch(apiUrl(path), {
     ...options,
