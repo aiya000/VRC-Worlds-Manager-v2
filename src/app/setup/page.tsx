@@ -67,8 +67,8 @@ const WelcomePage: React.FC = () => {
   const [showMigrationConfirm, setShowMigrationConfirm] = useState(false);
 
   useEffect(() => {
-    setLanguage(preferences.language);
-  }, [preferences.language, setLanguage]);
+    setLanguage('en-US');
+  }, [setLanguage]);
 
   useEffect(() => {
     info(`Theme changed to: ${preferences.theme}`);
@@ -275,7 +275,7 @@ const WelcomePage: React.FC = () => {
             currentPage={1}
             onBack={handleBack}
             onNext={handleNext}
-            isFirstPage={true}
+            isFirstPage
           >
             <div className="h-full flex flex-col justify-center space-y-8">
               <div className="space-y-2 text-center">
