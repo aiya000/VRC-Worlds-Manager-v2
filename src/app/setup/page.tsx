@@ -92,13 +92,29 @@ const WelcomePage: React.FC = () => {
       toast(t('general:error-title'), {
         description: t('setup-page:toast:error:migrate:message', result.error),
       });
-      setPage(3);
-      return;
+      return false;
     }
-    setPage(4);
+
     toast(t('general:success-title'), {
       description: t('setup-page:toast:success:migrate:message'),
     });
+
+    return true;
+  };
+
+  const handleMigration = async () => {
+    setIsLoading(true);
+    const migrationSucceeded = await migrate();
+    setIsLoading(false);
+
+    if (!migrationSucceeded) {
+      setAlreadyMigrated(false);
+      setPage(3);
+      return;
+    }
+
+    setAlreadyMigrated(true);
+    setPage(4);
   };
 
   const handleNext = async () => {
@@ -151,10 +167,8 @@ const WelcomePage: React.FC = () => {
         setShowMigrationConfirm(true);
         return;
       }
-      setIsLoading(true);
-      await migrate();
-      setIsLoading(false);
-      setAlreadyMigrated(true);
+      await handleMigration();
+      return;
     }
     if (page === 6) {
       const [result_theme, result_language, result_card_size] =
@@ -193,6 +207,7 @@ const WelcomePage: React.FC = () => {
       }
 
       router.push('/login');
+      return;
     }
     setPage(page + 1);
   };
@@ -266,9 +281,9 @@ const WelcomePage: React.FC = () => {
     pathValidation[1],
   ]);
 
-  const handleMigrationConfirm = () => {
+  const handleMigrationConfirm = async () => {
     setShowMigrationConfirm(false);
-    migrate();
+    await handleMigration();
   };
 
   const handleMigrationCancel = () => {
@@ -299,7 +314,9 @@ const WelcomePage: React.FC = () => {
           >
             <div className="h-full flex flex-col items-center justify-center space-y-8">
               <div className="space-y-2 text-center">
-                <p>初期設定およびこのアプリで使用する言語を設定してください。</p>
+                <p>
+                  初期設定およびこのアプリで使用する言語を設定してください。
+                </p>
                 <p>Please select the language to use for setup and this app.</p>
               </div>
               <Select
