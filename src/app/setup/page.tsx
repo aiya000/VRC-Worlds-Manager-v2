@@ -319,7 +319,7 @@ const WelcomePage: React.FC = () => {
                 <p className="text-sm text-muted-foreground">
                   {t('setup-page:not-first-time:foretext')}
                   <a
-                    href="https://discord.gg/gNzbpux5xW"
+                    href="https://github.com/aiya000/VRC-Worlds-Manager-v2/issues/new"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500 hover:underline"
@@ -635,7 +635,7 @@ const WelcomePage: React.FC = () => {
                   <p className="text-sm text-muted-foreground">
                     {t('setup-page:need-help:foretext')}
                     <a
-                      href="https://discord.gg/gNzbpux5xW"
+                      href="https://github.com/aiya000/VRC-Worlds-Manager-v2/issues/new"
                       className="text-blue-500 hover:underline"
                     >
                       {t('setup-page:discord')}
