@@ -9,6 +9,21 @@ import { LocalizationContext } from '../../../components/localization-context';
 import { useFolders } from '../hook/use-folders';
 import { useTheme } from 'next-themes';
 
+const normalizeThemeValue = (theme: string): 'light' | 'dark' | 'system' => {
+  const unwrappedTheme =
+    theme.startsWith('"') && theme.endsWith('"') ? theme.slice(1, -1) : theme;
+
+  if (
+    unwrappedTheme === 'light' ||
+    unwrappedTheme === 'dark' ||
+    unwrappedTheme === 'system'
+  ) {
+    return unwrappedTheme;
+  }
+
+  return 'system';
+};
+
 export const useSettingsPage = () => {
   const [cardSize, setCardSize] = useState<CardSize>('Normal');
   const [language, setLanguage] = useState<string>('en-US');
@@ -80,7 +95,10 @@ export const useSettingsPage = () => {
         const cardSizeResult = await commands.getCardSize();
         const folderRemovalPreferenceResult =
           await commands.getFolderRemovalPreference();
-        const theme = themeResult.status === 'ok' ? themeResult.data : 'system';
+        const theme =
+          themeResult.status === 'ok'
+            ? normalizeThemeValue(themeResult.data)
+            : 'system';
         const language =
           languageResult.status === 'ok' ? languageResult.data : 'en-US';
         const cardSize =
@@ -260,12 +278,13 @@ export const useSettingsPage = () => {
 
   const handleThemeChange = async (value: string) => {
     try {
-      info(`Setting theme to: ${value}`);
-      const result = await commands.setTheme(value);
+      const normalizedTheme = normalizeThemeValue(value);
+      info(`Setting theme to: ${normalizedTheme}`);
+      const result = await commands.setTheme(normalizedTheme);
 
       if (result.status === 'ok') {
-        setTheme(value);
-        info(`Theme set to: ${value}`);
+        setTheme(normalizedTheme);
+        info(`Theme set to: ${normalizedTheme}`);
       } else {
         error(`Failed to set theme: ${result.error}`);
         toast(t('general:error-title'), {
