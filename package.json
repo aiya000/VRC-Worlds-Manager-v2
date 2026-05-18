@@ -10,7 +10,7 @@
     "lint": "next lint",
     "format": "prettier --write .",
     "prepare": "husky",
-    "test": "vitest run",
+    "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "vitest run",
     "test:e2e": "playwright test"
   },
