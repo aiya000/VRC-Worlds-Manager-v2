@@ -67,10 +67,6 @@ const WelcomePage: React.FC = () => {
   const [showMigrationConfirm, setShowMigrationConfirm] = useState(false);
 
   useEffect(() => {
-    setLanguage('en-US');
-  }, [setLanguage]);
-
-  useEffect(() => {
     info(`Theme changed to: ${preferences.theme}`);
   }, [preferences.theme]);
 
@@ -96,6 +92,9 @@ const WelcomePage: React.FC = () => {
   };
 
   const handleNext = async () => {
+    if (page === 1) {
+      setLanguage(preferences.language);
+    }
     if (page === 2) {
       try {
         const hasDataResult = await commands.checkExistingData();
@@ -275,7 +274,7 @@ const WelcomePage: React.FC = () => {
             currentPage={1}
             onBack={handleBack}
             onNext={handleNext}
-            isFirstPage
+            isFirstPage={true}
           >
             <div className="h-full flex flex-col justify-center space-y-8">
               <div className="space-y-2 text-center">
