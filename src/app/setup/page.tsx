@@ -67,6 +67,11 @@ const WelcomePage: React.FC = () => {
   const [showMigrationConfirm, setShowMigrationConfirm] = useState(false);
 
   useEffect(() => {
+    setLanguage(preferences.language);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     info(`Theme changed to: ${preferences.theme}`);
   }, [preferences.theme]);
 
@@ -82,17 +87,17 @@ const WelcomePage: React.FC = () => {
       toast(t('general:error-title'), {
         description: t('setup-page:toast:error:migrate:message', result.error),
       });
-      setPage(2);
+      setPage(3);
       return;
     }
-    setPage(3);
+    setPage(4);
     toast(t('general:success-title'), {
       description: t('setup-page:toast:success:migrate:message'),
     });
   };
 
   const handleNext = async () => {
-    if (page === 1) {
+    if (page === 2) {
       try {
         const hasDataResult = await commands.checkExistingData();
         if (hasDataResult.status === 'ok') {
@@ -109,7 +114,7 @@ const WelcomePage: React.FC = () => {
         setPathValidation([false, false]);
       }
     }
-    if (page === 2) {
+    if (page === 3) {
       if (
         !pathValidation[0] ||
         !pathValidation[1] ||
@@ -129,7 +134,7 @@ const WelcomePage: React.FC = () => {
       setIsLoading(false);
       setAlreadyMigrated(true);
     }
-    if (page === 5) {
+    if (page === 6) {
       const [result_theme, result_language, result_card_size] =
         await Promise.all([
           commands.setTheme(preferences.theme),
@@ -155,7 +160,7 @@ const WelcomePage: React.FC = () => {
         });
 
         error(`Failed to save preferences: ${errorResult.error}`);
-        setPage(4);
+        setPage(5);
         return;
       }
 
@@ -250,7 +255,7 @@ const WelcomePage: React.FC = () => {
   const handleMigrationCancel = () => {
     setShowMigrationConfirm(false);
     setAlreadyMigrated(true);
-    setPage(3);
+    setPage(4);
   };
 
   return (
@@ -267,11 +272,60 @@ const WelcomePage: React.FC = () => {
 
         {page === 1 && (
           <SetupLayout
-            title={t('setup-page:welcome-title')}
+            title="言語 / Language"
             currentPage={1}
             onBack={handleBack}
             onNext={handleNext}
             isFirstPage={true}
+          >
+            <div className="h-full flex flex-col justify-center space-y-8">
+              <div className="space-y-2 text-center">
+                <p>
+                  初期設定およびこのアプリで使用する言語を設定してください。
+                </p>
+                <p>Please select the language to use for setup and this app.</p>
+              </div>
+
+              <div className="space-y-3">
+                <Button
+                  variant={
+                    preferences.language === 'ja-JP' ? 'default' : 'outline'
+                  }
+                  className="w-full"
+                  onClick={() => {
+                    setLanguage('ja-JP');
+                    setPreferences({ ...preferences, language: 'ja-JP' });
+                  }}
+                >
+                  日本語
+                </Button>
+                <Button
+                  variant={
+                    preferences.language === 'en-US' ? 'default' : 'outline'
+                  }
+                  className="w-full"
+                  onClick={() => {
+                    setLanguage('en-US');
+                    setPreferences({ ...preferences, language: 'en-US' });
+                  }}
+                >
+                  English
+                </Button>
+              </div>
+
+              <div className="space-y-2 text-center text-sm text-muted-foreground">
+                <p>この設定は後から変えることができます。</p>
+                <p>You can change this setting later.</p>
+              </div>
+            </div>
+          </SetupLayout>
+        )}
+        {page === 2 && (
+          <SetupLayout
+            title={t('setup-page:welcome-title')}
+            currentPage={2}
+            onBack={handleBack}
+            onNext={handleNext}
           >
             <div className="h-full flex flex-col items-center justify-center space-y-6 relative">
               <div className="absolute top-0 right-0">
@@ -332,10 +386,10 @@ const WelcomePage: React.FC = () => {
             </div>
           </SetupLayout>
         )}
-        {page === 2 && (
+        {page === 3 && (
           <SetupLayout
             title={t('setup-page:migration-title')}
-            currentPage={2}
+            currentPage={3}
             onBack={handleBack}
             onNext={handleNext}
             isMigrationPage={true}
@@ -466,10 +520,10 @@ const WelcomePage: React.FC = () => {
             </div>
           </SetupLayout>
         )}
-        {page === 3 && (
+        {page === 4 && (
           <SetupLayout
             title={t('setup-page:ui-customization-title')}
-            currentPage={3}
+            currentPage={4}
             onBack={handleBack}
             onNext={handleNext}
           >
@@ -536,10 +590,10 @@ const WelcomePage: React.FC = () => {
             </div>
           </SetupLayout>
         )}
-        {page === 4 && (
+        {page === 5 && (
           <SetupLayout
             title={t('setup-page:preferences-title')}
-            currentPage={4}
+            currentPage={5}
             onBack={handleBack}
             onNext={handleNext}
           >
@@ -607,10 +661,10 @@ const WelcomePage: React.FC = () => {
             </div>
           </SetupLayout>
         )}
-        {page === 5 && (
+        {page === 6 && (
           <SetupLayout
             title={t('setup-page:complete-title')}
-            currentPage={5}
+            currentPage={6}
             onBack={handleBack}
             onNext={handleNext}
             isLastPage={true}
