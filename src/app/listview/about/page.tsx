@@ -265,7 +265,7 @@ export default function AboutSection() {
               href="https://github.com/Raifa21/VRC-Worlds-Manager-v2"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline-offset-2 hover:underline"
+              className="text-foreground/80 underline-offset-2 hover:underline hover:text-foreground"
             >
               {t('about-section:fork-attribution:link-text')}
             </a>
