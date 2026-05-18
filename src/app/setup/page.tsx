@@ -73,7 +73,10 @@ const WelcomePage: React.FC = () => {
   const handleLanguageChange = (value: string) => {
     if (value !== 'ja-JP' && value !== 'en-US') return;
     setLanguage(value);
-    setPreferences({ ...preferences, language: value });
+    setPreferences((prevPreferences) => ({
+      ...prevPreferences,
+      language: value,
+    }));
   };
 
   useEffect(() => {
