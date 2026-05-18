@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { info } from '@tauri-apps/plugin-log';
 
 interface SetupLayoutProps {
   title: string;
@@ -39,7 +38,8 @@ export function SetupLayout({
 }: SetupLayoutProps) {
   const { t } = useLocalization();
   const setupTotalPages = 6;
-  const progressValue = ((currentPage - 1) / (setupTotalPages - 1)) * 100;
+  const clampedPage = Math.min(setupTotalPages, Math.max(1, currentPage));
+  const progressValue = ((clampedPage - 1) / (setupTotalPages - 1)) * 100;
 
   return (
     <div className="container max-w-2xl mx-auto p-4">
