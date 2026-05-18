@@ -636,6 +636,8 @@ const WelcomePage: React.FC = () => {
                     {t('setup-page:need-help:foretext')}
                     <a
                       href="https://github.com/aiya000/VRC-Worlds-Manager-v2/issues/new"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-blue-500 hover:underline"
                     >
                       {t('setup-page:github-issues')}
