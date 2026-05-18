@@ -335,7 +335,7 @@ const WelcomePage: React.FC = () => {
                     rel="noopener noreferrer"
                     className="text-blue-500 hover:underline"
                   >
-                    {t('setup-page:discord')}
+                    {t('setup-page:github-issues')}
                   </a>{' '}
                   {t('setup-page:not-first-time:posttext')}
                 </p>
@@ -651,7 +651,7 @@ const WelcomePage: React.FC = () => {
                       href="https://github.com/aiya000/VRC-Worlds-Manager-v2/issues/new"
                       className="text-blue-500 hover:underline"
                     >
-                      {t('setup-page:discord')}
+                      {t('setup-page:github-issues')}
                     </a>
                     {t('setup-page:need-help:posttext')}
                   </p>
