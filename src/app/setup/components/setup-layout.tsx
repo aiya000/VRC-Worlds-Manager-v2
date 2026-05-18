@@ -38,9 +38,12 @@ export function SetupLayout({
   isLoading = false,
 }: SetupLayoutProps) {
   const { t } = useLocalization();
+  const setupTotalPages = 6;
+  const progressValue = ((currentPage - 1) / (setupTotalPages - 1)) * 100;
+
   return (
     <div className="container max-w-2xl mx-auto p-4">
-      <Progress value={(currentPage - 1) * 20} className="mb-8" />
+      <Progress value={progressValue} className="mb-8" />
       <Card className="h-[480px]">
         <CardHeader>
           <CardTitle>{title}</CardTitle>

@@ -80,10 +80,6 @@ const WelcomePage: React.FC = () => {
     info(`Theme changed to: ${preferences.theme}`);
   }, [preferences.theme]);
 
-  useEffect(() => {
-    setLanguage(preferences.language);
-  }, [preferences.language, setLanguage]);
-
   const migrate = async () => {
     const result = await commands.migrateOldData(
       migrationPaths[0],
@@ -103,6 +99,10 @@ const WelcomePage: React.FC = () => {
   };
 
   const handleNext = async () => {
+    if (page === 1) {
+      setLanguage(preferences.language);
+    }
+
     if (page === 2) {
       try {
         const hasDataResult = await commands.checkExistingData();
@@ -304,7 +304,11 @@ const WelcomePage: React.FC = () => {
                 onValueChange={handleLanguageChange}
               >
                 <SelectTrigger className="w-[220px]">
-                  <SelectValue />
+                  <SelectValue
+                    placeholder={
+                      preferences.language === 'ja-JP' ? '日本語' : 'English'
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ja-JP">日本語</SelectItem>
