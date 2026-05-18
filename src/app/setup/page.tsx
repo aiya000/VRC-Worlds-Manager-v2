@@ -68,8 +68,7 @@ const WelcomePage: React.FC = () => {
 
   useEffect(() => {
     setLanguage(preferences.language);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [preferences.language, setLanguage]);
 
   useEffect(() => {
     info(`Theme changed to: ${preferences.theme}`);
