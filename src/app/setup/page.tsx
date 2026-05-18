@@ -30,6 +30,7 @@ import { info, error } from '@/lib/services/logger';
 import { SaturnIcon } from '@/components/icons/saturn-icon';
 import { FolderOpen, Info } from 'lucide-react';
 import { MigrationConfirmationPopup } from '@/app/listview/settings/components/popups/migration-confirmation-popup';
+import { SiGithub } from '@icons-pack/react-simple-icons';
 
 const WelcomePage: React.FC = () => {
   const router = useRouter();
@@ -319,11 +320,12 @@ const WelcomePage: React.FC = () => {
                 <p className="text-sm text-muted-foreground">
                   {t('setup-page:not-first-time:foretext')}
                   <a
-                    href="https://discord.gg/gNzbpux5xW"
+                    href="https://github.com/aiya000/VRC-Worlds-Manager-v2/issues/new"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-500 hover:underline"
+                    className="inline-flex items-center gap-1 text-blue-500 hover:underline"
                   >
+                    <SiGithub className="h-4 w-4" />
                     {t('setup-page:discord')}
                   </a>{' '}
                   {t('setup-page:not-first-time:posttext')}
@@ -635,9 +637,12 @@ const WelcomePage: React.FC = () => {
                   <p className="text-sm text-muted-foreground">
                     {t('setup-page:need-help:foretext')}
                     <a
-                      href="https://discord.gg/gNzbpux5xW"
-                      className="text-blue-500 hover:underline"
+                      href="https://github.com/aiya000/VRC-Worlds-Manager-v2/issues/new"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-blue-500 hover:underline"
                     >
+                      <SiGithub className="h-4 w-4" />
                       {t('setup-page:discord')}
                     </a>
                     {t('setup-page:need-help:posttext')}
