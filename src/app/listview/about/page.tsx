@@ -258,6 +258,23 @@ export default function AboutSection() {
             </Button>
           </div>
         </div>
+        <div className="container mx-auto px-4 pb-3">
+          <p className="text-xs text-muted-foreground">
+            {t('about-section:fork-attribution:foretext')}
+            <a
+              href="https://github.com/Raifa21/VRC-Worlds-Manager-v2"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline-offset-2 hover:underline"
+            >
+              {t('about-section:fork-attribution:link-text')}
+            </a>
+            {t('about-section:fork-attribution:posttext')}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {t('about-section:fork-attribution:thanks')}
+          </p>
+        </div>
       </div>
     </div>
   );
