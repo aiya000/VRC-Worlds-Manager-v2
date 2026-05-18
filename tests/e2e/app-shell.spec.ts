@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('playwright can execute browser assertions', async ({ page }) => {
+test('browser environment is properly configured', async ({ page }) => {
   await page.setContent(`
     <main>
       <h1>VRC Worlds Manager</h1>
