@@ -3,7 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useLocalization } from '@/hooks/use-localization';
 import { Button } from '@/components/ui/button';
-import { SiGithub } from '@icons-pack/react-simple-icons';
+import { SiDiscord } from '@icons-pack/react-simple-icons';
 import { FolderOpen, Globe } from 'lucide-react';
 import { commands } from '@/lib/commands';
 import { toast } from 'sonner';
@@ -141,12 +141,12 @@ export function ErrorContent() {
 
           <Button variant="secondary" className="gap-2 w-full" asChild>
             <a
-              href="https://github.com/aiya000/VRC-Worlds-Manager-v2/issues/new"
+              href="https://discord.gg/gNzbpux5xW"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center"
             >
-              <SiGithub className="h-4 w-4" />
+              <SiDiscord className="h-4 w-4" />
               <span>{t('error-page:contact-support')}</span>
             </a>
           </Button>
