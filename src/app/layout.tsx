@@ -27,39 +27,35 @@ export const metadata: Metadata = {
 
 const normalizeStoredThemeScript = `
   (() => {
-    try {
-      const themeKey = 'theme';
-      const storedTheme = window.localStorage.getItem(themeKey);
+    const themeKey = 'theme';
+    const storedTheme = window.localStorage.getItem(themeKey);
+    const validThemes = ['light', 'dark', 'system'];
 
-      if (!storedTheme) {
-        return;
-      }
+    if (!storedTheme || validThemes.includes(storedTheme)) {
+      return;
+    }
 
-      const parsedTheme = JSON.parse(storedTheme);
-      const validThemes = ['light', 'dark', 'system'];
+    const legacyThemeMatch = storedTheme.match(/^"(light|dark|system)"$/);
 
-      if (
-        typeof parsedTheme !== 'string' ||
-        !validThemes.includes(parsedTheme)
-      ) {
-        return;
-      }
+    if (!legacyThemeMatch) {
+      return;
+    }
 
-      window.localStorage.setItem(themeKey, parsedTheme);
+    const normalizedTheme = legacyThemeMatch[1];
+    const root = document.documentElement;
+    const resolvedTheme =
+      normalizedTheme === 'system'
+        ? window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light'
+        : normalizedTheme;
 
-      const root = document.documentElement;
-      const resolvedTheme =
-        parsedTheme === 'system'
-          ? window.matchMedia('(prefers-color-scheme: dark)').matches
-            ? 'dark'
-            : 'light'
-          : parsedTheme;
+    window.localStorage.setItem(themeKey, normalizedTheme);
 
-      root.classList.remove(storedTheme);
-      root.classList.remove('light', 'dark');
-      root.classList.add(resolvedTheme);
-      root.style.colorScheme = resolvedTheme;
-    } catch {}
+    root.classList.remove(storedTheme);
+    root.classList.remove('light', 'dark');
+    root.classList.add(resolvedTheme);
+    root.style.colorScheme = resolvedTheme;
   })();
 `;
 
