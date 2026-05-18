@@ -277,6 +277,7 @@ const WelcomePage: React.FC = () => {
             isFirstPage={true}
           >
             <div className="h-full flex flex-col justify-center space-y-8">
+              {/* Keep this screen bilingual and hardcoded so users can choose a language before localized keys are applied. */}
               <div className="space-y-2 text-center">
                 <p>
                   初期設定およびこのアプリで使用する言語を設定してください。
