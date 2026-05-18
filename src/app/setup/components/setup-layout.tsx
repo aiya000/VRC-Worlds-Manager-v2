@@ -40,7 +40,7 @@ export function SetupLayout({
   const { t } = useLocalization();
   return (
     <div className="container max-w-2xl mx-auto p-4">
-      <Progress value={currentPage * 25 - 25} className="mb-8" />
+      <Progress value={(currentPage - 1) * 20} className="mb-8" />
       <Card className="h-[480px]">
         <CardHeader>
           <CardTitle>{title}</CardTitle>
