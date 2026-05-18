@@ -337,7 +337,7 @@ const WelcomePage: React.FC = () => {
                     className="inline-flex items-center gap-1 text-blue-500 hover:underline"
                   >
                     <SiGithub className="h-4 w-4" />
-                    {t('setup-page:discord')}
+                    {t('setup-page:github-issues')}
                   </a>{' '}
                   {t('setup-page:not-first-time:posttext')}
                 </p>
@@ -656,7 +656,7 @@ const WelcomePage: React.FC = () => {
                       className="inline-flex items-center gap-1 text-blue-500 hover:underline"
                     >
                       <SiGithub className="h-4 w-4" />
-                      {t('setup-page:discord')}
+                      {t('setup-page:github-issues')}
                     </a>
                     {t('setup-page:need-help:posttext')}
                   </p>
