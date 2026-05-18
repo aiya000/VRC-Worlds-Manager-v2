@@ -330,12 +330,12 @@ const WelcomePage: React.FC = () => {
                 <p className="text-sm text-muted-foreground">
                   {t('setup-page:not-first-time:foretext')}
                   <a
-                    href="https://github.com/aiya000/VRC-Worlds-Manager-v2/issues/new"
+                    href="https://discord.gg/gNzbpux5xW"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500 hover:underline"
                   >
-                    {t('setup-page:github-issues')}
+                    {t('setup-page:discord')}
                   </a>{' '}
                   {t('setup-page:not-first-time:posttext')}
                 </p>
@@ -648,12 +648,10 @@ const WelcomePage: React.FC = () => {
                   <p className="text-sm text-muted-foreground">
                     {t('setup-page:need-help:foretext')}
                     <a
-                      href="https://github.com/aiya000/VRC-Worlds-Manager-v2/issues/new"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href="https://discord.gg/gNzbpux5xW"
                       className="text-blue-500 hover:underline"
                     >
-                      {t('setup-page:github-issues')}
+                      {t('setup-page:discord')}
                     </a>
                     {t('setup-page:need-help:posttext')}
                   </p>
