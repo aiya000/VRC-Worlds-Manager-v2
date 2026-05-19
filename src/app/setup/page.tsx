@@ -70,9 +70,9 @@ const WelcomePage: React.FC = () => {
     info(`Theme changed to: ${preferences.theme}`);
   }, [preferences.theme]);
 
-  const migrate = async () => {
+  const migrate = async (): Promise<boolean> => {
     if (!migrationFiles[0] || !migrationFiles[1]) {
-      return;
+      return false;
     }
     const result = await commands.migrateOldDataFromFiles(
       migrationFiles[0],
@@ -82,13 +82,12 @@ const WelcomePage: React.FC = () => {
       toast(t('general:error-title'), {
         description: t('setup-page:toast:error:migrate:message', result.error),
       });
-      setPage(3);
-      return;
+      return false;
     }
-    setPage(4);
     toast(t('general:success-title'), {
       description: t('setup-page:toast:success:migrate:message'),
     });
+    return true;
   };
 
   const handleNext = async () => {
@@ -127,10 +126,8 @@ const WelcomePage: React.FC = () => {
         setShowMigrationConfirm(true);
         return;
       }
-      setIsLoading(true);
-      await migrate();
-      setIsLoading(false);
-      setAlreadyMigrated(true);
+      await runMigration();
+      return;
     }
     if (page === 6) {
       const [result_theme, result_language, result_card_size] =
@@ -169,8 +166,31 @@ const WelcomePage: React.FC = () => {
       }
 
       router.push('/login');
+      return;
     }
     setPage(page + 1);
+  };
+
+  const runMigration = async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+      const migrated = await migrate();
+      if (!migrated) {
+        setPage(3);
+        return;
+      }
+      setAlreadyMigrated(true);
+      setPage(4);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      error(`Migration failed unexpectedly: ${message}`);
+      toast(t('general:error-title'), {
+        description: t('setup-page:toast:error:migrate:message', message),
+      });
+      setPage(3);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBack = () => {
@@ -245,9 +265,18 @@ const WelcomePage: React.FC = () => {
     pathValidation[1],
   ]);
 
-  const handleMigrationConfirm = () => {
+  const handleMigrationConfirm = async () => {
     setShowMigrationConfirm(false);
-    migrate();
+    try {
+      await runMigration();
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      error(`Migration confirmation failed: ${message}`);
+      toast(t('general:error-title'), {
+        description: t('setup-page:toast:error:migrate:message', message),
+      });
+      setPage(3);
+    }
   };
 
   const handleMigrationCancel = () => {
