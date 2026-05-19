@@ -15,6 +15,7 @@ export default function AboutSection() {
   const { t } = useLocalization();
   const [orderedSupporters, setOrderedSupporters] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? 'unknown';
 
   useEffect(() => {
     async function fetchPatreonData() {
@@ -230,7 +231,7 @@ export default function AboutSection() {
       <div className="w-full border-t bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
           <div className="text-sm text-muted-foreground">
-            VRChat Worlds Manager Web 2.0.0
+            VRChat Worlds Manager Web {appVersion}
           </div>
 
           <div className="flex gap-4">
