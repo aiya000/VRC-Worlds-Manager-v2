@@ -72,7 +72,7 @@
   "setup-page:github-issues": "GitHub Issues",
   "setup-page:not-first-time:posttext": "でお問い合わせください",
   "setup-page:migration-title": "データ移行",
-  "setup-page:migration-description": "旧 VRChat Worlds Manager Web を利用していた場合、データを移行することができます！元のデータが変更されることはありません",
+  "setup-page:migration-description": "旧 VRChat Worlds Manager（デスクトップ版 VRChat Worlds Manager v1）を利用していた場合、データを移行することができます！元のデータが変更されることはありません",
   "setup-page:worlds-file-error": "既存のワールドファイルが見つかりません。",
   "setup-page:folders-file-error": "既存のフォルダファイルが見つかりません。",
   "setup-page:migrate-button": "移行",
