@@ -73,7 +73,7 @@
   "setup-page:github-issues": "GitHub Issues",
   "setup-page:not-first-time:posttext": " for support.",
   "setup-page:migration-title": "Migration",
-  "setup-page:migration-description": "If you have used the original VRChat Worlds Manager Web, you can migrate your old data. Your original data will not be modified during migration.",
+  "setup-page:migration-description": "If you have used the original VRC Worlds Manager (desktop version, VRChat Worlds Manager v1), you can migrate your old data. Your original data will not be modified during migration.",
   "setup-page:worlds-file-error": "Could not detect existing worlds file.",
   "setup-page:folders-file-error": "Could not detect existing folders file.",
   "setup-page:migrate-button": "Migrate",
