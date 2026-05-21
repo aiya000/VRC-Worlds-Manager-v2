@@ -30,19 +30,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check if Tauri files exist
+        id: tauri-check
+        run: |
+          if [[ -f "src-tauri/Cargo.toml" && -f "src-tauri/tauri.conf.json" ]]; then
+            echo "tauri_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "tauri_exists=false" >> "$GITHUB_OUTPUT"
+            echo "src-tauri/ files not found. Skipping version check (web-only project)."
+          fi
       - id: package-json
+        if: steps.tauri-check.outputs.tauri_exists == 'true'
         uses: mikefarah/yq@v4.45.1
         with:
           cmd: yq -oy '.version' package.json
       - id: cargo-toml
+        if: steps.tauri-check.outputs.tauri_exists == 'true'
         uses: mikefarah/yq@v4.45.1
         with:
           cmd: yq -oy '.package.version' src-tauri/Cargo.toml
       - id: tauri-conf-json
+        if: steps.tauri-check.outputs.tauri_exists == 'true'
         uses: mikefarah/yq@v4.45.1
         with:
           cmd: yq -oy '.version' src-tauri/tauri.conf.json
       - name: Check Version Consistency
+        if: steps.tauri-check.outputs.tauri_exists == 'true'
         run: |
           echo "Package.json version: ${{ steps.package-json.outputs.result }}"
           echo "Cargo.toml version: ${{ steps.cargo-toml.outputs.result }}"

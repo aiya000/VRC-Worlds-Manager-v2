@@ -14,7 +14,7 @@ describe('test scripts', () => {
     };
 
     expect(packageJson.scripts).toMatchObject({
-      test: 'npm run test:unit && npm run test:integration',
+      test: 'bun run test:unit && bun run test:integration',
       'test:unit': 'vitest run tests/unit',
       'test:integration': 'vitest run tests/integration',
       'test:e2e': 'playwright test',
