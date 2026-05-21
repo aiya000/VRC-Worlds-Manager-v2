@@ -1,5 +1,7 @@
 # VRChat Worlds Manager Web
 
+[![Tests](https://github.com/aiya000/VRC-Worlds-Manager-v2/actions/workflows/test.yml/badge.svg)](https://github.com/aiya000/VRC-Worlds-Manager-v2/actions/workflows/test.yml)
+
 [日本語はこちら / 日本語のREADMEはREADME_JP.mdを参照してください。](./README_JP.md)
 
 VRChat Worlds Manager Web is a web application (PWA) that helps VRChat users organize and store their favorite worlds. Based on the original [VRC Worlds Manager v2](https://github.com/Raifa21/VRC-Worlds-Manager-v2) desktop application.
