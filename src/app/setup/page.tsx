@@ -71,9 +71,9 @@ const WelcomePage: React.FC = () => {
     info(`Theme changed to: ${preferences.theme}`);
   }, [preferences.theme]);
 
-  const migrate = async () => {
+  const migrate = async (): Promise<boolean> => {
     if (!migrationFiles[0] || !migrationFiles[1]) {
-      return;
+      return false;
     }
     const result = await commands.migrateOldDataFromFiles(
       migrationFiles[0],
@@ -83,17 +83,19 @@ const WelcomePage: React.FC = () => {
       toast(t('general:error-title'), {
         description: t('setup-page:toast:error:migrate:message', result.error),
       });
-      setPage(2);
-      return;
+      return false;
     }
-    setPage(3);
     toast(t('general:success-title'), {
       description: t('setup-page:toast:success:migrate:message'),
     });
+    return true;
   };
 
   const handleNext = async () => {
     if (page === 1) {
+      setLanguage(preferences.language);
+    }
+    if (page === 2) {
       try {
         const hasDataResult = await commands.checkExistingData();
         if (hasDataResult.status === 'ok') {
@@ -110,7 +112,7 @@ const WelcomePage: React.FC = () => {
         setPathValidation([false, false]);
       }
     }
-    if (page === 2) {
+    if (page === 3) {
       if (
         !pathValidation[0] ||
         !pathValidation[1] ||
@@ -125,12 +127,10 @@ const WelcomePage: React.FC = () => {
         setShowMigrationConfirm(true);
         return;
       }
-      setIsLoading(true);
-      await migrate();
-      setIsLoading(false);
-      setAlreadyMigrated(true);
+      await runMigration();
+      return;
     }
-    if (page === 5) {
+    if (page === 6) {
       const [result_theme, result_language, result_card_size] =
         await Promise.all([
           commands.setTheme(preferences.theme),
@@ -156,7 +156,7 @@ const WelcomePage: React.FC = () => {
         });
 
         error(`Failed to save preferences: ${errorResult.error}`);
-        setPage(4);
+        setPage(5);
         return;
       }
 
@@ -167,8 +167,31 @@ const WelcomePage: React.FC = () => {
       }
 
       router.push('/login');
+      return;
     }
     setPage(page + 1);
+  };
+
+  const runMigration = async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+      const migrated = await migrate();
+      if (!migrated) {
+        setPage(3);
+        return;
+      }
+      setAlreadyMigrated(true);
+      setPage(4);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      error(`Migration failed unexpectedly: ${message}`);
+      toast(t('general:error-title'), {
+        description: t('setup-page:toast:error:migrate:message', message),
+      });
+      setPage(3);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBack = () => {
@@ -243,15 +266,24 @@ const WelcomePage: React.FC = () => {
     pathValidation[1],
   ]);
 
-  const handleMigrationConfirm = () => {
+  const handleMigrationConfirm = async () => {
     setShowMigrationConfirm(false);
-    migrate();
+    try {
+      await runMigration();
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      error(`Migration confirmation failed: ${message}`);
+      toast(t('general:error-title'), {
+        description: t('setup-page:toast:error:migrate:message', message),
+      });
+      setPage(3);
+    }
   };
 
   const handleMigrationCancel = () => {
     setShowMigrationConfirm(false);
     setAlreadyMigrated(true);
-    setPage(3);
+    setPage(4);
   };
 
   return (
@@ -268,11 +300,61 @@ const WelcomePage: React.FC = () => {
 
         {page === 1 && (
           <SetupLayout
-            title={t('setup-page:welcome-title')}
+            title="言語 / Language"
             currentPage={1}
             onBack={handleBack}
             onNext={handleNext}
             isFirstPage={true}
+          >
+            <div className="h-full flex flex-col justify-center space-y-8">
+              {/* Keep this screen bilingual and hardcoded so users can choose a language before localized keys are applied. */}
+              <div className="space-y-2 text-center">
+                <p>
+                  初期設定およびこのアプリで使用する言語を設定してください。
+                </p>
+                <p>Please select the language to use for setup and this app.</p>
+              </div>
+
+              <div className="space-y-3">
+                <Button
+                  variant={
+                    preferences.language === 'ja-JP' ? 'default' : 'outline'
+                  }
+                  className="w-full"
+                  onClick={() => {
+                    setLanguage('ja-JP');
+                    setPreferences({ ...preferences, language: 'ja-JP' });
+                  }}
+                >
+                  日本語
+                </Button>
+                <Button
+                  variant={
+                    preferences.language === 'en-US' ? 'default' : 'outline'
+                  }
+                  className="w-full"
+                  onClick={() => {
+                    setLanguage('en-US');
+                    setPreferences({ ...preferences, language: 'en-US' });
+                  }}
+                >
+                  English
+                </Button>
+              </div>
+
+              <div className="space-y-2 text-center text-sm text-muted-foreground">
+                <p>この設定は後から変えることができます。</p>
+                <p>You can change this setting later.</p>
+              </div>
+            </div>
+          </SetupLayout>
+        )}
+        {page === 2 && (
+          <SetupLayout
+            title={t('setup-page:welcome-title')}
+            currentPage={2}
+            onBack={handleBack}
+            onNext={handleNext}
           >
             <div className="h-full flex flex-col items-center justify-center space-y-6 relative">
               <div className="absolute top-0 right-0">
@@ -334,10 +416,10 @@ const WelcomePage: React.FC = () => {
             </div>
           </SetupLayout>
         )}
-        {page === 2 && (
+        {page === 3 && (
           <SetupLayout
             title={t('setup-page:migration-title')}
-            currentPage={2}
+            currentPage={3}
             onBack={handleBack}
             onNext={handleNext}
             isMigrationPage={true}
@@ -468,10 +550,10 @@ const WelcomePage: React.FC = () => {
             </div>
           </SetupLayout>
         )}
-        {page === 3 && (
+        {page === 4 && (
           <SetupLayout
             title={t('setup-page:ui-customization-title')}
-            currentPage={3}
+            currentPage={4}
             onBack={handleBack}
             onNext={handleNext}
           >
@@ -538,10 +620,10 @@ const WelcomePage: React.FC = () => {
             </div>
           </SetupLayout>
         )}
-        {page === 4 && (
+        {page === 5 && (
           <SetupLayout
             title={t('setup-page:preferences-title')}
-            currentPage={4}
+            currentPage={5}
             onBack={handleBack}
             onNext={handleNext}
           >
@@ -609,10 +691,10 @@ const WelcomePage: React.FC = () => {
             </div>
           </SetupLayout>
         )}
-        {page === 5 && (
+        {page === 6 && (
           <SetupLayout
             title={t('setup-page:complete-title')}
-            currentPage={5}
+            currentPage={6}
             onBack={handleBack}
             onNext={handleNext}
             isLastPage={true}
