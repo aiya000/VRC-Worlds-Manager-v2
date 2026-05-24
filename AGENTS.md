@@ -221,6 +221,13 @@ tests/
 ### When Implementing Features
 
 - When you implement a new feature, **basically always add tests** for it
+- Add tests whenever possible, even for small changes
+
+### Test Scope Policy
+
+- **Goal**: Tests within your PR's scope must pass. Tests outside your PR's scope must also pass (do not break existing tests).
+- Before submitting, verify that all existing tests outside your change scope continue to pass.
+- If a pre-existing test fails due to reasons unrelated to your changes, document it clearly in the PR.
 
 ### Before Committing
 
