@@ -1,1 +1,1 @@
-tsc --noEmit && npx lint-staged
+tsc --noEmit && bunx lint-staged

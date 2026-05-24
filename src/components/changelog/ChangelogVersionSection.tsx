@@ -1,16 +1,16 @@
-import { LocalizedChanges } from '@/lib/commands';
-import { FC } from 'react';
-import { ChangelogLineEntry } from './ChangelogLineEntry';
-import { Bug, Cog, Rocket } from 'lucide-react';
-import { Label } from '@/components/ui/label';
-import { useLocalization } from '@/hooks/use-localization';
+import { LocalizedChanges } from '@/lib/commands'
+import { FC } from 'react'
+import { ChangelogLineEntry } from './ChangelogLineEntry'
+import { Bug, Cog, Rocket } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { useLocalization } from '@/hooks/use-localization'
 
 type Props = {
-  change: LocalizedChanges;
-};
+  change: LocalizedChanges
+}
 
 export const ChangelogVersionSection: FC<Props> = ({ change }) => {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
 
   return (
     <div>
@@ -56,5 +56,5 @@ export const ChangelogVersionSection: FC<Props> = ({ change }) => {
           ))}
       </div>
     </div>
-  );
-};
+  )
+}

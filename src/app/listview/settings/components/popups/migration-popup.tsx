@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useLocalization } from '@/hooks/use-localization';
-import { commands } from '@/lib/commands';
-import { info, error } from '@/lib/services/logger';
+import React, { useState } from 'react'
+import { useLocalization } from '@/hooks/use-localization'
+import { commands } from '@/lib/commands'
+import { info, error } from '@/lib/services/logger'
 import {
   FolderOpen,
   ArrowRightLeft,
@@ -9,11 +9,11 @@ import {
   Info,
   AlertTriangle,
   FileJson,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { SaturnIcon } from '@/components/icons/saturn-icon';
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { SaturnIcon } from '@/components/icons/saturn-icon'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,17 +23,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from '@/components/ui/alert-dialog'
 
 interface MigrationData {
-  number_of_worlds: number;
-  number_of_folders: number;
+  number_of_worlds: number
+  number_of_folders: number
 }
 
 interface MigrationPopupProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: (worldsFile: File, foldersFile: File) => Promise<void>;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onConfirm: (worldsFile: File, foldersFile: File) => Promise<void>
 }
 
 export function MigrationPopup({
@@ -41,92 +41,90 @@ export function MigrationPopup({
   onOpenChange,
   onConfirm,
 }: MigrationPopupProps) {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
   const [migrationFiles, setMigrationFiles] = useState<
     [File | null, File | null]
-  >([null, null]);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [migrationData, setMigrationData] = useState<MigrationData | null>(
-    null,
-  );
+  >([null, null])
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [migrationData, setMigrationData] = useState<MigrationData | null>(null)
 
   const handleFilePick = (index: number) => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
     input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
+      const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) {
-        info('File selection cancelled');
-        return;
+        info('File selection cancelled')
+        return
       }
 
       try {
-        const newFiles: [File | null, File | null] = [...migrationFiles];
-        newFiles[index] = file;
-        setMigrationFiles(newFiles);
+        const newFiles: [File | null, File | null] = [...migrationFiles]
+        newFiles[index] = file
+        setMigrationFiles(newFiles)
 
         if (newFiles[0] && newFiles[1]) {
-          await validateAndLoadMetadata(newFiles[0], newFiles[1]);
+          await validateAndLoadMetadata(newFiles[0], newFiles[1])
         }
       } catch (e) {
-        error(`Failed to select file: ${e}`);
-        setErrorMessage(t('settings-page:error-select-file'));
+        error(`Failed to select file: ${e}`)
+        setErrorMessage(t('settings-page:error-select-file'))
       }
-    };
-    input.click();
-  };
+    }
+    input.click()
+  }
 
   const validateAndLoadMetadata = async (
     worldsFile: File,
     foldersFile: File,
   ) => {
-    setIsLoading(true);
-    setErrorMessage(null);
+    setIsLoading(true)
+    setErrorMessage(null)
 
     try {
       const result = await commands.getMigrationMetadataFromFiles(
         worldsFile,
         foldersFile,
-      );
+      )
 
       if (result.status === 'error') {
-        setErrorMessage(result.error);
-        setMigrationData(null);
-        setIsLoading(false);
-        return;
+        setErrorMessage(result.error)
+        setMigrationData(null)
+        setIsLoading(false)
+        return
       }
       const data: MigrationData = {
         number_of_worlds: result.data.number_of_worlds,
         number_of_folders: result.data.number_of_folders,
-      };
-      setMigrationData(data);
-      setIsLoading(false);
+      }
+      setMigrationData(data)
+      setIsLoading(false)
     } catch (e) {
-      error(`Failed to read migration data: ${e}`);
-      setErrorMessage(t('settings-page:error-read-migration-files'));
-      setMigrationData(null);
+      error(`Failed to read migration data: ${e}`)
+      setErrorMessage(t('settings-page:error-read-migration-files'))
+      setMigrationData(null)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleConfirm = async () => {
     if (!migrationFiles[0] || !migrationFiles[1]) {
-      return;
+      return
     }
 
     try {
-      await onConfirm(migrationFiles[0], migrationFiles[1]);
+      await onConfirm(migrationFiles[0], migrationFiles[1])
 
-      setMigrationFiles([null, null]);
-      setMigrationData(null);
-      onOpenChange(false);
+      setMigrationFiles([null, null])
+      setMigrationData(null)
+      onOpenChange(false)
     } catch (e) {
-      error(`Migration confirmation error: ${e}`);
+      error(`Migration confirmation error: ${e}`)
     }
-  };
+  }
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -261,5 +259,5 @@ export function MigrationPopup({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  );
+  )
 }

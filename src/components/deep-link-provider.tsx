@@ -1,29 +1,29 @@
-'use client';
+'use client'
 
-import { useEffect } from 'react';
-import { info } from '@/lib/services/logger';
-import { useFolders } from '@/app/listview/hook/use-folders';
+import { useEffect } from 'react'
+import { info } from '@/lib/services/logger'
+import { useFolders } from '@/app/listview/hook/use-folders'
 
 export const DeepLinkProvider = ({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) => {
-  const { importFolder } = useFolders();
+  const { importFolder } = useFolders()
 
   useEffect(() => {
     // Web version: detect ?import=<shareId> in the URL query parameters
-    const params = new URLSearchParams(window.location.search);
-    const importId = params.get('import');
+    const params = new URLSearchParams(window.location.search)
+    const importId = params.get('import')
     if (importId) {
-      info(`[DeepLink] Detected import parameter: ${importId}`);
-      importFolder(importId);
+      info(`[DeepLink] Detected import parameter: ${importId}`)
+      importFolder(importId)
       // Clean up the URL to remove the query parameter
-      const url = new URL(window.location.href);
-      url.searchParams.delete('import');
-      window.history.replaceState({}, '', url.toString());
+      const url = new URL(window.location.href)
+      url.searchParams.delete('import')
+      window.history.replaceState({}, '', url.toString())
     }
-  }, [importFolder]);
+  }, [importFolder])
 
-  return <>{children}</>;
-};
+  return <>{children}</>
+}

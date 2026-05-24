@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { useLocalization } from '@/hooks/use-localization';
-import { commands } from '@/lib/commands';
-import { info, error } from '@/lib/services/logger';
-import { FolderOpen } from 'lucide-react';
-import { Calendar, Info, AlertTriangle, Loader2, Folder } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { SaturnIcon } from '../../../../../components/icons/saturn-icon';
+import React, { useState } from 'react'
+import { useLocalization } from '@/hooks/use-localization'
+import { commands } from '@/lib/commands'
+import { info, error } from '@/lib/services/logger'
+import { FolderOpen } from 'lucide-react'
+import { Calendar, Info, AlertTriangle, Loader2, Folder } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { SaturnIcon } from '../../../../../components/icons/saturn-icon'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,18 +15,18 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../../../../components/ui/alert-dialog';
+} from '../../../../../components/ui/alert-dialog'
 
 interface BackupMetadata {
-  date: string;
-  number_of_worlds: number;
-  number_of_folders: number;
+  date: string
+  number_of_worlds: number
+  number_of_folders: number
 }
 
 interface RestoreBackupDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: (file: File) => Promise<void>;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onConfirm: (file: File) => Promise<void>
 }
 
 export function RestoreBackupDialog({
@@ -34,73 +34,73 @@ export function RestoreBackupDialog({
   onOpenChange,
   onConfirm,
 }: RestoreBackupDialogProps) {
-  const { t } = useLocalization();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [metadata, setMetadata] = useState<BackupMetadata | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { t } = useLocalization()
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [metadata, setMetadata] = useState<BackupMetadata | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleDateConversion = (dateString: string) => {
-    const dateParts = dateString.split('_');
-    const date = dateParts[0];
-    return date;
-  };
+    const dateParts = dateString.split('_')
+    const date = dateParts[0]
+    return date
+  }
 
   const handleSelectBackup = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
     input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
+      const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) {
-        info('Backup selection cancelled');
-        return;
+        info('Backup selection cancelled')
+        return
       }
 
-      setIsLoading(true);
-      setErrorMessage(null);
+      setIsLoading(true)
+      setErrorMessage(null)
 
       try {
-        const result = await commands.getBackupMetadataFromFile(file);
+        const result = await commands.getBackupMetadataFromFile(file)
 
         if (result.status === 'error') {
-          setErrorMessage(result.error);
-          setSelectedFile(null);
-          setMetadata(null);
-          setIsLoading(false);
-          return;
+          setErrorMessage(result.error)
+          setSelectedFile(null)
+          setMetadata(null)
+          setIsLoading(false)
+          return
         }
 
-        setSelectedFile(file);
+        setSelectedFile(file)
         const meta: BackupMetadata = {
           date: handleDateConversion(result.data.date),
           number_of_worlds: result.data.number_of_worlds,
           number_of_folders: result.data.number_of_folders,
-        };
-        setMetadata(meta);
-        setIsLoading(false);
+        }
+        setMetadata(meta)
+        setIsLoading(false)
       } catch (e) {
-        error(`Failed to select backup: ${e}`);
-        setErrorMessage(t('settings-page:error-read-backup'));
-        setIsLoading(false);
+        error(`Failed to select backup: ${e}`)
+        setErrorMessage(t('settings-page:error-read-backup'))
+        setIsLoading(false)
       }
-    };
-    input.click();
-  };
+    }
+    input.click()
+  }
 
   const handleConfirm = async () => {
     if (!selectedFile) {
-      return;
+      return
     }
     try {
-      await onConfirm(selectedFile);
-      setSelectedFile(null);
-      setMetadata(null);
-      onOpenChange(false);
+      await onConfirm(selectedFile)
+      setSelectedFile(null)
+      setMetadata(null)
+      onOpenChange(false)
     } catch (_e) {
       // Error handling is done in the parent component
     }
-  };
+  }
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -212,5 +212,5 @@ export function RestoreBackupDialog({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  );
+  )
 }

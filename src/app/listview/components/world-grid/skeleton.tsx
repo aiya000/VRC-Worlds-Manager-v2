@@ -1,15 +1,15 @@
-import React, { useMemo } from 'react';
-import WorldCardSkeleton from '@/components/world-card-skeleton';
+import React, { useMemo } from 'react'
+import WorldCardSkeleton from '@/components/world-card-skeleton'
 
 interface WorldGridSkeletonProps {
-  count?: number; // approximate number of cards to show
+  count?: number // approximate number of cards to show
 }
 
 // Simple skeleton grid that mimics the spacing of the real grid.
 export const WorldGridSkeleton: React.FC<WorldGridSkeletonProps> = ({
   count = 12,
 }) => {
-  const items = useMemo(() => Array.from({ length: count }), [count]);
+  const items = useMemo(() => Array.from({ length: count }), [count])
 
   return (
     <div className="pt-2 flex-1 overflow-auto relative">
@@ -28,7 +28,7 @@ export const WorldGridSkeleton: React.FC<WorldGridSkeletonProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default WorldGridSkeleton;
+export default WorldGridSkeleton

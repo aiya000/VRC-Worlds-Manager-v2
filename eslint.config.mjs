@@ -1,8 +1,8 @@
-import nextPlugin from '@next/eslint-plugin-next';
-import reactPlugin from 'eslint-plugin-react';
-import reactHooksPlugin from 'eslint-plugin-react-hooks';
-import unusedImports from 'eslint-plugin-unused-imports';
-import tseslint from 'typescript-eslint';
+import nextPlugin from '@next/eslint-plugin-next'
+import reactPlugin from 'eslint-plugin-react'
+import reactHooksPlugin from 'eslint-plugin-react-hooks'
+import unusedImports from 'eslint-plugin-unused-imports'
+import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   ...tseslint.configs.recommended,
@@ -30,4 +30,4 @@ export default tseslint.config(
       eqeqeq: ['error', 'always'],
     },
   },
-);
+)

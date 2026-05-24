@@ -1,33 +1,33 @@
-import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
-import { ThemeProvider } from '@/components/theme-provider';
-import { Toaster } from '@/components/ui/sonner';
+import type { Metadata } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from '@/components/ui/sonner'
 
-import '@/app/globals.css';
-import { LocalizationContextProvider } from '@/components/localization-context';
-import { DeepLinkProvider } from '@/components/deep-link-provider';
-import { PatreonProvider } from '@/contexts/patreon-context';
-import { SwRegister } from '@/components/sw-register';
+import '@/app/globals.css'
+import { LocalizationContextProvider } from '@/components/localization-context'
+import { DeepLinkProvider } from '@/components/deep-link-provider'
+import { PatreonProvider } from '@/contexts/patreon-context'
+import { SwRegister } from '@/components/sw-register'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
-});
+})
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
-});
+})
 
 export const metadata: Metadata = {
   title: 'VRChat Worlds Manager Web',
   description: 'Manage your VRChat worlds with ease',
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -55,5 +55,5 @@ export default function RootLayout({
         </DeepLinkProvider>
       </body>
     </html>
-  );
+  )
 }

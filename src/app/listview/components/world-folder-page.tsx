@@ -1,29 +1,29 @@
-import React from 'react';
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { SearchBar } from './searchbar';
-import { WorldGrid } from './world-grid';
-import { WorldGridSkeleton } from './world-grid/skeleton';
-import { useWorldFolderPage } from '../hook/use-world-folder-page';
-import { WorldDisplayData } from '@/lib/commands';
+import React from 'react'
+import { Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { SearchBar } from './searchbar'
+import { WorldGrid } from './world-grid'
+import { WorldGridSkeleton } from './world-grid/skeleton'
+import { useWorldFolderPage } from '../hook/use-world-folder-page'
+import { WorldDisplayData } from '@/lib/commands'
 
 type RenderActionsArgs = {
-  openAddWorld: () => void;
-  handleReload: () => Promise<void>;
-  isLoading: boolean;
-  worlds: WorldDisplayData[];
-  filteredWorlds: WorldDisplayData[];
-};
+  openAddWorld: () => void
+  handleReload: () => Promise<void>
+  isLoading: boolean
+  worlds: WorldDisplayData[]
+  filteredWorlds: WorldDisplayData[]
+}
 
 type WorldFolderPageProps = {
-  folderId: string;
-  title: string;
-  emptyAllMessage: string;
-  emptyFilteredMessage: string;
-  renderActions?: (args: RenderActionsArgs) => React.ReactNode;
-  showPreReloadToast?: boolean;
-  reloadLogScope?: string;
-};
+  folderId: string
+  title: string
+  emptyAllMessage: string
+  emptyFilteredMessage: string
+  renderActions?: (args: RenderActionsArgs) => React.ReactNode
+  showPreReloadToast?: boolean
+  reloadLogScope?: string
+}
 
 export function WorldFolderPage(props: WorldFolderPageProps) {
   const {
@@ -34,7 +34,7 @@ export function WorldFolderPage(props: WorldFolderPageProps) {
     renderActions,
     showPreReloadToast,
     reloadLogScope,
-  } = props;
+  } = props
 
   const {
     t,
@@ -53,7 +53,7 @@ export function WorldFolderPage(props: WorldFolderPageProps) {
     folderId,
     showPreReloadToast,
     reloadLogScope,
-  });
+  })
 
   return (
     <div className="flex h-screen">
@@ -129,7 +129,7 @@ export function WorldFolderPage(props: WorldFolderPageProps) {
         )}
       </div>
     </div>
-  );
+  )
 }
 
-export default WorldFolderPage;
+export default WorldFolderPage

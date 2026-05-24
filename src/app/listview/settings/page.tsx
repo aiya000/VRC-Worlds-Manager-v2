@@ -1,19 +1,19 @@
-'use client';
+'use client'
 
-import React from 'react';
-import { useTheme } from 'next-themes';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import React from 'react'
+import { useTheme } from 'next-themes'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { WorldCardPreview } from '@/components/world-card';
+} from '@/components/ui/select'
+import { WorldCardPreview } from '@/components/world-card'
 
-import { FolderRemovalPreference } from '@/lib/commands';
+import { FolderRemovalPreference } from '@/lib/commands'
 import {
   LogOut,
   Trash2,
@@ -21,14 +21,14 @@ import {
   FolderOpen,
   Save,
   FolderUp,
-} from 'lucide-react';
-import { Card } from '../../../components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RestoreBackupDialog } from '@/app/listview/settings/components/popups/restore-backup-dialog';
-import { MigrationPopup } from '@/app/listview/settings/components/popups/migration-popup';
-import { DeleteDataConfirmationDialog } from '@/app/listview/settings/components/popups/delete-data-confirmation';
-import { ExportPopup } from './components/popups/export';
-import { useSettingsPage } from './hook';
+} from 'lucide-react'
+import { Card } from '../../../components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { RestoreBackupDialog } from '@/app/listview/settings/components/popups/restore-backup-dialog'
+import { MigrationPopup } from '@/app/listview/settings/components/popups/migration-popup'
+import { DeleteDataConfirmationDialog } from '@/app/listview/settings/components/popups/delete-data-confirmation'
+import { ExportPopup } from './components/popups/export'
+import { useSettingsPage } from './hook'
 
 export default function SettingsPage() {
   const {
@@ -55,7 +55,7 @@ export default function SettingsPage() {
     handleFolderRemovalPreferenceChange,
     openHiddenFolder,
     t,
-  } = useSettingsPage();
+  } = useSettingsPage()
 
   return (
     <div className="container max-w-4xl mx-auto p-6 space-y-6">
@@ -358,5 +358,5 @@ export default function SettingsPage() {
         onConfirm={handleDeleteConfirm}
       />
     </div>
-  );
+  )
 }

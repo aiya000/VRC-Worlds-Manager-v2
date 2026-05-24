@@ -1,12 +1,12 @@
-import PAndroid from '@/../public/icons/Platform_Android.svg';
-import PIos from '@/../public/icons/Platform_iOS.svg';
-import PWindows from '@/../public/icons/Platform_Windows.svg';
-import Image from 'next/image';
-import { useLocalization } from '@/hooks/use-localization';
-import { Platform } from '@/lib/commands';
+import PAndroid from '@/../public/icons/Platform_Android.svg'
+import PIos from '@/../public/icons/Platform_iOS.svg'
+import PWindows from '@/../public/icons/Platform_Windows.svg'
+import Image from 'next/image'
+import { useLocalization } from '@/hooks/use-localization'
+import { Platform } from '@/lib/commands'
 
 export function PlatformIndicator({ platform }: { platform: Platform[] }) {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
 
   return (
     <div className="flex flex-row">
@@ -32,5 +32,5 @@ export function PlatformIndicator({ platform }: { platform: Platform[] }) {
         <Image src={PIos} alt={t('world-card:ios')} width={25} height={25} />
       )}
     </div>
-  );
+  )
 }

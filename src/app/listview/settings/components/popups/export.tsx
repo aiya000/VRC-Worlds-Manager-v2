@@ -1,30 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { useLocalization } from '@/hooks/use-localization';
-import { X, FileJson, ChevronDown, SortAsc, SortDesc } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useEffect, useState } from 'react'
+import { useLocalization } from '@/hooks/use-localization'
+import { X, FileJson, ChevronDown, SortAsc, SortDesc } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '../../../../../components/ui/dialog';
+} from '../../../../../components/ui/dialog'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { Command, CommandGroup, CommandItem } from '@/components/ui/command';
-import { commands, FolderData } from '@/lib/commands';
-import { Checkbox } from '../../../../../components/ui/checkbox';
+} from '@/components/ui/popover'
+import { Command, CommandGroup, CommandItem } from '@/components/ui/command'
+import { commands, FolderData } from '@/lib/commands'
+import { Checkbox } from '../../../../../components/ui/checkbox'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { getDefaultDirection } from '@/app/listview/hook/use-filters';
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import { getDefaultDirection } from '@/app/listview/hook/use-filters'
 
 export enum ExportType {
   PLS = 'pls',
@@ -37,17 +37,17 @@ type SortField =
   | 'favorites'
   | 'capacity'
   | 'dateAdded'
-  | 'lastUpdated';
+  | 'lastUpdated'
 
 interface ExportPopupProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
   onConfirm: (
     folders: string[],
     export_type: ExportType,
     sortField: SortField,
     sortDirection: 'asc' | 'desc',
-  ) => void;
+  ) => void
 }
 
 export function ExportPopup({
@@ -55,48 +55,48 @@ export function ExportPopup({
   onOpenChange,
   onConfirm,
 }: ExportPopupProps) {
-  const { t } = useLocalization();
-  const [folders, setFolders] = useState<FolderData[]>([]);
-  const [selectedFolders, setSelectedFolders] = useState<string[]>([]);
-  const [exportType, setExportType] = useState<ExportType>(ExportType.PLS);
-  const [sortField, setSortField] = useState<SortField>('dateAdded');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const { t } = useLocalization()
+  const [folders, setFolders] = useState<FolderData[]>([])
+  const [selectedFolders, setSelectedFolders] = useState<string[]>([])
+  const [exportType, setExportType] = useState<ExportType>(ExportType.PLS)
+  const [sortField, setSortField] = useState<SortField>('dateAdded')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
 
   useEffect(() => {
     // get folders from backend
     async function fetchFolders() {
       try {
-        const result = await commands.getFolders();
+        const result = await commands.getFolders()
         if (result.status === 'ok') {
-          setFolders(result.data);
+          setFolders(result.data)
         } else {
-          console.error('Failed to fetch folders:', result.error);
+          console.error('Failed to fetch folders:', result.error)
         }
       } catch (error) {
-        console.error('Error fetching folders:', error);
+        console.error('Error fetching folders:', error)
       }
     }
-    fetchFolders();
-  }, [open]);
+    fetchFolders()
+  }, [open])
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) return
     commands
       .getSortPreferences()
       .then((result) => {
         if (result.status === 'ok') {
-          const [field, direction] = result.data;
-          const coercedField = (field as SortField) ?? 'dateAdded';
+          const [field, direction] = result.data
+          const coercedField = (field as SortField) ?? 'dateAdded'
           const coercedDir =
-            (direction as 'asc' | 'desc') ?? getDefaultDirection(coercedField);
-          setSortField(coercedField);
-          setSortDirection(coercedDir);
+            (direction as 'asc' | 'desc') ?? getDefaultDirection(coercedField)
+          setSortField(coercedField)
+          setSortDirection(coercedDir)
         }
       })
       .catch((e) => {
-        console.error('Failed to load sort preferences for export:', e);
-      });
-  }, [open]);
+        console.error('Failed to load sort preferences for export:', e)
+      })
+  }, [open])
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -113,9 +113,9 @@ export function ExportPopup({
               <Select
                 value={sortField}
                 onValueChange={(value) => {
-                  const field = value as SortField;
-                  setSortField(field);
-                  setSortDirection(getDefaultDirection(field));
+                  const field = value as SortField
+                  setSortField(field)
+                  setSortDirection(getDefaultDirection(field))
                 }}
               >
                 <SelectTrigger className="flex-1">
@@ -174,7 +174,7 @@ export function ExportPopup({
                       checked
                         ? [...prev, folder.name]
                         : prev.filter((name) => name !== folder.name),
-                    );
+                    )
                   }}
                   className="shrink-0 self-center"
                   disabled={folder.world_count === 0}
@@ -251,5 +251,5 @@ export function ExportPopup({
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

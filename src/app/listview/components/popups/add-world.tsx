@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -6,17 +6,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { AlertCircle, Check, Loader2 } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { AlertCircle, Check, Loader2 } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   commands,
   WorldDetails,
   CardSize,
   WorldDisplayData,
-} from '@/lib/commands';
+} from '@/lib/commands'
 import {
   Card,
   CardContent,
@@ -24,145 +24,145 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { WorldCardPreview } from '@/components/world-card';
-import { useLocalization } from '@/hooks/use-localization';
-import { info, error as logError } from '@/lib/services/logger';
-import { useWorlds } from '../../hook/use-worlds';
-import { FolderType } from '@/types/folders';
+} from '@/components/ui/card'
+import { WorldCardPreview } from '@/components/world-card'
+import { useLocalization } from '@/hooks/use-localization'
+import { info, error as logError } from '@/lib/services/logger'
+import { useWorlds } from '../../hook/use-worlds'
+import { FolderType } from '@/types/folders'
 
 interface AddWorldPopupProps {
-  currentFolder: FolderType;
-  onClose: () => void;
+  currentFolder: FolderType
+  onClose: () => void
 }
 
 export function AddWorldPopup({ onClose, currentFolder }: AddWorldPopupProps) {
-  const { t } = useLocalization();
-  const [worldInput, setWorldInput] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [previewWorld, setPreviewWorld] = useState<WorldDetails | null>(null);
-  const [isDuplicate, setIsDuplicate] = useState<boolean>(false);
-  const [existingWorlds, setExistingWorlds] = useState<string[]>([]);
+  const { t } = useLocalization()
+  const [worldInput, setWorldInput] = useState<string>('')
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [previewWorld, setPreviewWorld] = useState<WorldDetails | null>(null)
+  const [isDuplicate, setIsDuplicate] = useState<boolean>(false)
+  const [existingWorlds, setExistingWorlds] = useState<string[]>([])
 
-  const { addWorld, getAllWorlds } = useWorlds(currentFolder);
+  const { addWorld, getAllWorlds } = useWorlds(currentFolder)
 
   useEffect(() => {
     async function fetchWorlds() {
-      setIsLoading(true);
+      setIsLoading(true)
       try {
-        const worlds = await getAllWorlds();
-        setExistingWorlds(worlds.map((world) => world.worldId));
+        const worlds = await getAllWorlds()
+        setExistingWorlds(worlds.map((world) => world.worldId))
       } catch (e) {
         // handle error if needed
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
-    fetchWorlds();
-  }, [getAllWorlds]);
+    fetchWorlds()
+  }, [getAllWorlds])
 
   // Parse input to extract world ID
   const parseWorldId = (input: string): string | null => {
     // Remove trailing slashes and whitespace
-    const cleaned = input.trim();
+    const cleaned = input.trim()
 
     // Extract world ID from URL or direct input
     const worldIdMatch = cleaned.match(
       /wrld_[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}/,
-    );
+    )
 
     if (worldIdMatch) {
-      return worldIdMatch[0];
+      return worldIdMatch[0]
     }
 
     // If there's a slash, try extracting from a URL pattern
     if (cleaned.includes('/')) {
       // Handle URLs like vrchat.com/home/world/wrld_1234...
-      const parts = cleaned.split('/');
+      const parts = cleaned.split('/')
       for (const part of parts) {
         if (part.startsWith('wrld_')) {
           // Further clean up any query parameters
-          return part.split('?')[0];
+          return part.split('?')[0]
         }
       }
     }
 
     // Check if it's just a simple wrld_ ID
     if (cleaned.startsWith('wrld_')) {
-      return cleaned;
+      return cleaned
     }
 
-    return null;
-  };
+    return null
+  }
 
   const handleCheckWorldId = async (input: string) => {
-    setIsLoading(true);
-    setError(null);
-    setPreviewWorld(null);
-    setIsDuplicate(false);
+    setIsLoading(true)
+    setError(null)
+    setPreviewWorld(null)
+    setIsDuplicate(false)
 
-    const parsedWorldId = parseWorldId(input);
-    info(`Checking world ID: ${parsedWorldId}`);
+    const parsedWorldId = parseWorldId(input)
+    info(`Checking world ID: ${parsedWorldId}`)
 
     if (!parsedWorldId) {
       setError(
         'Invalid world ID format. Please enter a valid VRChat world ID (wrld_...)',
-      );
-      logError('Invalid world ID format');
-      setIsLoading(false);
-      return;
+      )
+      logError('Invalid world ID format')
+      setIsLoading(false)
+      return
     }
 
     // Check if the world is already in the collection
     if (existingWorlds.includes(parsedWorldId)) {
-      setIsDuplicate(true);
+      setIsDuplicate(true)
     }
 
     try {
-      const worldDetails = await commands.checkWorldInfo(parsedWorldId);
+      const worldDetails = await commands.checkWorldInfo(parsedWorldId)
       if (!worldDetails) {
-        setError('World not found. Please check the ID or URL.');
-        setIsLoading(false);
-        return;
+        setError('World not found. Please check the ID or URL.')
+        setIsLoading(false)
+        return
       }
 
       if (worldDetails.status === 'ok') {
-        setPreviewWorld(worldDetails.data);
+        setPreviewWorld(worldDetails.data)
       } else {
-        setError(worldDetails.error);
+        setError(worldDetails.error)
       }
     } catch (err) {
-      setError(`Failed to fetch world details: ${err}`);
+      setError(`Failed to fetch world details: ${err}`)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleConfirm = () => {
     // If we have a preview world, use its ID
     if (previewWorld) {
-      addWorld(previewWorld.worldId);
-      setWorldInput('');
-      setPreviewWorld(null);
-      onClose();
-      return;
+      addWorld(previewWorld.worldId)
+      setWorldInput('')
+      setPreviewWorld(null)
+      onClose()
+      return
     }
-  };
+  }
 
   const handleCancel = () => {
-    setWorldInput('');
-    setError(null);
-    setPreviewWorld(null);
-    setIsDuplicate(false);
-    onClose();
-  };
+    setWorldInput('')
+    setError(null)
+    setPreviewWorld(null)
+    setIsDuplicate(false)
+    onClose()
+  }
 
   return (
     <Dialog
       open
       onOpenChange={(open) => {
-        if (!open) handleCancel();
+        if (!open) handleCancel()
       }}
     >
       <DialogContent className="sm:max-w-lg">
@@ -310,5 +310,5 @@ export function AddWorldPopup({ onClose, currentFolder }: AddWorldPopupProps) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

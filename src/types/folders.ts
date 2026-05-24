@@ -6,10 +6,10 @@ export enum SpecialFolders {
   NotFolder = 'not-a-folder(if you see this, something is wrong! Please report it)',
 }
 
-export type FolderType = SpecialFolders | UserFolder;
+export type FolderType = SpecialFolders | UserFolder
 
-export type UserFolder = string;
+export type UserFolder = string
 
 export function isUserFolder(folder: FolderType): folder is UserFolder {
-  return !Object.values(SpecialFolders).includes(folder as SpecialFolders);
+  return !Object.values(SpecialFolders).includes(folder as SpecialFolders)
 }

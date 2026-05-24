@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -6,25 +6,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Progress } from '@/components/ui/progress';
-import { FC } from 'react';
-import { useLocalization } from '@/hooks/use-localization';
-import { useUpdateDialog } from './hook';
-import { Changelog } from '../changelog';
+} from '@/components/ui/dialog'
+import { Progress } from '@/components/ui/progress'
+import { FC } from 'react'
+import { useLocalization } from '@/hooks/use-localization'
+import { useUpdateDialog } from './hook'
+import { Changelog } from '../changelog'
 
 type Props = {
-  dialogOpen: boolean;
-  setDialogOpen: (open: boolean) => void;
-  taskId: string | null;
-};
+  dialogOpen: boolean
+  setDialogOpen: (open: boolean) => void
+  taskId: string | null
+}
 
 export const UpdateDialog: FC<Props> = ({
   dialogOpen,
   setDialogOpen,
   taskId,
 }) => {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
 
   const {
     progress,
@@ -35,14 +35,14 @@ export const UpdateDialog: FC<Props> = ({
     dialogOpen,
     setDialogOpen,
     taskId,
-  });
+  })
 
   return (
     <Dialog open={dialogOpen}>
       <DialogContent
         className="max-w-[600px] [&>button]:hidden"
         onInteractOutside={(e) => {
-          e.preventDefault();
+          e.preventDefault()
         }}
       >
         <DialogHeader>
@@ -89,5 +89,5 @@ export const UpdateDialog: FC<Props> = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}

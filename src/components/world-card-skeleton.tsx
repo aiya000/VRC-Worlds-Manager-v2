@@ -1,5 +1,5 @@
-import React from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
+import React from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // A visual stand-in for a world card while data loads. Matches the "Normal" size.
 export const WorldCardSkeleton: React.FC = () => {
@@ -16,7 +16,7 @@ export const WorldCardSkeleton: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default WorldCardSkeleton;
+export default WorldCardSkeleton

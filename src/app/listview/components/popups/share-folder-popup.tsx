@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useLocalization } from '@/hooks/use-localization';
-import { commands } from '@/lib/commands';
-import { info, error } from '@/lib/services/logger';
+import React, { useEffect, useState } from 'react'
+import { useLocalization } from '@/hooks/use-localization'
+import { commands } from '@/lib/commands'
+import { info, error } from '@/lib/services/logger'
 import {
   FolderOpen,
   Loader2,
@@ -9,11 +9,11 @@ import {
   Copy,
   Eye,
   Twitter,
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from 'lucide-react'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
@@ -21,12 +21,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '../../../../components/ui/dialog';
+} from '../../../../components/ui/dialog'
 
 interface ShareFolderPopupProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  folderName: string;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  folderName: string
 }
 
 export function ShareFolderPopup({
@@ -34,158 +34,158 @@ export function ShareFolderPopup({
   onOpenChange,
   folderName,
 }: ShareFolderPopupProps) {
-  const { t } = useLocalization();
-  const [infoLoading, setInfoLoading] = useState(false);
-  const [folderInfo, setFolderInfo] = useState<number | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [shareLoading, setShareLoading] = useState(false);
-  const [shareId, setShareId] = useState<string | null>(null);
+  const { t } = useLocalization()
+  const [infoLoading, setInfoLoading] = useState(false)
+  const [folderInfo, setFolderInfo] = useState<number | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [shareLoading, setShareLoading] = useState(false)
+  const [shareId, setShareId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!open) {
       // Reset state when dialog closes
-      setShareId(null);
-      setErrorMessage(null);
-      setShareLoading(false);
-      setInfoLoading(false); // Add this
-      return;
+      setShareId(null)
+      setErrorMessage(null)
+      setShareLoading(false)
+      setInfoLoading(false) // Add this
+      return
     }
 
     // 1) Fetch folder info FIRST
-    setErrorMessage(null);
-    setFolderInfo(null);
-    setInfoLoading(true);
+    setErrorMessage(null)
+    setFolderInfo(null)
+    setInfoLoading(true)
 
     const fetchFolderInfo = async () => {
-      info(`Fetching folder info for: ${folderName}`);
+      info(`Fetching folder info for: ${folderName}`)
       try {
-        const result = await commands.getWorlds(folderName);
-        info(`getWorlds result: ${JSON.stringify(result)}`);
+        const result = await commands.getWorlds(folderName)
+        info(`getWorlds result: ${JSON.stringify(result)}`)
 
         if (result.status === 'ok') {
-          setFolderInfo(result.data.length);
+          setFolderInfo(result.data.length)
 
           // 2) ONLY THEN fetch/create share ID
-          setShareLoading(true);
+          setShareLoading(true)
           try {
-            const shareRes = await commands.updateFolderShare(folderName);
+            const shareRes = await commands.updateFolderShare(folderName)
             if (shareRes.status === 'ok') {
-              setShareId(shareRes.data);
+              setShareId(shareRes.data)
             } else {
-              setErrorMessage(t('share-folder:error-message', shareRes.error));
+              setErrorMessage(t('share-folder:error-message', shareRes.error))
             }
           } catch (e) {
-            setErrorMessage('Failed to create share');
+            setErrorMessage('Failed to create share')
           } finally {
-            setShareLoading(false);
+            setShareLoading(false)
           }
         } else {
-          error(`getWorlds error: ${result.error}`);
-          setErrorMessage(t('share-folder:error-message', result.error));
+          error(`getWorlds error: ${result.error}`)
+          setErrorMessage(t('share-folder:error-message', result.error))
         }
       } catch (e) {
-        error(`Failed to fetch folder info: ${e}`);
-        setErrorMessage(t('share-folder:error-message', e));
+        error(`Failed to fetch folder info: ${e}`)
+        setErrorMessage(t('share-folder:error-message', e))
       } finally {
-        setInfoLoading(false);
+        setInfoLoading(false)
       }
-    };
+    }
 
-    fetchFolderInfo();
-  }, [open, folderName]);
+    fetchFolderInfo()
+  }, [open, folderName])
 
   const handleShare = async () => {
-    setErrorMessage(null);
-    setShareLoading(true);
-    const id = await commands.shareFolder(folderName);
+    setErrorMessage(null)
+    setShareLoading(true)
+    const id = await commands.shareFolder(folderName)
     if (id.status === 'ok') {
-      info(`Shared folder "${folderName}" as ${id.data}`);
-      setShareId(id.data);
+      info(`Shared folder "${folderName}" as ${id.data}`)
+      setShareId(id.data)
     } else {
-      setErrorMessage(t('share-folder:error-message', id.error));
+      setErrorMessage(t('share-folder:error-message', id.error))
     }
-    setShareLoading(false);
-  };
+    setShareLoading(false)
+  }
 
   // Handler to copy the share ID to clipboard
   const handleCopyId = async () => {
     if (shareId) {
       try {
-        await navigator.clipboard.writeText(shareId);
-        info('Copied share ID to clipboard');
-        toast.success(t('share-folder:toast-id-copied'));
-        onOpenChange(false);
+        await navigator.clipboard.writeText(shareId)
+        info('Copied share ID to clipboard')
+        toast.success(t('share-folder:toast-id-copied'))
+        onOpenChange(false)
       } catch (e) {
-        error(`Clipboard copy failed: ${e}`);
+        error(`Clipboard copy failed: ${e}`)
       }
     }
-  };
+  }
 
   const shareLink = shareId
     ? `https://vrcwm.raifaworks.com/folder/${shareId}`
-    : '';
+    : ''
 
   const shareText = shareId
     ? t('share-folder:share-text', folderName, shareLink)
-    : '';
+    : ''
 
   const tweetText = shareId
     ? t('share-folder:twitter-text', folderName, shareLink)
-    : '';
+    : ''
 
   const tweetIntentUrl = shareId
     ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`
-    : '';
+    : ''
 
   // Handler to copy the share link to clipboard
   const handleCopyLink = async () => {
     if (shareLink) {
       try {
-        await navigator.clipboard.writeText(shareLink);
-        info('Copied share link to clipboard');
-        toast.success(t('share-folder:toast-link-copied', folderName));
-        onOpenChange(false);
+        await navigator.clipboard.writeText(shareLink)
+        info('Copied share link to clipboard')
+        toast.success(t('share-folder:toast-link-copied', folderName))
+        onOpenChange(false)
       } catch (e) {
-        error(`Clipboard copy failed: ${e}`);
+        error(`Clipboard copy failed: ${e}`)
       }
     }
-  };
+  }
 
   const handleCopyText = async () => {
     if (shareText) {
       try {
-        await navigator.clipboard.writeText(shareText);
-        info('Copied share text to clipboard');
-        toast.success(t('share-folder:toast-text-copied', folderName));
-        onOpenChange(false);
+        await navigator.clipboard.writeText(shareText)
+        info('Copied share text to clipboard')
+        toast.success(t('share-folder:toast-text-copied', folderName))
+        onOpenChange(false)
       } catch (e) {
-        error(`Clipboard copy failed: ${e}`);
+        error(`Clipboard copy failed: ${e}`)
       }
     }
-  };
+  }
 
   const handleTweetShare = async () => {
-    if (!tweetIntentUrl) return;
+    if (!tweetIntentUrl) return
     try {
-      window.open(tweetIntentUrl, '_blank');
-      toast.success(t('share-folder:toast-twitter-opened', folderName));
-      onOpenChange(false);
+      window.open(tweetIntentUrl, '_blank')
+      toast.success(t('share-folder:toast-twitter-opened', folderName))
+      onOpenChange(false)
     } catch (e) {
-      error(`Failed to open Twitter share: ${e}`);
+      error(`Failed to open Twitter share: ${e}`)
     }
-  };
+  }
 
   // Handler to preview folder in browser
   const handlePreviewFolder = async () => {
     if (shareLink) {
       try {
-        window.open(shareLink, '_blank');
-        info('Opened folder preview in browser');
+        window.open(shareLink, '_blank')
+        info('Opened folder preview in browser')
       } catch (e) {
-        error(`Failed to open browser: ${e}`);
+        error(`Failed to open browser: ${e}`)
       }
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -332,5 +332,5 @@ export function ShareFolderPopup({
         )}
       </DialogContent>
     </Dialog>
-  );
+  )
 }

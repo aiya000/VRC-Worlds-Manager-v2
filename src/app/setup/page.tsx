@@ -1,115 +1,115 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect, useContext } from 'react';
-import { Button } from '@/components/ui/button';
-import { useTheme } from 'next-themes';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useContext } from 'react'
+import { Button } from '@/components/ui/button'
+import { useTheme } from 'next-themes'
+import { useRouter } from 'next/navigation'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { WorldCardPreview } from '@/components/world-card';
-import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
-import { Loader2, Globe } from 'lucide-react';
-import { commands, CardSize } from '@/lib/commands';
-import { SetupLayout } from '@/app/setup/components/setup-layout';
-import { useLocalization } from '@/hooks/use-localization';
-import { LocalizationContext } from '@/components/localization-context';
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import { WorldCardPreview } from '@/components/world-card'
+import { toast } from 'sonner'
+import { Input } from '@/components/ui/input'
+import { Loader2, Globe } from 'lucide-react'
+import { commands, CardSize } from '@/lib/commands'
+import { SetupLayout } from '@/app/setup/components/setup-layout'
+import { useLocalization } from '@/hooks/use-localization'
+import { LocalizationContext } from '@/components/localization-context'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { info, error } from '@/lib/services/logger';
-import { SaturnIcon } from '@/components/icons/saturn-icon';
-import { FolderOpen, Info } from 'lucide-react';
-import { MigrationConfirmationPopup } from '@/app/listview/settings/components/popups/migration-confirmation-popup';
-import { SiGithub } from '@icons-pack/react-simple-icons';
+} from '@/components/ui/dropdown-menu'
+import { info, error } from '@/lib/services/logger'
+import { SaturnIcon } from '@/components/icons/saturn-icon'
+import { FolderOpen, Info } from 'lucide-react'
+import { MigrationConfirmationPopup } from '@/app/listview/settings/components/popups/migration-confirmation-popup'
+import { SiGithub } from '@icons-pack/react-simple-icons'
 
 const WelcomePage: React.FC = () => {
-  const router = useRouter();
-  const { t } = useLocalization();
-  const { setTheme } = useTheme();
-  const { setLanguage } = useContext(LocalizationContext);
-  const [selectedSize, setSelectedSize] = useState<CardSize>('Normal');
-  const [page, setPage] = useState(1);
+  const router = useRouter()
+  const { t } = useLocalization()
+  const { setTheme } = useTheme()
+  const { setLanguage } = useContext(LocalizationContext)
+  const [selectedSize, setSelectedSize] = useState<CardSize>('Normal')
+  const [page, setPage] = useState(1)
   const [preferences, setPreferences] = useState({
     theme: 'system',
     language: 'en-US',
     card_size: 'Normal' as CardSize,
-  });
+  })
   const [migrationFiles, setMigrationFiles] = useState<
     [File | null, File | null]
-  >([null, null]);
+  >([null, null])
   const [pathValidation, setPathValidation] = useState<[boolean, boolean]>([
     false,
     false,
-  ]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [alreadyMigrated, setAlreadyMigrated] = useState<boolean>(false);
+  ])
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [alreadyMigrated, setAlreadyMigrated] = useState<boolean>(false)
   const [hasExistingData, setHasExistingData] = useState<[boolean, boolean]>([
     false,
     false,
-  ]);
+  ])
   const [migrationMeta, setMigrationMeta] = useState<{
-    number_of_worlds: number;
-    number_of_folders: number;
-  } | null>(null);
-  const [migrationMetaLoading, setMigrationMetaLoading] = useState(false);
+    number_of_worlds: number
+    number_of_folders: number
+  } | null>(null)
+  const [migrationMetaLoading, setMigrationMetaLoading] = useState(false)
   const [migrationMetaError, setMigrationMetaError] = useState<string | null>(
     null,
-  );
-  const [showMigrationConfirm, setShowMigrationConfirm] = useState(false);
+  )
+  const [showMigrationConfirm, setShowMigrationConfirm] = useState(false)
 
   useEffect(() => {
-    info(`Theme changed to: ${preferences.theme}`);
-  }, [preferences.theme]);
+    info(`Theme changed to: ${preferences.theme}`)
+  }, [preferences.theme])
 
   const migrate = async (): Promise<boolean> => {
     if (!migrationFiles[0] || !migrationFiles[1]) {
-      return false;
+      return false
     }
     const result = await commands.migrateOldDataFromFiles(
       migrationFiles[0],
       migrationFiles[1],
-    );
+    )
     if (result.status === 'error') {
       toast(t('general:error-title'), {
         description: t('setup-page:toast:error:migrate:message', result.error),
-      });
-      return false;
+      })
+      return false
     }
     toast(t('general:success-title'), {
       description: t('setup-page:toast:success:migrate:message'),
-    });
-    return true;
-  };
+    })
+    return true
+  }
 
   const handleNext = async () => {
     if (page === 1) {
-      setLanguage(preferences.language);
+      setLanguage(preferences.language)
     }
     if (page === 2) {
       try {
-        const hasDataResult = await commands.checkExistingData();
+        const hasDataResult = await commands.checkExistingData()
         if (hasDataResult.status === 'ok') {
-          setHasExistingData(hasDataResult.data);
+          setHasExistingData(hasDataResult.data)
         } else {
-          error(`Failed to fetch existing data: ${hasDataResult.error}`);
+          error(`Failed to fetch existing data: ${hasDataResult.error}`)
         }
 
         // Web version: no auto-detection of old installation paths.
         // User must manually select files.
-        setPathValidation([false, false]);
+        setPathValidation([false, false])
       } catch (e) {
-        error(`Failed to check existing data: ${e}`);
-        setPathValidation([false, false]);
+        error(`Failed to check existing data: ${e}`)
+        setPathValidation([false, false])
       }
     }
     if (page === 3) {
@@ -118,17 +118,17 @@ const WelcomePage: React.FC = () => {
         !pathValidation[1] ||
         migrationMetaError !== null
       ) {
-        setAlreadyMigrated(false);
-        setPage(3);
-        return;
+        setAlreadyMigrated(false)
+        setPage(3)
+        return
       }
 
       if (hasExistingData[0] || hasExistingData[1]) {
-        setShowMigrationConfirm(true);
-        return;
+        setShowMigrationConfirm(true)
+        return
       }
-      await runMigration();
-      return;
+      await runMigration()
+      return
     }
     if (page === 6) {
       const [result_theme, result_language, result_card_size] =
@@ -136,7 +136,7 @@ const WelcomePage: React.FC = () => {
           commands.setTheme(preferences.theme),
           commands.setLanguage(preferences.language),
           commands.setCardSize(preferences.card_size),
-        ]);
+        ])
 
       const errorResult =
         result_theme.status === 'error'
@@ -145,7 +145,7 @@ const WelcomePage: React.FC = () => {
             ? result_language
             : result_card_size.status === 'error'
               ? result_card_size
-              : null;
+              : null
 
       if (errorResult) {
         toast(t('general:error-title'), {
@@ -153,74 +153,74 @@ const WelcomePage: React.FC = () => {
             'setup-page:toast:error:save-preference:message',
             errorResult.error,
           ),
-        });
+        })
 
-        error(`Failed to save preferences: ${errorResult.error}`);
-        setPage(5);
-        return;
+        error(`Failed to save preferences: ${errorResult.error}`)
+        setPage(5)
+        return
       }
 
-      await commands.createEmptyAuth();
+      await commands.createEmptyAuth()
 
       if (!alreadyMigrated) {
-        await commands.createEmptyFiles();
+        await commands.createEmptyFiles()
       }
 
-      router.push('/login');
-      return;
+      router.push('/login')
+      return
     }
-    setPage(page + 1);
-  };
+    setPage(page + 1)
+  }
 
   const runMigration = async (): Promise<void> => {
     try {
-      setIsLoading(true);
-      const migrated = await migrate();
+      setIsLoading(true)
+      const migrated = await migrate()
       if (!migrated) {
-        setPage(3);
-        return;
+        setPage(3)
+        return
       }
-      setAlreadyMigrated(true);
-      setPage(4);
+      setAlreadyMigrated(true)
+      setPage(4)
     } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      error(`Migration failed unexpectedly: ${message}`);
+      const message = e instanceof Error ? e.message : String(e)
+      error(`Migration failed unexpectedly: ${message}`)
       toast(t('general:error-title'), {
         description: t('setup-page:toast:error:migrate:message', message),
-      });
-      setPage(3);
+      })
+      setPage(3)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleBack = () => {
-    setPage(page - 1);
-  };
+    setPage(page - 1)
+  }
 
   const handleFilePick = (index: number) => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
     input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
+      const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) {
-        info('File selection cancelled');
-        return;
+        info('File selection cancelled')
+        return
       }
 
-      const newFiles: [File | null, File | null] = [...migrationFiles];
-      newFiles[index] = file;
-      setMigrationFiles(newFiles);
+      const newFiles: [File | null, File | null] = [...migrationFiles]
+      newFiles[index] = file
+      setMigrationFiles(newFiles)
 
-      const newValidation: [boolean, boolean] = [...pathValidation];
-      newValidation[index] = true;
-      setPathValidation(newValidation);
+      const newValidation: [boolean, boolean] = [...pathValidation]
+      newValidation[index] = true
+      setPathValidation(newValidation)
 
-      info(`Selected file: ${file.name}`);
-    };
-    input.click();
-  };
+      info(`Selected file: ${file.name}`)
+    }
+    input.click()
+  }
 
   // Fetch migration metadata when both files are selected
   useEffect(() => {
@@ -231,60 +231,60 @@ const WelcomePage: React.FC = () => {
         migrationFiles[0] &&
         migrationFiles[1]
       ) {
-        setMigrationMetaLoading(true);
-        setMigrationMetaError(null);
-        setMigrationMeta(null);
+        setMigrationMetaLoading(true)
+        setMigrationMetaError(null)
+        setMigrationMeta(null)
         try {
           const result = await commands.getMigrationMetadataFromFiles(
             migrationFiles[0],
             migrationFiles[1],
-          );
+          )
           if (result.status === 'ok') {
-            setMigrationMeta(result.data);
+            setMigrationMeta(result.data)
           } else {
-            setMigrationMetaError(result.error);
+            setMigrationMetaError(result.error)
           }
         } catch (e: unknown) {
           setMigrationMetaError(
             e instanceof Error ? e.message : 'Unknown error',
-          );
+          )
         } finally {
-          setMigrationMetaLoading(false);
+          setMigrationMetaLoading(false)
         }
       } else {
-        setMigrationMeta(null);
-        setMigrationMetaError(null);
-        setMigrationMetaLoading(false);
+        setMigrationMeta(null)
+        setMigrationMetaError(null)
+        setMigrationMetaLoading(false)
       }
-    };
-    fetchMeta();
+    }
+    fetchMeta()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     migrationFiles[0],
     migrationFiles[1],
     pathValidation[0],
     pathValidation[1],
-  ]);
+  ])
 
   const handleMigrationConfirm = async () => {
-    setShowMigrationConfirm(false);
+    setShowMigrationConfirm(false)
     try {
-      await runMigration();
+      await runMigration()
     } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      error(`Migration confirmation failed: ${message}`);
+      const message = e instanceof Error ? e.message : String(e)
+      error(`Migration confirmation failed: ${message}`)
       toast(t('general:error-title'), {
         description: t('setup-page:toast:error:migrate:message', message),
-      });
-      setPage(3);
+      })
+      setPage(3)
     }
-  };
+  }
 
   const handleMigrationCancel = () => {
-    setShowMigrationConfirm(false);
-    setAlreadyMigrated(true);
-    setPage(4);
-  };
+    setShowMigrationConfirm(false)
+    setAlreadyMigrated(true)
+    setPage(4)
+  }
 
   return (
     <>
@@ -292,7 +292,7 @@ const WelcomePage: React.FC = () => {
         <MigrationConfirmationPopup
           open={showMigrationConfirm}
           onOpenChange={(open) => {
-            if (!open) setShowMigrationConfirm(false);
+            if (!open) setShowMigrationConfirm(false)
           }}
           onCancel={handleMigrationCancel}
           onConfirm={handleMigrationConfirm}
@@ -322,8 +322,8 @@ const WelcomePage: React.FC = () => {
                   }
                   className="w-full"
                   onClick={() => {
-                    setLanguage('ja-JP');
-                    setPreferences({ ...preferences, language: 'ja-JP' });
+                    setLanguage('ja-JP')
+                    setPreferences({ ...preferences, language: 'ja-JP' })
                   }}
                 >
                   日本語
@@ -334,8 +334,8 @@ const WelcomePage: React.FC = () => {
                   }
                   className="w-full"
                   onClick={() => {
-                    setLanguage('en-US');
-                    setPreferences({ ...preferences, language: 'en-US' });
+                    setLanguage('en-US')
+                    setPreferences({ ...preferences, language: 'en-US' })
                   }}
                 >
                   English
@@ -373,16 +373,16 @@ const WelcomePage: React.FC = () => {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
                       onClick={() => {
-                        setLanguage('en-US');
-                        setPreferences({ ...preferences, language: 'en-US' });
+                        setLanguage('en-US')
+                        setPreferences({ ...preferences, language: 'en-US' })
                       }}
                     >
                       English
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
-                        setLanguage('ja-JP');
-                        setPreferences({ ...preferences, language: 'ja-JP' });
+                        setLanguage('ja-JP')
+                        setPreferences({ ...preferences, language: 'ja-JP' })
                       }}
                     >
                       日本語
@@ -572,8 +572,8 @@ const WelcomePage: React.FC = () => {
                   <Select
                     defaultValue={preferences.card_size}
                     onValueChange={(value: CardSize) => {
-                      setSelectedSize(value);
-                      setPreferences({ ...preferences, card_size: value });
+                      setSelectedSize(value)
+                      setPreferences({ ...preferences, card_size: value })
                     }}
                   >
                     <SelectTrigger className="w-[180px]">
@@ -644,8 +644,8 @@ const WelcomePage: React.FC = () => {
                   <Select
                     defaultValue={preferences.theme}
                     onValueChange={(value) => {
-                      setTheme(value);
-                      setPreferences({ ...preferences, theme: value });
+                      setTheme(value)
+                      setPreferences({ ...preferences, theme: value })
                     }}
                   >
                     <SelectTrigger className="w-[180px]">
@@ -674,8 +674,8 @@ const WelcomePage: React.FC = () => {
                   <Select
                     defaultValue={preferences.language}
                     onValueChange={(value) => {
-                      setLanguage(value);
-                      setPreferences({ ...preferences, language: value });
+                      setLanguage(value)
+                      setPreferences({ ...preferences, language: value })
                     }}
                   >
                     <SelectTrigger className="w-[180px]">
@@ -736,7 +736,7 @@ const WelcomePage: React.FC = () => {
         )}
       </div>
     </>
-  );
-};
+  )
+}
 
-export default WelcomePage;
+export default WelcomePage
