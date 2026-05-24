@@ -2,7 +2,7 @@ import useSWR, { mutate } from 'swr';
 import { commands, FolderData } from '@/lib/bindings';
 import { toast } from 'sonner';
 import { useLocalization } from '../../../hooks/use-localization';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { usePopupStore } from './usePopups/store';
 
 const fetchFolders = async (): Promise<FolderData[]> => {

@@ -4,7 +4,6 @@ import { commands } from '@/lib/bindings';
 import { info, error } from '@tauri-apps/plugin-log';
 import {
   FolderOpen,
-  ArrowRightLeft,
   Loader2,
   Info,
   AlertTriangle,

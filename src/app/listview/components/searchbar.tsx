@@ -19,7 +19,6 @@ import {
 import { useSelectedWorldsStore } from '../hook/use-selected-worlds';
 import { useRef, useEffect } from 'react';
 import { usePopupStore } from '../hook/usePopups/store';
-import { useFolders } from '../hook/use-folders';
 import { Badge } from '@/components/ui/badge';
 import { FolderType } from '@/types/folders';
 import { useWorldFiltersStore } from '../hook/use-filters';

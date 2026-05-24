@@ -75,7 +75,7 @@ export function ShareFolderPopup({
             } else {
               setErrorMessage(t('share-folder:error-message', shareRes.error));
             }
-          } catch (e) {
+          } catch {
             setErrorMessage('Failed to create share');
           } finally {
             setShareLoading(false);
@@ -93,7 +93,7 @@ export function ShareFolderPopup({
     };
 
     fetchFolderInfo();
-  }, [open, folderName]);
+  }, [open, folderName, t]);
 
   const handleShare = async () => {
     setErrorMessage(null);

@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { Heart } from 'lucide-react';
 import { CardSize, WorldDisplayData } from '@/lib/bindings';
 import { useLocalization } from '@/hooks/use-localization';
@@ -31,13 +32,17 @@ export function WorldCardPreview(props: WorldCardPreviewProps) {
           <PlatformIndicator platform={world.platform} />
         </div>
       </div>
-      <img
-        src={world.thumbnailUrl}
-        alt={world.name}
-        className={`w-full h-2/3 object-cover rounded-t-lg`}
-        draggable="false"
-        loading="lazy"
-      />
+      <div className="relative w-full h-2/3">
+        <Image
+          src={world.thumbnailUrl}
+          alt={world.name}
+          fill
+          className="object-cover rounded-t-lg"
+          draggable={false}
+          loading="lazy"
+          unoptimized
+        />
+      </div>
 
       {/* Various size renderings... */}
 

@@ -89,6 +89,8 @@ export default function FindWorldsPage() {
   };
 
   const { importFolder } = useFolders();
+  const importFolderRef = useRef(importFolder);
+  importFolderRef.current = importFolder;
 
   const fetchRecentlyVisitedWorlds = useCallback(async () => {
     try {
@@ -142,7 +144,7 @@ export default function FindWorldsPage() {
         const match = urls[0].match(importRegex);
         if (match && match[1]) {
           const uuid = match[1];
-          importFolder(uuid);
+          importFolderRef.current(uuid);
         }
       });
     })();
@@ -268,7 +270,7 @@ export default function FindWorldsPage() {
           } else if (typeof window !== 'undefined') {
             window.scrollBy({ top: -100, behavior: 'smooth' });
           }
-        } catch (_) {
+        } catch {
           // noop
         }
       }
@@ -277,6 +279,9 @@ export default function FindWorldsPage() {
       setIsSearching(false);
     }
   };
+
+  const handleSearchRef = useRef(handleSearch);
+  handleSearchRef.current = handleSearch;
 
   // Add this useEffect to observe when user scrolls to bottom
   useEffect(() => {
@@ -294,7 +299,7 @@ export default function FindWorldsPage() {
       (entries) => {
         // When the load more indicator comes into view
         if (entries[0].isIntersecting) {
-          handleSearch(true);
+          handleSearchRef.current(true);
         }
       },
       { threshold: 0.5 }, // Trigger when element is 50% visible

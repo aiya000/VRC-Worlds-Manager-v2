@@ -4,9 +4,7 @@ import { Loader2 } from 'lucide-react';
 import {
   GroupInstanceCreatePermission,
   UserGroup,
-  GroupInstanceCreateAllowedType,
   GroupRole,
-  GroupInstancePermissionInfo,
   commands,
 } from '@/lib/bindings';
 import { GroupInstanceType } from '@/types/instances';
@@ -127,7 +125,7 @@ export function GroupInstanceCreator({
     } else {
       setIsLoading(false);
     }
-  }, [groups]);
+  }, [groups, externalLoading]);
 
   // Add useEffect to load the saved region preference
   useEffect(() => {

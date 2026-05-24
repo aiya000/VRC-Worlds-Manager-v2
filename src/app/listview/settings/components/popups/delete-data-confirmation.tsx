@@ -30,6 +30,17 @@ export function DeleteDataConfirmationDialog({
   const holdDuration = 3000; // 3 seconds in milliseconds
   const stepInterval = 50; // Update every 50ms
 
+  const handleConfirm = async () => {
+    try {
+      await onConfirm();
+    } catch (error) {
+      console.error('Error during data deletion:', error);
+    }
+  };
+
+  const handleConfirmRef = useRef(handleConfirm);
+  handleConfirmRef.current = handleConfirm;
+
   useEffect(() => {
     if (isHolding) {
       intervalRef.current = setInterval(() => {
@@ -40,7 +51,7 @@ export function DeleteDataConfirmationDialog({
             info('Deleting data...');
             if (intervalRef.current) clearInterval(intervalRef.current);
             setIsHolding(false);
-            handleConfirm();
+            handleConfirmRef.current();
             return 100;
           }
           return newProgress;
@@ -53,7 +64,7 @@ export function DeleteDataConfirmationDialog({
         intervalRef.current = null;
       }
       // Only reset progress if we haven't completed
-      if (progress < 100) setProgress(0);
+      setProgress((p) => (p < 100 ? 0 : p));
     }
 
     return () => {
@@ -79,14 +90,6 @@ export function DeleteDataConfirmationDialog({
 
   const handleMouseLeave = () => {
     setIsHolding(false);
-  };
-
-  const handleConfirm = async () => {
-    try {
-      await onConfirm();
-    } catch (error) {
-      console.error('Error during data deletion:', error);
-    }
   };
 
   return (

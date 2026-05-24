@@ -132,7 +132,7 @@ export const useWorldsStore = create<WorldsStoreState>((set, get) => ({
       const next = exists ? entry.worlds : [res.data, ...entry.worlds];
       return {
         byKey: { ...s.byKey, [key]: { ...entry, worlds: next } },
-      } as any;
+      } as Pick<WorldsStoreState, 'byKey'>;
     });
   },
   async getAllWorlds() {
@@ -161,7 +161,7 @@ export function useWorlds(folder: FolderType) {
         description: t('listview-page:error-fetch-worlds'),
       });
     });
-  }, [key]);
+  }, [key, folder, store, t]);
 
   const refresh = () => store.load(folder, { force: true });
   const addWorld = async (worldId: string) => {

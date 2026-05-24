@@ -99,7 +99,7 @@ export function RestoreBackupDialog({
       setSelectedPath(null);
       setMetadata(null);
       onOpenChange(false);
-    } catch (e) {
+    } catch {
       // Error handling is done in the parent component
     }
   };

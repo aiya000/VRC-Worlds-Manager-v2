@@ -1,6 +1,6 @@
 import { WorldCardPreview } from '@/components/world-card';
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { FolderType, SpecialFolders } from '@/types/folders';
+import { useState } from 'react';
+import { FolderType } from '@/types/folders';
 import { CardSize, WorldDisplayData } from '@/lib/bindings';
 import { useLocalization } from '@/hooks/use-localization';
 import {
@@ -22,10 +22,7 @@ import {
   AlertDialogCancel,
 } from '@/components/ui/alert-dialog';
 import * as Portal from '@radix-ui/react-portal';
-import { info, error } from '@tauri-apps/plugin-log';
-import { commands } from '@/lib/bindings';
 import { Badge } from '@/components/ui/badge';
-import { useFolders } from '../../hook/use-folders';
 import { useWorldGrid } from './hook';
 
 interface WorldGridProps {
@@ -50,15 +47,11 @@ export function WorldGrid({
   const {
     cardSize,
     selectedWorlds,
-    selectAllWorlds,
     toggleWorld,
-    clearSelection,
     isSelectionMode,
-    selectAllFindPage,
     handleOpenFolderDialog,
     handleOpenWorldDetails,
     handleShareWorld,
-    handleDeleteWorld,
     handleRemoveFromCurrentFolder,
     removeWorldsFromFolder,
     handleHideWorld,
@@ -176,7 +169,7 @@ export function WorldGrid({
               {isFindPage ? (
                 <>
                   <ContextMenuItem
-                    onSelect={(e) => {
+                    onSelect={() => {
                       handleOpenFolderDialog(world.worldId);
                     }}
                   >
@@ -184,7 +177,7 @@ export function WorldGrid({
                   </ContextMenuItem>
                   <ContextMenuSeparator />
                   <ContextMenuItem
-                    onSelect={(e) => {
+                    onSelect={() => {
                       handleShareWorld(world.worldId, world.name);
                     }}
                   >
@@ -195,7 +188,7 @@ export function WorldGrid({
               ) : !isHiddenFolder ? (
                 <>
                   <ContextMenuItem
-                    onSelect={(e) => {
+                    onSelect={() => {
                       handleOpenFolderDialog(world.worldId);
                     }}
                   >
@@ -203,7 +196,7 @@ export function WorldGrid({
                   </ContextMenuItem>
                   {!isSpecialFolder && (
                     <ContextMenuItem
-                      onSelect={(e) => {
+                      onSelect={() => {
                         handleRemoveFromCurrentFolder(world.worldId);
                       }}
                       className="text-destructive"
@@ -212,7 +205,7 @@ export function WorldGrid({
                     </ContextMenuItem>
                   )}
                   <ContextMenuItem
-                    onSelect={(e) => {
+                    onSelect={() => {
                       const worldsToHide =
                         selectedWorlds.length > 0 &&
                         selectedWorlds.includes(world.worldId)
@@ -232,7 +225,7 @@ export function WorldGrid({
                   </ContextMenuItem>
                   <ContextMenuSeparator />
                   <ContextMenuItem
-                    onSelect={(e) => {
+                    onSelect={() => {
                       handleShareWorld(world.worldId, world.name);
                     }}
                   >
@@ -243,7 +236,7 @@ export function WorldGrid({
               ) : (
                 <>
                   <ContextMenuItem
-                    onSelect={(e) => {
+                    onSelect={() => {
                       const worldsToRestore =
                         selectedWorlds.length > 0 &&
                         selectedWorlds.includes(world.worldId)
@@ -256,7 +249,7 @@ export function WorldGrid({
                   </ContextMenuItem>
                   <ContextMenuSeparator />
                   <ContextMenuItem
-                    onSelect={(e) => {
+                    onSelect={() => {
                       handleShareWorld(world.worldId, world.name);
                     }}
                   >

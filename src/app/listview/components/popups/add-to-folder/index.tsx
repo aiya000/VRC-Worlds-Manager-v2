@@ -1,4 +1,3 @@
-import { useState, useRef, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,18 +9,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Check, Info, Loader2, Minus, AlertCircle } from 'lucide-react';
-import { commands, WorldDisplayData } from '@/lib/bindings';
+import { WorldDisplayData } from '@/lib/bindings';
 import { useLocalization } from '@/hooks/use-localization';
 import { Alert, AlertDescription } from '../../../../../components/ui/alert';
 import { Input } from '../../../../../components/ui/input';
-import { error, info } from '@tauri-apps/plugin-log';
 import { Checkbox } from '../../../../../components/ui/checkbox';
-import { FolderRemovalPreference } from '@/lib/bindings';
-import { useFolders } from '@/app/listview/hook/use-folders';
 
-import { usePathname } from 'next/navigation';
-import { useSelectedWorldsStore } from '../../../hook/use-selected-worlds';
-import { useWorlds } from '../../../hook/use-worlds';
 import { useAddToFolderPopup } from './hook';
 import { FolderType } from '@/types/folders';
 
@@ -59,7 +52,6 @@ export function AddToFolderDialog({
     handleKeepInCurrentFolder,
     handleCancel,
     isFindPage,
-    createdFolder,
   } = useAddToFolderPopup({ selectedWorlds, currentFolder, onClose });
 
   return (
@@ -91,7 +83,6 @@ export function AddToFolderDialog({
             <ScrollArea className={isFindPage ? 'h-[240px]' : 'h-[300px]'}>
               <div ref={listRef} className="space-y-2 px-2 pb-2">
                 {folders.map((folder) => {
-                  const isNew = folder.name === createdFolder;
                   const state = getFolderState(folder.name);
                   const isAll = state === 'all';
                   const isSome = state === 'some';

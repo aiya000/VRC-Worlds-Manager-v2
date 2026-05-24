@@ -51,7 +51,7 @@ export const useWorldFiltersStore = create<FilterState>((set) => ({
   availableAuthors: [],
   availableTags: [],
   setSortField: (field) =>
-    set((state) => {
+    set((_state) => {
       const newDirection = getDefaultDirection(field);
       // Save to backend
       commands.setSortPreferences(field, newDirection).catch((e) => {
@@ -362,7 +362,7 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
       // 5. Commit if still latest & not cancelled (avoid redundant updates)
       if (!cancelled && seq === requestSeq.current) {
         const state = useWorldFiltersStore.getState();
-        const arraysEqual = (a: any[], b: any[]) =>
+        const arraysEqual = <T,>(a: T[], b: T[]) =>
           a.length === b.length && a.every((v, i) => v === b[i]);
         if (
           !arraysEqual(
@@ -426,7 +426,10 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
 }
 
 // Helper to extract value for sorting
-function getSortValue(world: WorldDisplayData, field: SortField): any {
+function getSortValue(
+  world: WorldDisplayData,
+  field: SortField,
+): string | number | null | undefined {
   switch (field) {
     case 'name':
       return world.name;

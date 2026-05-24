@@ -165,7 +165,7 @@ export const useUpdateDialog = ({
       unlistenProgressFn?.();
       unlistenCompleteFn?.();
     };
-  }, [taskId, onCancelButtonClick, t, toast]);
+  }, [taskId, onCancelButtonClick, t]);
 
   return {
     progress,

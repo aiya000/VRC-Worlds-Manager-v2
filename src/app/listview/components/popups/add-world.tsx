@@ -9,19 +9,15 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { AlertCircle, Check, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   commands,
   WorldDetails,
-  CardSize,
-  WorldDisplayData,
 } from '@/lib/bindings';
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -53,7 +49,7 @@ export function AddWorldPopup({ onClose, currentFolder }: AddWorldPopupProps) {
       try {
         const worlds = await getAllWorlds();
         setExistingWorlds(worlds.map((world) => world.worldId));
-      } catch (e) {
+      } catch {
         // handle error if needed
       } finally {
         setIsLoading(false);

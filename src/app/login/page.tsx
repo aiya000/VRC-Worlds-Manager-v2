@@ -31,7 +31,7 @@ export default function Login() {
 
   useEffect(() => {
     checkForUpdate();
-  }, []);
+  }, [checkForUpdate]);
 
   const handleLogin = async () => {
     setLoading(true);

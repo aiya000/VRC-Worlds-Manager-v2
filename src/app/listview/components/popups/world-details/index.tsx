@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, Fragment } from 'react';
+import Image from 'next/image';
 import { info, error } from '@tauri-apps/plugin-log';
 import { toast } from 'sonner';
-import Image from 'next/image';
 import { mutate as mutateFoldersCache } from 'swr';
 import {
   Dialog,
@@ -15,14 +15,10 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, ExternalLink, Pencil, Plus, X } from 'lucide-react';
-import QPc from '@/../public/icons/VennColorQPc.svg';
-import QPcQ from '@/../public/icons/VennColorQPcQ.svg';
-import QQ from '@/../public/icons/VennColorQQ.svg';
 import { ChevronRight } from 'lucide-react';
 import {
   GroupInstanceCreatePermission,
   UserGroup,
-  GroupInstancePermissionInfo,
   GroupRole,
   commands,
   FolderData,
@@ -429,7 +425,7 @@ export function WorldDetailPopup({
     } else {
       console.error(result.error);
     }
-  }, [worldId, memoInput]);
+  }, [worldId, memoInput, memo]);
 
   const handleGroupInstanceClick = async () => {
     try {
@@ -490,9 +486,12 @@ export function WorldDetailPopup({
     onOpenChange(false); // Close dialog after creating instance
   };
 
-  const handleDeleteWorld = (worldId: string) => {
-    deleteWorld(worldId);
-  };
+  const handleDeleteWorld = useCallback(
+    (worldId: string) => {
+      deleteWorld(worldId);
+    },
+    [deleteWorld],
+  );
 
   // Add this effect to handle the countdown and auto-close
   useEffect(() => {
@@ -517,6 +516,7 @@ export function WorldDetailPopup({
     isCountdownActive,
     onOpenChange,
     worldId,
+    handleDeleteWorld,
   ]);
 
   async function toggleWorldFolder(folder: string): Promise<void> {
@@ -802,14 +802,17 @@ export function WorldDetailPopup({
                               platform={worldDetails.platform}
                             />
                           </div>
-                          <img
+                          <Image
                             src={worldDetails.thumbnailUrl}
                             alt={worldDetails.name}
+                            width={400}
+                            height={220}
                             className="object-cover w-full h-full"
                             style={{
                               backgroundColor: 'black',
-                              maxWidth: '100%', // Add max-width constraint
+                              maxWidth: '100%',
                             }}
+                            unoptimized
                           />
                         </a>
                       </div>
