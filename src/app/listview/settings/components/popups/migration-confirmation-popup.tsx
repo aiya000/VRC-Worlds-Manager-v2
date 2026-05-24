@@ -1,18 +1,18 @@
-import { useLocalization } from '@/hooks/use-localization';
-import { Button } from '@/components/ui/button';
+import { useLocalization } from '@/hooks/use-localization'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from '@/components/ui/dialog'
 
 interface MigrationConfirmationPopupProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onCancel: () => void;
-  onConfirm: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onCancel: () => void
+  onConfirm: () => void
 }
 
 export function MigrationConfirmationPopup({
@@ -21,7 +21,7 @@ export function MigrationConfirmationPopup({
   onCancel,
   onConfirm,
 }: MigrationConfirmationPopupProps) {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -41,5 +41,5 @@ export function MigrationConfirmationPopup({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

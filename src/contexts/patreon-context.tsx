@@ -1,38 +1,38 @@
-'use client';
+'use client'
 
-import React, { createContext, useContext, ReactNode } from 'react';
-import { usePatreonStore } from '@/stores/patreon-store';
-import { useEffect } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react'
+import { usePatreonStore } from '@/stores/patreon-store'
+import { useEffect } from 'react'
 
 interface PatreonContextType {
-  supporters: Set<string>;
-  isLoading: boolean;
+  supporters: Set<string>
+  isLoading: boolean
 }
 
-const PatreonContext = createContext<PatreonContextType | undefined>(undefined);
+const PatreonContext = createContext<PatreonContextType | undefined>(undefined)
 
 interface PatreonProviderProps {
-  children: ReactNode;
+  children: ReactNode
 }
 
 export function PatreonProvider({ children }: PatreonProviderProps) {
-  const { supporters, isLoading, fetchSupporters } = usePatreonStore();
+  const { supporters, isLoading, fetchSupporters } = usePatreonStore()
 
   useEffect(() => {
-    fetchSupporters();
-  }, []);
+    fetchSupporters()
+  }, [])
 
   return (
     <PatreonContext.Provider value={{ supporters, isLoading }}>
       {children}
     </PatreonContext.Provider>
-  );
+  )
 }
 
 export function usePatreonContext() {
-  const context = useContext(PatreonContext);
+  const context = useContext(PatreonContext)
   if (context === undefined) {
-    throw new Error('usePatreonContext must be used within a PatreonProvider');
+    throw new Error('usePatreonContext must be used within a PatreonProvider')
   }
-  return context;
+  return context
 }

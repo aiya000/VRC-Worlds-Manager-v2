@@ -1,32 +1,32 @@
-'use client';
+'use client'
 
-import { SaturnIcon } from '../../../components/icons/saturn-icon';
-import { GearIcon } from '../../../components/icons/gear-icon';
-import { Info, FileQuestion, History, Plus } from 'lucide-react';
-import { SpecialFolders } from '@/types/folders';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { FolderData } from '@/lib/commands';
-import { useState, useEffect, useRef } from 'react';
-import { useLocalization } from '@/hooks/use-localization';
+import { SaturnIcon } from '../../../components/icons/saturn-icon'
+import { GearIcon } from '../../../components/icons/gear-icon'
+import { Info, FileQuestion, History, Plus } from 'lucide-react'
+import { SpecialFolders } from '@/types/folders'
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
+import { FolderData } from '@/lib/commands'
+import { useState, useEffect, useRef } from 'react'
+import { useLocalization } from '@/hooks/use-localization'
 
-import { Separator } from '@/components/ui/separator';
+import { Separator } from '@/components/ui/separator'
 
-import { SidebarGroup } from '@/components/ui/sidebar';
-import { error } from '@/lib/services/logger';
+import { SidebarGroup } from '@/components/ui/sidebar'
+import { error } from '@/lib/services/logger'
 
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from '@/components/ui/context-menu';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import { useFolders } from '@/app/listview/hook/use-folders';
-import { useRouter } from 'next/navigation';
-import { usePathname } from 'next/navigation';
-import { useSearchParams } from 'next/navigation';
-import { usePopupStore } from '../hook/usePopups/store';
+} from '@/components/ui/context-menu'
+import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
+import { useFolders } from '@/app/listview/hook/use-folders'
+import { useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
+import { usePopupStore } from '../hook/usePopups/store'
 
 const sidebarStyles = {
   container:
@@ -36,103 +36,103 @@ const sidebarStyles = {
   link: 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent/50 hover:text-accent-foreground',
   activeLink: 'bg-accent/60 text-accent-foreground',
   footer: 'sticky bottom-0 left-0 mt-auto p-1 pb-2',
-};
+}
 
-const SIDEBAR_CLASS = 'app-sidebar';
+const SIDEBAR_CLASS = 'app-sidebar'
 
 interface AppSidebarProps {
-  sidebarWidth: number;
+  sidebarWidth: number
 }
 
 export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
   const { folders, moveFolder, createFolder, deleteFolder, renameFolder } =
-    useFolders();
-  const setPopup = usePopupStore((state) => state.setPopup);
+    useFolders()
+  const setPopup = usePopupStore((state) => state.setPopup)
 
-  const [localFolders, setLocalFolders] = useState<FolderData[]>(folders);
-  const [editingFolder, setEditingFolder] = useState<string | null>(null);
-  const [newFolderName, setNewFolderName] = useState('');
-  const [isComposing, setIsComposing] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const composingRef = useRef(false);
-  const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [localFolders, setLocalFolders] = useState<FolderData[]>(folders)
+  const [editingFolder, setEditingFolder] = useState<string | null>(null)
+  const [newFolderName, setNewFolderName] = useState('')
+  const [isComposing, setIsComposing] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const composingRef = useRef(false)
+  const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   // Update local folders when prop changes
   useEffect(() => {
-    setLocalFolders(folders);
-  }, [folders]);
+    setLocalFolders(folders)
+  }, [folders])
 
   const handleDragEnd = async (result: any) => {
-    if (!result.destination) return;
+    if (!result.destination) return
 
-    const { source, destination } = result;
-    const newFolders = Array.from(localFolders);
-    const [movedFolder] = newFolders.splice(source.index, 1);
-    newFolders.splice(destination.index, 0, movedFolder);
+    const { source, destination } = result
+    const newFolders = Array.from(localFolders)
+    const [movedFolder] = newFolders.splice(source.index, 1)
+    newFolders.splice(destination.index, 0, movedFolder)
 
     // Update local state immediately
-    setLocalFolders(newFolders);
+    setLocalFolders(newFolders)
 
     try {
-      moveFolder(movedFolder.name, destination.index);
+      moveFolder(movedFolder.name, destination.index)
     } catch (e) {
       // Revert on error
-      setLocalFolders(folders);
-      error(`Error moving folder: ${e}`);
+      setLocalFolders(folders)
+      error(`Error moving folder: ${e}`)
     }
-  };
+  }
 
   const handleRename = async (folder: string) => {
-    const oldName = folder;
-    const newName = newFolderName;
+    const oldName = folder
+    const newName = newFolderName
     renameFolder(oldName, newName).then(() => {
-      setEditingFolder(null);
-      setNewFolderName('');
+      setEditingFolder(null)
+      setNewFolderName('')
       // If currently viewing this user folder, update the URL so the page title reflects the rename
-      const currentFolder = searchParams?.get('folderName');
+      const currentFolder = searchParams?.get('folderName')
       if (
         pathname === '/listview/folders/userFolder' &&
         currentFolder === oldName
       ) {
         router.replace(
           `/listview/folders/userFolder?folderName=${encodeURIComponent(newName)}`,
-        );
+        )
       }
-    });
-  };
+    })
+  }
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // F8 key handler - prevent focus loss and text selection
       if (e.key === 'F8' && document.activeElement === inputRef.current) {
         // Save current text length to restore cursor position later
-        const textLength = inputRef.current?.value.length || 0;
+        const textLength = inputRef.current?.value.length || 0
 
         // Schedule focus restoration after the F8 key event completes
         setTimeout(() => {
           if (inputRef.current) {
             // Restore focus
-            inputRef.current.focus();
+            inputRef.current.focus()
 
             // Place cursor at the end of text without selection
-            inputRef.current.setSelectionRange(textLength, textLength);
+            inputRef.current.setSelectionRange(textLength, textLength)
           }
-        }, 10);
+        }, 10)
       }
-    };
+    }
 
     // Add global key listener
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
 
   // Increase the timeout for focusing when editing starts
   useEffect(() => {
@@ -140,25 +140,25 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
       // Use a longer timeout to ensure all other events have been processed
       const focusTimer = setTimeout(() => {
         if (inputRef.current) {
-          inputRef.current.focus();
+          inputRef.current.focus()
           // Optionally select all text for convenience
-          inputRef.current.select();
+          inputRef.current.select()
         }
-      }, 50); // Increased from 10ms to 50ms
+      }, 50) // Increased from 10ms to 50ms
 
       // Clean up timer on component unmount or when editingFolder changes
-      return () => clearTimeout(focusTimer);
+      return () => clearTimeout(focusTimer)
     }
-  }, [editingFolder]);
+  }, [editingFolder])
 
   // Improve the click outside handler to be more precise
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       // Skip if no active editing or during composition
-      if (!editingFolder || isComposing) return;
+      if (!editingFolder || isComposing) return
 
       // Get the clicked element
-      const target = event.target as HTMLElement;
+      const target = event.target as HTMLElement
 
       // Check if click is inside the input or its parent container
       if (
@@ -168,21 +168,21 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
           target.closest('.folder-edit-container'))
       ) {
         // Add this class to your container
-        return;
+        return
       }
 
       // If we click anywhere else, cancel editing
-      setEditingFolder(null);
-      setNewFolderName('');
-    };
+      setEditingFolder(null)
+      setNewFolderName('')
+    }
 
     // Use mousedown instead of click for better timing
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside)
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [editingFolder, isComposing]); // Add isComposing to deps
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [editingFolder, isComposing]) // Add isComposing to deps
 
   return (
     <aside className={cn(sidebarStyles.container, SIDEBAR_CLASS)}>
@@ -203,8 +203,8 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
               ${pathname === '/listview/folders/special/all' ? sidebarStyles.activeLink : 'hover:bg-accent/50 hover:text-accent-foreground'}
             `}
             onClick={() => {
-              if (pathname === '/listview/folders/special/all') return;
-              router.push('/listview/folders/special/all');
+              if (pathname === '/listview/folders/special/all') return
+              router.push('/listview/folders/special/all')
             }}
           >
             <SaturnIcon className="h-[18px] w-[18px]" />
@@ -222,8 +222,8 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
               ${pathname === '/listview/folders/special/find' ? sidebarStyles.activeLink : 'hover:bg-accent/50 hover:text-accent-foreground'}
             `}
             onClick={() => {
-              if (pathname === '/listview/folders/special/find') return;
-              router.push('/listview/folders/special/find');
+              if (pathname === '/listview/folders/special/find') return
+              router.push('/listview/folders/special/find')
             }}
           >
             <History className="h-5 w-5" />
@@ -243,8 +243,8 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
               }
             `}
             onClick={() => {
-              if (pathname === '/listview/folders/special/unclassified') return;
-              router.push('/listview/folders/special/unclassified');
+              if (pathname === '/listview/folders/special/unclassified') return
+              router.push('/listview/folders/special/unclassified')
             }}
           >
             <FileQuestion className="h-5 w-5" />
@@ -297,10 +297,10 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
                                   pathname ===
                                   `/listview/folders/userFolder?folderName=${folder.name}`
                                 )
-                                  return;
+                                  return
                                 router.push(
                                   `/listview/folders/userFolder?folderName=${folder.name}`,
-                                );
+                                )
                               }}
                             >
                               {editingFolder === folder.name ? (
@@ -313,51 +313,51 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
                                   onFocus={() => {
                                     // Clear any pending blur actions
                                     if (blurTimeoutRef.current) {
-                                      clearTimeout(blurTimeoutRef.current);
-                                      blurTimeoutRef.current = null;
+                                      clearTimeout(blurTimeoutRef.current)
+                                      blurTimeoutRef.current = null
                                     }
                                   }}
                                   onKeyDown={(e) => {
                                     // Prevent event bubbling when typing
-                                    e.stopPropagation();
+                                    e.stopPropagation()
 
                                     if (
                                       e.key === 'Enter' &&
                                       !composingRef.current
                                     ) {
-                                      e.preventDefault();
-                                      handleRename(folder.name);
+                                      e.preventDefault()
+                                      handleRename(folder.name)
                                     } else if (e.key === 'Escape') {
-                                      e.preventDefault();
-                                      setEditingFolder(null);
-                                      setNewFolderName('');
+                                      e.preventDefault()
+                                      setEditingFolder(null)
+                                      setNewFolderName('')
                                     }
                                   }}
                                   onClick={(e) => {
                                     // Prevent click from bubbling to parent
-                                    e.preventDefault();
-                                    e.stopPropagation();
+                                    e.preventDefault()
+                                    e.stopPropagation()
                                   }}
                                   onCompositionStart={() => {
-                                    composingRef.current = true;
-                                    setIsComposing(true);
+                                    composingRef.current = true
+                                    setIsComposing(true)
                                   }}
                                   onCompositionEnd={() => {
-                                    composingRef.current = false;
+                                    composingRef.current = false
 
                                     // Use a longer timeout for IME operations
                                     setTimeout(() => {
                                       if (inputRef.current) {
                                         const textLength =
-                                          inputRef.current.value.length;
-                                        inputRef.current.focus();
+                                          inputRef.current.value.length
+                                        inputRef.current.focus()
                                         inputRef.current.setSelectionRange(
                                           textLength,
                                           textLength,
-                                        );
+                                        )
                                       }
-                                      setIsComposing(false);
-                                    }, 150);
+                                      setIsComposing(false)
+                                    }, 150)
                                   }}
                                   className="h-6 py-0 w-full folder-edit-container" // Ensure no horizontal overflow
                                   autoFocus={true}
@@ -378,15 +378,15 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
                             <ContextMenuItem
                               onClick={() => {
                                 // First set the editing state
-                                setEditingFolder(folder.name);
-                                setNewFolderName(folder.name);
+                                setEditingFolder(folder.name)
+                                setNewFolderName(folder.name)
                                 // Use double RAF to ensure DOM has updated and context menu has closed
                                 requestAnimationFrame(() => {
                                   requestAnimationFrame(() => {
-                                    inputRef.current?.focus();
-                                    inputRef.current?.select(); // Also select the text for convenience
-                                  });
-                                });
+                                    inputRef.current?.focus()
+                                    inputRef.current?.select() // Also select the text for convenience
+                                  })
+                                })
                               }}
                             >
                               {t('app-sidebar:rename')}
@@ -411,7 +411,7 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
           <div
             className={`${sidebarStyles.link} cursor-pointer`}
             onClick={() => {
-              setPopup('showCreateFolder', true);
+              setPopup('showCreateFolder', true)
             }}
           >
             <Plus className="h-5 w-5" />
@@ -432,8 +432,8 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
               }
             `}
             onClick={() => {
-              if (pathname === `/listview/about`) return;
-              router.push('/listview/about');
+              if (pathname === `/listview/about`) return
+              router.push('/listview/about')
             }}
           >
             <Info className="h-5 w-5" />
@@ -449,8 +449,8 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
               }
             `}
             onClick={() => {
-              if (pathname === `/listview/settings`) return;
-              router.push('/listview/settings');
+              if (pathname === `/listview/settings`) return
+              router.push('/listview/settings')
             }}
           >
             <div className="h-5 w-5 flex items-center justify-center">
@@ -461,5 +461,5 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
         </SidebarGroup>
       </footer>
     </aside>
-  );
+  )
 }

@@ -1,28 +1,28 @@
-import React from 'react';
-import { useLocalization } from '@/hooks/use-localization';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import React from 'react'
+import { useLocalization } from '@/hooks/use-localization'
+import { Progress } from '@/components/ui/progress'
+import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { info } from '@/lib/services/logger';
+} from '@/components/ui/card'
+import { info } from '@/lib/services/logger'
 
 interface SetupLayoutProps {
-  title: string;
-  currentPage: number;
-  children: React.ReactNode;
-  onBack: () => void;
-  onNext: () => void;
-  isFirstPage?: boolean;
-  isLastPage?: boolean;
-  isMigrationPage?: boolean;
-  isLoading?: boolean;
-  isValid?: boolean;
+  title: string
+  currentPage: number
+  children: React.ReactNode
+  onBack: () => void
+  onNext: () => void
+  isFirstPage?: boolean
+  isLastPage?: boolean
+  isMigrationPage?: boolean
+  isLoading?: boolean
+  isValid?: boolean
 }
 
 export function SetupLayout({
@@ -37,8 +37,8 @@ export function SetupLayout({
   isValid = false,
   isLoading = false,
 }: SetupLayoutProps) {
-  const { t } = useLocalization();
-  const totalPages = 6;
+  const { t } = useLocalization()
+  const totalPages = 6
   return (
     <div className="container max-w-2xl mx-auto p-4">
       <Progress
@@ -92,5 +92,5 @@ export function SetupLayout({
         </CardFooter>
       </Card>
     </div>
-  );
+  )
 }

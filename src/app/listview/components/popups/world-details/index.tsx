@@ -1,24 +1,24 @@
-import { useState, useEffect, useCallback, Fragment } from 'react';
-import { info, error } from '@/lib/services/logger';
-import { toast } from 'sonner';
-import Image from 'next/image';
-import { mutate as mutateFoldersCache } from 'swr';
+import { useState, useEffect, useCallback, Fragment } from 'react'
+import { info, error } from '@/lib/services/logger'
+import { toast } from 'sonner'
+import Image from 'next/image'
+import { mutate as mutateFoldersCache } from 'swr'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, ExternalLink, Pencil, Plus, X } from 'lucide-react';
-import QPc from '@/../public/icons/VennColorQPc.svg';
-import QPcQ from '@/../public/icons/VennColorQPcQ.svg';
-import QQ from '@/../public/icons/VennColorQQ.svg';
-import { ChevronRight } from 'lucide-react';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { AlertCircle, ExternalLink, Pencil, Plus, X } from 'lucide-react'
+import QPc from '@/../public/icons/VennColorQPc.svg'
+import QPcQ from '@/../public/icons/VennColorQPcQ.svg'
+import QQ from '@/../public/icons/VennColorQQ.svg'
+import { ChevronRight } from 'lucide-react'
 import {
   GroupInstanceCreatePermission,
   UserGroup,
@@ -26,40 +26,40 @@ import {
   GroupRole,
   commands,
   FolderData,
-} from '@/lib/commands';
-import { WorldDisplayData } from '@/lib/commands';
-import { WorldDetails } from '@/lib/commands';
-import { WorldCardPreview } from '@/components/world-card';
-import { GroupInstanceCreator } from './group-instance-creator';
-import { GroupInstanceType, InstanceType } from '@/types/instances';
-import { InstanceRegion } from '@/lib/commands';
-import { useLocalization } from '@/hooks/use-localization';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import MemoRenderer from '@/components/memo-renderer';
-import { useFolders } from '@/app/listview/hook/use-folders';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useWorldDetailsActions } from './hook';
-import { useWorlds } from '@/app/listview/hook/use-worlds';
-import { FolderType } from '@/types/folders';
-import { usePatreonContext } from '@/contexts/patreon-context';
-import { PlatformIndicator } from '@/components/platform-indicator';
+} from '@/lib/commands'
+import { WorldDisplayData } from '@/lib/commands'
+import { WorldDetails } from '@/lib/commands'
+import { WorldCardPreview } from '@/components/world-card'
+import { GroupInstanceCreator } from './group-instance-creator'
+import { GroupInstanceType, InstanceType } from '@/types/instances'
+import { InstanceRegion } from '@/lib/commands'
+import { useLocalization } from '@/hooks/use-localization'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
+import MemoRenderer from '@/components/memo-renderer'
+import { useFolders } from '@/app/listview/hook/use-folders'
+import { Checkbox } from '@/components/ui/checkbox'
+import { useWorldDetailsActions } from './hook'
+import { useWorlds } from '@/app/listview/hook/use-worlds'
+import { FolderType } from '@/types/folders'
+import { usePatreonContext } from '@/contexts/patreon-context'
+import { PlatformIndicator } from '@/components/platform-indicator'
 
 export interface WorldDetailDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  worldId: string;
-  currentFolder: FolderType;
-  dontSaveToLocal?: boolean;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  worldId: string
+  currentFolder: FolderType
+  dontSaveToLocal?: boolean
 }
 
 interface GroupInstance {
-  groups: UserGroup[];
-  selectedGroupId: string | null;
-  permission: GroupInstanceCreatePermission | null;
-  roles: GroupRole[];
-  isLoading: boolean;
+  groups: UserGroup[]
+  selectedGroupId: string | null
+  permission: GroupInstanceCreatePermission | null
+  roles: GroupRole[]
+  isLoading: boolean
 }
 
 // Add this function at the top of your file or in a separate utils file
@@ -71,8 +71,8 @@ const mapRegion = {
       USE: 'use' as InstanceRegion,
       EU: 'eu' as InstanceRegion,
       JP: 'jp' as InstanceRegion,
-    };
-    return mapping[uiRegion] || ('jp' as InstanceRegion);
+    }
+    return mapping[uiRegion] || ('jp' as InstanceRegion)
   },
 
   // Backend to UI mapping
@@ -82,10 +82,10 @@ const mapRegion = {
       use: 'USE',
       eu: 'EU',
       jp: 'JP',
-    };
-    return mapping[backendRegion] || 'JP';
+    }
+    return mapping[backendRegion] || 'JP'
   },
-};
+}
 
 export function WorldDetailPopup({
   open,
@@ -102,75 +102,75 @@ export function WorldDetailPopup({
     deleteWorld,
     selectAuthor,
     selectTag,
-  } = useWorldDetailsActions(onOpenChange);
-  const { t } = useLocalization();
-  const { folders } = useFolders();
-  const { supporters } = usePatreonContext();
-  const [isLoading, setIsLoading] = useState(false);
-  const [worldDetails, setWorldDetails] = useState<WorldDetails | null>(null);
-  const [errorState, setErrorState] = useState<string | null>(null);
+  } = useWorldDetailsActions(onOpenChange)
+  const { t } = useLocalization()
+  const { folders } = useFolders()
+  const { supporters } = usePatreonContext()
+  const [isLoading, setIsLoading] = useState(false)
+  const [worldDetails, setWorldDetails] = useState<WorldDetails | null>(null)
+  const [errorState, setErrorState] = useState<string | null>(null)
   const [selectedInstanceType, setSelectedInstanceType] =
-    useState<InstanceType>('public');
-  const [selectedRegion, setSelectedRegion] = useState<InstanceRegion>('jp');
+    useState<InstanceType>('public')
+  const [selectedRegion, setSelectedRegion] = useState<InstanceRegion>('jp')
   const [groupInstanceState, setGroupInstanceState] = useState<GroupInstance>({
     groups: [],
     selectedGroupId: null,
     permission: null,
     roles: [],
     isLoading: true,
-  });
+  })
   const [instanceCreationType, setInstanceCreationType] = useState<
     'normal' | 'group'
-  >('normal');
-  const [memo, setMemo] = useState<string | null>(null);
-  const [isEditingMemo, setIsEditingMemo] = useState<boolean>(false);
-  const [memoInput, setMemoInput] = useState<string>('');
-  const [customTags, setCustomTags] = useState<string[]>([]);
-  const [customTagInput, setCustomTagInput] = useState<string>('');
-  const [isSavingCustomTags, setIsSavingCustomTags] = useState<boolean>(false);
+  >('normal')
+  const [memo, setMemo] = useState<string | null>(null)
+  const [isEditingMemo, setIsEditingMemo] = useState<boolean>(false)
+  const [memoInput, setMemoInput] = useState<string>('')
+  const [customTags, setCustomTags] = useState<string[]>([])
+  const [customTagInput, setCustomTagInput] = useState<string>('')
+  const [isSavingCustomTags, setIsSavingCustomTags] = useState<boolean>(false)
 
-  const [isComposing, setIsComposing] = useState(false);
+  const [isComposing, setIsComposing] = useState(false)
 
-  const [isWorldNotPublic, setIsWorldNotPublic] = useState<boolean>(false);
-  const [isWorldBlacklisted, setIsWorldBlacklisted] = useState<boolean>(false);
+  const [isWorldNotPublic, setIsWorldNotPublic] = useState<boolean>(false)
+  const [isWorldBlacklisted, setIsWorldBlacklisted] = useState<boolean>(false)
   const [cachedWorldData, setCachedWorldData] =
-    useState<WorldDisplayData | null>(null);
+    useState<WorldDisplayData | null>(null)
 
   // Add these new state variables
-  const [countdownSeconds, setCountdownSeconds] = useState<number>(5);
-  const [isCountdownActive, setIsCountdownActive] = useState<boolean>(false);
-  const [worldFolders, setWorldFolders] = useState<string[]>([]);
+  const [countdownSeconds, setCountdownSeconds] = useState<number>(5)
+  const [isCountdownActive, setIsCountdownActive] = useState<boolean>(false)
+  const [worldFolders, setWorldFolders] = useState<string[]>([])
 
-  const { refresh } = useWorlds(currentFolder);
+  const { refresh } = useWorlds(currentFolder)
 
   const mergeCustomTagsIntoTags = useCallback(
     (existing: string[] | undefined, nextCustom: string[]) => {
       const base = (existing ?? []).filter(
         (tag) => !tag.toLowerCase().startsWith('custom:'),
-      );
-      return [...base, ...nextCustom];
+      )
+      return [...base, ...nextCustom]
     },
     [],
-  );
+  )
 
   const normalizeCustomTag = useCallback((raw: string): string | null => {
-    const trimmed = raw.trim();
-    if (!trimmed) return null;
+    const trimmed = raw.trim()
+    if (!trimmed) return null
 
     const withoutPrefix = trimmed.startsWith('custom:')
       ? trimmed.slice('custom:'.length)
-      : trimmed;
-    const cleaned = withoutPrefix.trim();
+      : trimmed
+    const cleaned = withoutPrefix.trim()
 
-    if (!cleaned) return null;
-    return `custom:${cleaned}`;
-  }, []);
+    if (!cleaned) return null
+    return `custom:${cleaned}`
+  }, [])
 
   const loadCustomTags = useCallback(async () => {
     try {
-      const result = await commands.getCustomTags(worldId);
+      const result = await commands.getCustomTags(worldId)
       if (result.status === 'ok') {
-        setCustomTags(result.data);
+        setCustomTags(result.data)
         setWorldDetails((prev) =>
           prev
             ? {
@@ -178,20 +178,20 @@ export function WorldDetailPopup({
                 tags: mergeCustomTagsIntoTags(prev.tags, result.data),
               }
             : prev,
-        );
+        )
       }
     } catch (e) {
-      error(`Unable to load custom tags for ${worldId}: ${e}`);
+      error(`Unable to load custom tags for ${worldId}: ${e}`)
     }
-  }, [mergeCustomTagsIntoTags, worldId]);
+  }, [mergeCustomTagsIntoTags, worldId])
 
   const persistCustomTags = useCallback(
     async (next: string[]) => {
-      setIsSavingCustomTags(true);
+      setIsSavingCustomTags(true)
       try {
-        const result = await commands.setCustomTags(worldId, next);
+        const result = await commands.setCustomTags(worldId, next)
         if (result.status === 'ok') {
-          setCustomTags(result.data);
+          setCustomTags(result.data)
           setWorldDetails((prev) =>
             prev
               ? {
@@ -199,42 +199,42 @@ export function WorldDetailPopup({
                   tags: mergeCustomTagsIntoTags(prev.tags, result.data),
                 }
               : prev,
-          );
-          refresh();
+          )
+          refresh()
         } else {
-          toast(t('general:error-title'), { description: result.error });
+          toast(t('general:error-title'), { description: result.error })
         }
       } catch (e) {
-        error(`Failed to save custom tags: ${e}`);
+        error(`Failed to save custom tags: ${e}`)
         toast(t('general:error-title'), {
           description: t('world-detail:custom-tags-save-error'),
-        });
+        })
       } finally {
-        setIsSavingCustomTags(false);
+        setIsSavingCustomTags(false)
       }
     },
     [mergeCustomTagsIntoTags, refresh, t, worldId],
-  );
+  )
 
   const handleAddCustomTag = useCallback(async () => {
     if (dontSaveToLocal || isSavingCustomTags) {
-      return;
+      return
     }
-    const normalized = normalizeCustomTag(customTagInput);
+    const normalized = normalizeCustomTag(customTagInput)
     if (!normalized) {
-      return;
+      return
     }
 
     const exists = customTags.some(
       (tag) => tag.toLowerCase() === normalized.toLowerCase(),
-    );
+    )
     if (exists) {
-      setCustomTagInput('');
-      return;
+      setCustomTagInput('')
+      return
     }
 
-    await persistCustomTags([...customTags, normalized]);
-    setCustomTagInput('');
+    await persistCustomTags([...customTags, normalized])
+    setCustomTagInput('')
   }, [
     customTagInput,
     customTags,
@@ -242,198 +242,198 @@ export function WorldDetailPopup({
     isSavingCustomTags,
     normalizeCustomTag,
     persistCustomTags,
-  ]);
+  ])
 
   const handleRemoveCustomTag = useCallback(
     async (tag: string) => {
       if (dontSaveToLocal || isSavingCustomTags) {
-        return;
+        return
       }
       const filtered = customTags.filter(
         (t) => t.toLowerCase() !== tag.toLowerCase(),
-      );
-      await persistCustomTags(filtered);
+      )
+      await persistCustomTags(filtered)
     },
     [customTags, dontSaveToLocal, isSavingCustomTags, persistCustomTags],
-  );
+  )
 
   useEffect(() => {
     const fetchWorldDetails = async () => {
-      if (!open) return;
+      if (!open) return
 
       // Reset all state when opening the dialog with a new world
-      setIsLoading(true);
-      setErrorState(null);
-      setIsWorldNotPublic(false);
-      setIsWorldBlacklisted(false); // Reset blacklisted status
-      setCountdownSeconds(5); // Reset to initial countdown value
-      setIsCountdownActive(false); // Reset countdown activation
-      setCustomTags([]);
-      setCustomTagInput('');
+      setIsLoading(true)
+      setErrorState(null)
+      setIsWorldNotPublic(false)
+      setIsWorldBlacklisted(false) // Reset blacklisted status
+      setCountdownSeconds(5) // Reset to initial countdown value
+      setIsCountdownActive(false) // Reset countdown activation
+      setCustomTags([])
+      setCustomTagInput('')
 
       try {
-        info(`Is dontSaveToLocal: ${dontSaveToLocal}`);
+        info(`Is dontSaveToLocal: ${dontSaveToLocal}`)
         const result = await commands.getWorld(
           worldId,
           dontSaveToLocal ?? false,
-        );
+        )
 
         if (result.status === 'ok') {
-          setWorldDetails(result.data);
+          setWorldDetails(result.data)
           setCustomTags(
             (result.data.tags ?? []).filter((tag) =>
               tag.toLowerCase().startsWith('custom:'),
             ),
-          );
+          )
         } else {
           if (result.error.includes('World is not public')) {
-            setIsWorldNotPublic(true);
+            setIsWorldNotPublic(true)
 
             // Get cached world data
             try {
-              const allWorldsResult = await commands.getAllWorlds();
-              const hiddenWorldsResult = await commands.getHiddenWorlds();
+              const allWorldsResult = await commands.getAllWorlds()
+              const hiddenWorldsResult = await commands.getHiddenWorlds()
 
-              let worldsList: WorldDisplayData[] = [];
+              let worldsList: WorldDisplayData[] = []
               if (allWorldsResult.status === 'ok') {
-                worldsList = allWorldsResult.data;
+                worldsList = allWorldsResult.data
               }
 
               if (hiddenWorldsResult.status === 'ok') {
-                worldsList = [...worldsList, ...hiddenWorldsResult.data];
+                worldsList = [...worldsList, ...hiddenWorldsResult.data]
               }
 
-              const cachedWorld = worldsList.find((w) => w.worldId === worldId);
+              const cachedWorld = worldsList.find((w) => w.worldId === worldId)
               if (cachedWorld) {
-                setCachedWorldData(cachedWorld);
+                setCachedWorldData(cachedWorld)
               }
             } catch (cacheError) {
-              error(`Failed to fetch cached world data: ${cacheError}`);
+              error(`Failed to fetch cached world data: ${cacheError}`)
             }
 
             // Check blacklist status separately
             try {
-              const blacklistResult = await commands.fetchBlacklist();
+              const blacklistResult = await commands.fetchBlacklist()
               if (blacklistResult.status === 'ok') {
-                const blacklistedWorlds = blacklistResult.data.worlds;
-                const isBlacklisted = blacklistedWorlds.includes(worldId);
-                setIsWorldBlacklisted(isBlacklisted);
+                const blacklistedWorlds = blacklistResult.data.worlds
+                const isBlacklisted = blacklistedWorlds.includes(worldId)
+                setIsWorldBlacklisted(isBlacklisted)
 
                 if (isBlacklisted) {
-                  setIsCountdownActive(true); // Start the countdown only if blacklisted
+                  setIsCountdownActive(true) // Start the countdown only if blacklisted
                 }
               } else {
-                error(`Failed to fetch blacklist: ${blacklistResult.error}`);
+                error(`Failed to fetch blacklist: ${blacklistResult.error}`)
               }
             } catch (blacklistError) {
-              error(`Failed to fetch blacklist: ${blacklistError}`);
+              error(`Failed to fetch blacklist: ${blacklistError}`)
             }
           }
-          setErrorState(result.error);
+          setErrorState(result.error)
         }
       } catch (e) {
-        error(`Failed to fetch world details: ${e}`);
-        setErrorState(e as string);
+        error(`Failed to fetch world details: ${e}`)
+        setErrorState(e as string)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
     const fetchMemo = async () => {
-      const result = await commands.getMemo(worldId);
+      const result = await commands.getMemo(worldId)
 
       if (result.status === 'ok') {
-        setMemo(result.data);
-        setMemoInput(result.data);
+        setMemo(result.data)
+        setMemoInput(result.data)
       } else {
-        console.error(result.error);
+        console.error(result.error)
       }
-    };
+    }
     const fetchWorldFolders = async () => {
-      if (!worldId) return;
+      if (!worldId) return
 
       try {
-        const result = await commands.getFoldersForWorld(worldId);
+        const result = await commands.getFoldersForWorld(worldId)
         if (result.status === 'ok') {
-          setWorldFolders(result.data);
+          setWorldFolders(result.data)
         } else {
-          error(`Failed to fetch folders for world: ${result.error}`);
+          error(`Failed to fetch folders for world: ${result.error}`)
         }
       } catch (e) {
-        error(`Error fetching folders for world: ${e}`);
+        error(`Error fetching folders for world: ${e}`)
       }
-    };
-
-    if (!open) return;
-
-    fetchWorldDetails();
-    if (!dontSaveToLocal) {
-      fetchMemo();
-      fetchWorldFolders();
     }
-    loadCustomTags();
-  }, [dontSaveToLocal, loadCustomTags, open, worldId]);
+
+    if (!open) return
+
+    fetchWorldDetails()
+    if (!dontSaveToLocal) {
+      fetchMemo()
+      fetchWorldFolders()
+    }
+    loadCustomTags()
+  }, [dontSaveToLocal, loadCustomTags, open, worldId])
 
   useEffect(() => {
     const loadRegionPreference = async () => {
       try {
-        const regionResult = await commands.getRegion();
+        const regionResult = await commands.getRegion()
         if (regionResult.status === 'ok') {
-          setSelectedRegion(regionResult.data);
-          info(`Loaded region preference: ${regionResult.data}`);
+          setSelectedRegion(regionResult.data)
+          info(`Loaded region preference: ${regionResult.data}`)
         }
       } catch (e) {
-        error(`Failed to load region preference: ${e}`);
+        error(`Failed to load region preference: ${e}`)
         // Fall back to JP if we can't load the preference
-        setSelectedRegion('jp' as InstanceRegion);
+        setSelectedRegion('jp' as InstanceRegion)
       }
-    };
+    }
 
-    loadRegionPreference();
-  }, []); // Empty dependency array means this runs once on mount
+    loadRegionPreference()
+  }, []) // Empty dependency array means this runs once on mount
 
   const setRegionPreference = async (region: InstanceRegion) => {
     try {
-      await commands.setRegion(region);
-      info(`Region preference set to ${region}`);
+      await commands.setRegion(region)
+      info(`Region preference set to ${region}`)
     } catch (e) {
-      error(`Failed to set region preference: ${e}`);
+      error(`Failed to set region preference: ${e}`)
     }
-  };
+  }
 
   const handleInstanceClick = () => {
     try {
-      setInstanceCreationType('normal');
+      setInstanceCreationType('normal')
       createInstance(
         worldId,
         selectedInstanceType as Exclude<InstanceType, 'group'>,
         selectedRegion,
-      );
-      setRegionPreference(selectedRegion);
+      )
+      setRegionPreference(selectedRegion)
     } catch (e) {
-      error(`Failed to create instance: ${e}`);
-      setErrorState(`Failed to create instance: ${e}`);
+      error(`Failed to create instance: ${e}`)
+      setErrorState(`Failed to create instance: ${e}`)
     }
-  };
+  }
 
   const handleSaveMemo = useCallback(async () => {
     if (memoInput === memo) {
-      setIsEditingMemo(false);
-      return;
+      setIsEditingMemo(false)
+      return
     }
 
-    const result = await commands.setMemoAndSave(worldId, memoInput);
+    const result = await commands.setMemoAndSave(worldId, memoInput)
     if (result.status === 'ok') {
-      setMemo(memoInput);
-      setIsEditingMemo(false);
+      setMemo(memoInput)
+      setIsEditingMemo(false)
     } else {
-      console.error(result.error);
+      console.error(result.error)
     }
-  }, [worldId, memoInput]);
+  }, [worldId, memoInput])
 
   const handleGroupInstanceClick = async () => {
     try {
-      setInstanceCreationType('group');
+      setInstanceCreationType('group')
       setGroupInstanceState((prev) => ({
         ...prev,
         groups: [],
@@ -441,34 +441,34 @@ export function WorldDetailPopup({
         permission: null,
         roles: [],
         isLoading: true,
-      }));
-      const groups = await getGroups();
-      info(`Loaded ${groups.length} groups`);
+      }))
+      const groups = await getGroups()
+      info(`Loaded ${groups.length} groups`)
       setGroupInstanceState((prev) => ({
         ...prev,
         groups,
         isLoading: false,
-      }));
-      setRegionPreference(selectedRegion);
+      }))
+      setRegionPreference(selectedRegion)
     } catch (e) {
-      error(`Failed to load groups: ${e}`);
+      error(`Failed to load groups: ${e}`)
       setGroupInstanceState((prev) => ({
         ...prev,
         isLoading: false,
-      }));
+      }))
     }
-  };
+  }
 
   const handleGroupSelect = async (groupId: string) => {
-    const permission = await getGroupPermissions(groupId);
+    const permission = await getGroupPermissions(groupId)
 
     setGroupInstanceState((prev) => ({
       ...prev,
       selectedGroupId: groupId,
       permission: permission.permission,
       roles: permission.roles,
-    }));
-  };
+    }))
+  }
 
   const handleCreateGroupInstance = (
     groupId: string,
@@ -484,32 +484,32 @@ export function WorldDetailPopup({
       instanceType,
       queueEnabled,
       selectedRoles,
-    );
+    )
     // Reset state after creating instance
-    setInstanceCreationType('normal');
-    onOpenChange(false); // Close dialog after creating instance
-  };
+    setInstanceCreationType('normal')
+    onOpenChange(false) // Close dialog after creating instance
+  }
 
   const handleDeleteWorld = (worldId: string) => {
-    deleteWorld(worldId);
-  };
+    deleteWorld(worldId)
+  }
 
   // Add this effect to handle the countdown and auto-close
   useEffect(() => {
     if (isWorldBlacklisted && isCountdownActive && countdownSeconds > 0) {
       const timer = setTimeout(() => {
-        setCountdownSeconds((prev) => prev - 1);
-      }, 1000);
+        setCountdownSeconds((prev) => prev - 1)
+      }, 1000)
 
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timer)
     } else if (
       isWorldBlacklisted &&
       isCountdownActive &&
       countdownSeconds === 0
     ) {
       // Delete the world when countdown ends, then close the dialog
-      handleDeleteWorld(worldId);
-      onOpenChange(false);
+      handleDeleteWorld(worldId)
+      onOpenChange(false)
     }
   }, [
     isWorldBlacklisted,
@@ -517,54 +517,54 @@ export function WorldDetailPopup({
     isCountdownActive,
     onOpenChange,
     worldId,
-  ]);
+  ])
 
   async function toggleWorldFolder(folder: string): Promise<void> {
     try {
-      const isRemoving = worldFolders.includes(folder);
-      let updatedFolders: string[];
+      const isRemoving = worldFolders.includes(folder)
+      let updatedFolders: string[]
       if (isRemoving) {
         // Remove folder
-        const result = await commands.removeWorldFromFolder(folder, worldId);
+        const result = await commands.removeWorldFromFolder(folder, worldId)
         if (result.status !== 'ok') {
           error(
             `Failed to remove world from folder "${folder}" for world ID "${worldId}": ${result.error}`,
-          );
-          return;
+          )
+          return
         }
-        updatedFolders = worldFolders.filter((f) => f !== folder);
+        updatedFolders = worldFolders.filter((f) => f !== folder)
       } else {
         // Add folder
-        const result = await commands.addWorldToFolder(folder, worldId);
+        const result = await commands.addWorldToFolder(folder, worldId)
         if (result.status !== 'ok') {
           error(
             `Failed to add world to folder "${folder}" for world ID "${worldId}": ${result.error}`,
-          );
-          return;
+          )
+          return
         }
-        updatedFolders = [...worldFolders, folder];
+        updatedFolders = [...worldFolders, folder]
       }
-      setWorldFolders(updatedFolders);
+      setWorldFolders(updatedFolders)
       // Optimistically bump cached folder count so sidebar updates immediately
-      const delta = isRemoving ? -1 : 1;
+      const delta = isRemoving ? -1 : 1
       await mutateFoldersCache<FolderData[]>(
         'folders',
         (current) => {
-          if (!current) return current;
+          if (!current) return current
           return current.map((f) => {
-            if (f.name !== folder) return f;
-            const nextCount = Math.max(0, f.world_count + delta);
-            return { ...f, world_count: nextCount };
-          });
+            if (f.name !== folder) return f
+            const nextCount = Math.max(0, f.world_count + delta)
+            return { ...f, world_count: nextCount }
+          })
         },
         { revalidate: true },
-      );
+      )
       info(
         `[WorldDetails] Optimistic folder count delta applied: ${folder}:${delta}`,
-      );
-      refresh();
+      )
+      refresh()
     } catch (e) {
-      error(`Error toggling world folder: ${e}`);
+      error(`Error toggling world folder: ${e}`)
     }
   }
   return (
@@ -573,21 +573,21 @@ export function WorldDetailPopup({
       onOpenChange={(open) => {
         // If closing the dialog and it's a blacklisted world, delete it
         if (!open && isWorldBlacklisted && countdownSeconds > 0) {
-          handleDeleteWorld(worldId);
+          handleDeleteWorld(worldId)
         }
 
         // Existing code
         if (!open) {
-          setInstanceCreationType('normal');
+          setInstanceCreationType('normal')
           setGroupInstanceState({
             groups: [],
             selectedGroupId: null,
             permission: null,
             roles: [],
             isLoading: true,
-          });
+          })
         }
-        onOpenChange(open);
+        onOpenChange(open)
       }}
     >
       <DialogContent className="max-w-[800px] h-[70vh] overflow-y-auto no-webview-scroll-bar">
@@ -697,10 +697,10 @@ export function WorldDetailPopup({
                                 {cachedWorldData.dateAdded
                                   ? (() => {
                                       const [date, time] =
-                                        cachedWorldData.dateAdded.split('T');
+                                        cachedWorldData.dateAdded.split('T')
                                       const timeWithoutMs = time
                                         ?.split('.')[0]
-                                        ?.replace('Z', '');
+                                        ?.replace('Z', '')
                                       return (
                                         <>
                                           {date}
@@ -711,7 +711,7 @@ export function WorldDetailPopup({
                                             </span>
                                           )}
                                         </>
-                                      );
+                                      )
                                     })()
                                   : ''}
                               </div>
@@ -823,7 +823,7 @@ export function WorldDetailPopup({
                           onClick={() => {
                             // set author filter and close via hook
                             // selectAuthor handles closing
-                            selectAuthor(worldDetails.authorName);
+                            selectAuthor(worldDetails.authorName)
                           }}
                         >
                           {worldDetails.authorName}
@@ -841,7 +841,7 @@ export function WorldDetailPopup({
                             value={selectedInstanceType}
                             onValueChange={(value) => {
                               if (value)
-                                setSelectedInstanceType(value as InstanceType);
+                                setSelectedInstanceType(value as InstanceType)
                             }}
                             className="grid grid-cols-2 gap-2"
                           >
@@ -901,7 +901,7 @@ export function WorldDetailPopup({
                             value={mapRegion.toUI(selectedRegion)}
                             onValueChange={(value) => {
                               if (value)
-                                setSelectedRegion(mapRegion.toBackend(value));
+                                setSelectedRegion(mapRegion.toBackend(value))
                             }}
                             className="flex gap-2"
                           >
@@ -923,9 +923,9 @@ export function WorldDetailPopup({
                             className="w-full"
                             onClick={() => {
                               if (selectedInstanceType === 'group') {
-                                handleGroupInstanceClick();
+                                handleGroupInstanceClick()
                               } else {
-                                handleInstanceClick();
+                                handleInstanceClick()
                               }
                             }}
                           >
@@ -957,7 +957,7 @@ export function WorldDetailPopup({
                           {worldDetails.tags
                             .filter((tag) => tag.startsWith('author_tag_'))
                             .map((tag) => {
-                              const label = tag.replace('author_tag_', '');
+                              const label = tag.replace('author_tag_', '')
                               return (
                                 <button
                                   key={tag}
@@ -966,15 +966,15 @@ export function WorldDetailPopup({
                                   title={label}
                                   onClick={() => {
                                     // set tag filter and close via hook
-                                    selectTag(label);
+                                    selectTag(label)
                                   }}
                                 >
                                   {label}
                                 </button>
-                              );
+                              )
                             })}
                           {customTags.map((tag) => {
-                            const label = tag.replace(/^custom:/i, '');
+                            const label = tag.replace(/^custom:/i, '')
                             return (
                               <div
                                 key={tag}
@@ -996,14 +996,14 @@ export function WorldDetailPopup({
                                   type="button"
                                   className="grid place-items-center rounded-full bg-black/20 hover:bg-black/30 transition-colors"
                                   onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRemoveCustomTag(tag);
+                                    e.stopPropagation()
+                                    handleRemoveCustomTag(tag)
                                   }}
                                 >
                                   <X className="h-3 w-3" />
                                 </button>
                               </div>
-                            );
+                            )
                           })}
                         </div>
                         {!dontSaveToLocal && (
@@ -1017,13 +1017,13 @@ export function WorldDetailPopup({
                               onCompositionStart={() => setIsComposing(true)}
                               onCompositionEnd={() => {
                                 setTimeout(() => {
-                                  setIsComposing(false);
-                                }, 150);
+                                  setIsComposing(false)
+                                }, 150)
                               }}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !isComposing) {
-                                  e.preventDefault();
-                                  handleAddCustomTag();
+                                  e.preventDefault()
+                                  handleAddCustomTag()
                                 }
                               }}
                               placeholder={t(
@@ -1132,8 +1132,8 @@ export function WorldDetailPopup({
                                     variant="secondary"
                                     className="w-full"
                                     onClick={() => {
-                                      setIsEditingMemo(false);
-                                      setMemoInput(memo ?? '');
+                                      setIsEditingMemo(false)
+                                      setMemoInput(memo ?? '')
                                     }}
                                   >
                                     {t('general:cancel')}
@@ -1193,5 +1193,5 @@ export function WorldDetailPopup({
         )}
       </DialogContent>
     </Dialog>
-  );
+  )
 }

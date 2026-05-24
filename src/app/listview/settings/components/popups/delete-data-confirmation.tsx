@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useLocalization } from '@/hooks/use-localization';
-import { AlertCircle, Trash2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react'
+import { useLocalization } from '@/hooks/use-localization'
+import { AlertCircle, Trash2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -8,14 +8,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { info } from '@/lib/services/logger';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { info } from '@/lib/services/logger'
 
 interface DeleteDataConfirmationDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: () => Promise<void>;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onConfirm: () => Promise<void>
 }
 
 export function DeleteDataConfirmationDialog({
@@ -23,71 +23,71 @@ export function DeleteDataConfirmationDialog({
   onOpenChange,
   onConfirm,
 }: DeleteDataConfirmationDialogProps) {
-  const { t } = useLocalization();
-  const [progress, setProgress] = useState(0);
-  const [isHolding, setIsHolding] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const holdDuration = 3000; // 3 seconds in milliseconds
-  const stepInterval = 50; // Update every 50ms
+  const { t } = useLocalization()
+  const [progress, setProgress] = useState(0)
+  const [isHolding, setIsHolding] = useState(false)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const holdDuration = 3000 // 3 seconds in milliseconds
+  const stepInterval = 50 // Update every 50ms
 
   useEffect(() => {
     if (isHolding) {
       intervalRef.current = setInterval(() => {
         setProgress((prev) => {
-          const newProgress = prev + (stepInterval / holdDuration) * 100;
+          const newProgress = prev + (stepInterval / holdDuration) * 100
           if (newProgress >= 100) {
             // Clear interval when reaching 100%
-            info('Deleting data...');
-            if (intervalRef.current) clearInterval(intervalRef.current);
-            setIsHolding(false);
-            handleConfirm();
-            return 100;
+            info('Deleting data...')
+            if (intervalRef.current) clearInterval(intervalRef.current)
+            setIsHolding(false)
+            handleConfirm()
+            return 100
           }
-          return newProgress;
-        });
-      }, stepInterval);
+          return newProgress
+        })
+      }, stepInterval)
     } else {
       // Reset progress when not holding
       if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
       }
       // Only reset progress if we haven't completed
-      if (progress < 100) setProgress(0);
+      if (progress < 100) setProgress(0)
     }
 
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isHolding]);
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [isHolding])
 
   useEffect(() => {
     if (!open) {
-      setProgress(0);
-      setIsHolding(false);
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      setProgress(0)
+      setIsHolding(false)
+      if (intervalRef.current) clearInterval(intervalRef.current)
     }
-  }, [open]);
+  }, [open])
 
   const handleMouseDown = () => {
-    setIsHolding(true);
-  };
+    setIsHolding(true)
+  }
 
   const handleMouseUp = () => {
-    setIsHolding(false);
-  };
+    setIsHolding(false)
+  }
 
   const handleMouseLeave = () => {
-    setIsHolding(false);
-  };
+    setIsHolding(false)
+  }
 
   const handleConfirm = async () => {
     try {
-      await onConfirm();
+      await onConfirm()
     } catch (error) {
-      console.error('Error during data deletion:', error);
+      console.error('Error during data deletion:', error)
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -185,5 +185,5 @@ export function DeleteDataConfirmationDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

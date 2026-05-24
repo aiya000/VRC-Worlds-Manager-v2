@@ -22,17 +22,17 @@
  * SOFTWARE.
  */
 
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { SiGithub, SiX } from '@icons-pack/react-simple-icons';
-import { FC } from 'react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { SiGithub, SiX } from '@icons-pack/react-simple-icons'
+import { FC } from 'react'
 
 type Props = {
-  name: string;
-  iconUrl: string;
+  name: string
+  iconUrl: string
 
-  xUsername?: string;
-  githubUsername?: string;
-};
+  xUsername?: string
+  githubUsername?: string
+}
 
 export const UserProfile: FC<Props> = ({
   name,
@@ -70,5 +70,5 @@ export const UserProfile: FC<Props> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

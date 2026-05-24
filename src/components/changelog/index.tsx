@@ -1,19 +1,19 @@
-import { LocalizedChanges } from '@/lib/commands';
-import { FC } from 'react';
-import { ChangelogVersionSection } from './ChangelogVersionSection';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { ExternalLink } from 'lucide-react';
-import { useLocalization } from '@/hooks/use-localization';
+import { LocalizedChanges } from '@/lib/commands'
+import { FC } from 'react'
+import { ChangelogVersionSection } from './ChangelogVersionSection'
+import { Separator } from '@/components/ui/separator'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
+import { ExternalLink } from 'lucide-react'
+import { useLocalization } from '@/hooks/use-localization'
 
 type Props = {
-  changes: LocalizedChanges[] | null;
-};
+  changes: LocalizedChanges[] | null
+}
 
 export const Changelog: FC<Props> = ({ changes }) => {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
 
   return (
     <div className="w-full">
@@ -71,5 +71,5 @@ export const Changelog: FC<Props> = ({ changes }) => {
       </div>
       <Separator className="mt-2" />
     </div>
-  );
-};
+  )
+}

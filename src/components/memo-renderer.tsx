@@ -1,16 +1,16 @@
-import { FC, Fragment } from 'react';
+import { FC, Fragment } from 'react'
 
-const URL_REGEX = /https?:\/\/[^\s]+/;
+const URL_REGEX = /https?:\/\/[^\s]+/
 
 type Props = {
-  value: string;
-};
+  value: string
+}
 
 export const MemoRenderer: FC<Props> = ({ value }) => {
   return (
     <pre className="whitespace-pre-wrap break-words font-sans h-full max-w-[700px] text-sm">
       {value.split('\n').map((line, index) => {
-        let buffer: string[] = [];
+        let buffer: string[] = []
 
         return (
           <p className="space-x-1" key={`${line}-${index}`}>
@@ -26,35 +26,35 @@ export const MemoRenderer: FC<Props> = ({ value }) => {
                   >
                     {text}
                   </a>
-                );
+                )
 
                 if (buffer.length <= 0) {
-                  return linkComponent;
+                  return linkComponent
                 }
 
-                const bufferedText = buffer.join(' ');
-                buffer = [];
+                const bufferedText = buffer.join(' ')
+                buffer = []
 
                 return (
                   <span key={`text-url-${index}`} className="space-x-1">
                     <span>{bufferedText}</span>
                     {linkComponent}
                   </span>
-                );
+                )
               }
 
-              buffer = [...buffer, text];
+              buffer = [...buffer, text]
 
-              return <Fragment key={`empty-${index}`}></Fragment>;
+              return <Fragment key={`empty-${index}`}></Fragment>
             })}
             {buffer.length > 0 && (
               <span key={`buffer-${line}-${index}`}>{buffer.join(' ')}</span>
             )}
           </p>
-        );
+        )
       })}
     </pre>
-  );
-};
+  )
+}
 
-export default MemoRenderer;
+export default MemoRenderer

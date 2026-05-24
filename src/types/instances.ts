@@ -1,4 +1,4 @@
-export type GroupInstanceType = 'public' | 'group+' | 'group';
+export type GroupInstanceType = 'public' | 'group+' | 'group'
 
 export type InstanceType =
   | 'public'
@@ -6,13 +6,13 @@ export type InstanceType =
   | 'friends+'
   | 'friends'
   | 'invite+'
-  | 'invite';
+  | 'invite'
 
 export interface GroupInstanceTypeOption {
-  type: GroupInstanceType;
-  label: string;
-  description: string;
-  requiresPermission: 'normal' | 'plus' | 'public';
+  type: GroupInstanceType
+  label: string
+  description: string
+  requiresPermission: 'normal' | 'plus' | 'public'
 }
 
 export const GROUP_INSTANCE_TYPES: GroupInstanceTypeOption[] = [
@@ -34,4 +34,4 @@ export const GROUP_INSTANCE_TYPES: GroupInstanceTypeOption[] = [
     description: 'Anyone can join',
     requiresPermission: 'public',
   },
-];
+]

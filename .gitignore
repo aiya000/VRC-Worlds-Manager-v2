@@ -51,3 +51,8 @@ next-env.d.ts
 
 # pnpm
 pnpm-lock.yaml
+
+# Claude Code worktrees and artifacts
+/.claude/worktrees/
+/feature/
+/pr-conversation-summary.md

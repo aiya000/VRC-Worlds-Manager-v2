@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -6,29 +6,29 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Check, Info, Loader2, Minus, AlertCircle } from 'lucide-react';
-import { commands, WorldDisplayData } from '@/lib/commands';
-import { useLocalization } from '@/hooks/use-localization';
-import { Alert, AlertDescription } from '../../../../../components/ui/alert';
-import { Input } from '../../../../../components/ui/input';
-import { error, info } from '@/lib/services/logger';
-import { Checkbox } from '../../../../../components/ui/checkbox';
-import { FolderRemovalPreference } from '@/lib/commands';
-import { useFolders } from '@/app/listview/hook/use-folders';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Check, Info, Loader2, Minus, AlertCircle } from 'lucide-react'
+import { commands, WorldDisplayData } from '@/lib/commands'
+import { useLocalization } from '@/hooks/use-localization'
+import { Alert, AlertDescription } from '../../../../../components/ui/alert'
+import { Input } from '../../../../../components/ui/input'
+import { error, info } from '@/lib/services/logger'
+import { Checkbox } from '../../../../../components/ui/checkbox'
+import { FolderRemovalPreference } from '@/lib/commands'
+import { useFolders } from '@/app/listview/hook/use-folders'
 
-import { usePathname } from 'next/navigation';
-import { useSelectedWorldsStore } from '../../../hook/use-selected-worlds';
-import { useWorlds } from '../../../hook/use-worlds';
-import { useAddToFolderPopup } from './hook';
-import { FolderType } from '@/types/folders';
+import { usePathname } from 'next/navigation'
+import { useSelectedWorldsStore } from '../../../hook/use-selected-worlds'
+import { useWorlds } from '../../../hook/use-worlds'
+import { useAddToFolderPopup } from './hook'
+import { FolderType } from '@/types/folders'
 
 interface AddToFolderDialogProps {
-  selectedWorlds: WorldDisplayData[];
-  currentFolder: FolderType;
-  onClose: () => void;
+  selectedWorlds: WorldDisplayData[]
+  currentFolder: FolderType
+  onClose: () => void
 }
 
 export function AddToFolderDialog({
@@ -36,7 +36,7 @@ export function AddToFolderDialog({
   currentFolder,
   onClose,
 }: AddToFolderDialogProps) {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
 
   const {
     folders,
@@ -60,7 +60,7 @@ export function AddToFolderDialog({
     handleCancel,
     isFindPage,
     createdFolder,
-  } = useAddToFolderPopup({ selectedWorlds, currentFolder, onClose });
+  } = useAddToFolderPopup({ selectedWorlds, currentFolder, onClose })
 
   return (
     <Dialog open={true} onOpenChange={handleCancel}>
@@ -91,10 +91,10 @@ export function AddToFolderDialog({
             <ScrollArea className={isFindPage ? 'h-[240px]' : 'h-[300px]'}>
               <div ref={listRef} className="space-y-2 px-2 pb-2">
                 {folders.map((folder) => {
-                  const isNew = folder.name === createdFolder;
-                  const state = getFolderState(folder.name);
-                  const isAll = state === 'all';
-                  const isSome = state === 'some';
+                  const isNew = folder.name === createdFolder
+                  const state = getFolderState(folder.name)
+                  const isAll = state === 'all'
+                  const isSome = state === 'some'
                   return (
                     <Button
                       key={folder.name}
@@ -122,7 +122,7 @@ export function AddToFolderDialog({
                         {isSome && <Minus />}
                       </span>
                     </Button>
-                  );
+                  )
                 })}
 
                 {isCreatingNew && (
@@ -133,19 +133,19 @@ export function AddToFolderDialog({
                     onKeyDown={(e) => {
                       // only submit on Enter if not composing (IME)
                       if (e.key === 'Enter' && !composingRef.current) {
-                        handleNewNameKey(e);
+                        handleNewNameKey(e)
                       }
                     }}
                     onCompositionStart={() => {
-                      composingRef.current = true;
-                      setIsComposing(true);
+                      composingRef.current = true
+                      setIsComposing(true)
                     }}
                     onCompositionEnd={() => {
                       // small timeout to ensure composition has ended
                       setTimeout(() => {
-                        composingRef.current = false;
-                        setIsComposing(false);
-                      }, 0);
+                        composingRef.current = false
+                        setIsComposing(false)
+                      }, 0)
                     }}
                     onBlur={() => setIsCreatingNew(false)} // hide input on focus loss
                     disabled={isLoading}
@@ -257,5 +257,5 @@ export function AddToFolderDialog({
         )}
       </DialogContent>
     </Dialog>
-  );
+  )
 }

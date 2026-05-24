@@ -1,21 +1,21 @@
-import { WorldDisplayData } from '@/lib/commands';
-import { create } from 'zustand';
+import { WorldDisplayData } from '@/lib/commands'
+import { create } from 'zustand'
 
 interface PopupState {
-  showAddToFolder: WorldDisplayData[] | null;
-  showAddWorld: boolean;
-  showAdvancedSearchPanel: boolean;
-  showCreateFolder: boolean;
-  showDeleteFolder: string | null;
-  showImportedFolderContainsHidden: WorldDisplayData[] | null;
-  showWorldDetails: { id: string; dontSaveToLocal: boolean } | null;
-  showShareFolder: boolean;
-  showShareWorld: { worldId: string; worldName: string } | null;
+  showAddToFolder: WorldDisplayData[] | null
+  showAddWorld: boolean
+  showAdvancedSearchPanel: boolean
+  showCreateFolder: boolean
+  showDeleteFolder: string | null
+  showImportedFolderContainsHidden: WorldDisplayData[] | null
+  showWorldDetails: { id: string; dontSaveToLocal: boolean } | null
+  showShareFolder: boolean
+  showShareWorld: { worldId: string; worldName: string } | null
   // Version bump to signal membership changes across components (e.g., Find badge refresh)
-  membershipVersion: number;
-  bumpMembershipVersion: () => void;
-  setPopup: <K extends keyof PopupState>(key: K, value: PopupState[K]) => void;
-  resetPopups: () => void;
+  membershipVersion: number
+  bumpMembershipVersion: () => void
+  setPopup: <K extends keyof PopupState>(key: K, value: PopupState[K]) => void
+  resetPopups: () => void
 }
 
 export const usePopupStore = create<PopupState>((set) => ({
@@ -44,4 +44,4 @@ export const usePopupStore = create<PopupState>((set) => ({
       showShareWorld: null,
       // do not reset membershipVersion here to preserve monotonicity
     }),
-}));
+}))

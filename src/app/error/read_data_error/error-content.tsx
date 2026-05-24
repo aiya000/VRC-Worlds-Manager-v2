@@ -1,38 +1,38 @@
-'use client';
+'use client'
 
-import { useSearchParams } from 'next/navigation';
-import { useLocalization } from '@/hooks/use-localization';
-import { Button } from '@/components/ui/button';
-import { SiGithub } from '@icons-pack/react-simple-icons';
-import { Globe } from 'lucide-react';
-import { useState, useContext } from 'react';
-import { LocalizationContext } from '@/components/localization-context';
+import { useSearchParams } from 'next/navigation'
+import { useLocalization } from '@/hooks/use-localization'
+import { Button } from '@/components/ui/button'
+import { SiGithub } from '@icons-pack/react-simple-icons'
+import { Globe } from 'lucide-react'
+import { useState, useContext } from 'react'
+import { LocalizationContext } from '@/components/localization-context'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu'
 
 export function ErrorContent() {
-  const { t } = useLocalization();
-  const { setLanguage } = useContext(LocalizationContext);
-  const searchParams = useSearchParams();
-  const [language, setLanguageState] = useState('en-US');
+  const { t } = useLocalization()
+  const { setLanguage } = useContext(LocalizationContext)
+  const searchParams = useSearchParams()
+  const [language, setLanguageState] = useState('en-US')
 
   // Get the first key from the query string as the error message
   const errorMessage = (() => {
     // Get all keys from the search params
-    const keys = Array.from(searchParams.keys());
+    const keys = Array.from(searchParams.keys())
 
     // If there are any keys, use the first one
     if (keys.length > 0) {
-      return keys[0].replace(/\+/g, ' '); // Replace '+' with spaces
+      return keys[0].replace(/\+/g, ' ') // Replace '+' with spaces
     }
 
     // Fallback to unknown error
-    return t('error-page:unknown-error');
-  })();
+    return t('error-page:unknown-error')
+  })()
 
   return (
     <div className="flex flex-col items-center justify-center h-screen p-6 relative">
@@ -49,16 +49,16 @@ export function ErrorContent() {
           <DropdownMenuContent align="end">
             <DropdownMenuItem
               onClick={() => {
-                setLanguage('en-US');
-                setLanguageState('en-US');
+                setLanguage('en-US')
+                setLanguageState('en-US')
               }}
             >
               English
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
-                setLanguage('ja-JP');
-                setLanguageState('ja-JP');
+                setLanguage('ja-JP')
+                setLanguageState('ja-JP')
               }}
             >
               日本語
@@ -98,5 +98,5 @@ export function ErrorContent() {
         </div>
       </div>
     </div>
-  );
+  )
 }

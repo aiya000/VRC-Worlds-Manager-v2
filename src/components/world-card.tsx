@@ -1,26 +1,26 @@
-import React from 'react';
-import { Heart } from 'lucide-react';
-import { CardSize, WorldDisplayData } from '@/lib/commands';
-import { useLocalization } from '@/hooks/use-localization';
-import { usePatreonContext } from '@/contexts/patreon-context';
-import { PlatformIndicator } from './platform-indicator';
+import React from 'react'
+import { Heart } from 'lucide-react'
+import { CardSize, WorldDisplayData } from '@/lib/commands'
+import { useLocalization } from '@/hooks/use-localization'
+import { usePatreonContext } from '@/contexts/patreon-context'
+import { PlatformIndicator } from './platform-indicator'
 
 interface WorldCardPreviewProps {
-  size: CardSize;
-  world: WorldDisplayData;
+  size: CardSize
+  world: WorldDisplayData
 }
 
 export function WorldCardPreview(props: WorldCardPreviewProps) {
-  const { size, world } = props;
-  const { t } = useLocalization();
-  const { supporters } = usePatreonContext();
-  const isSupporter = supporters.has(world.authorName);
+  const { size, world } = props
+  const { t } = useLocalization()
+  const { supporters } = usePatreonContext()
+  const isSupporter = supporters.has(world.authorName)
   const sizeClasses: Record<CardSize, string> = {
     Compact: 'w-48 h-32',
     Normal: 'w-52 h-48',
     Expanded: 'w-64 h-64',
     Original: 'w-64 h-44',
-  };
+  }
 
   return (
     <div
@@ -104,5 +104,5 @@ export function WorldCardPreview(props: WorldCardPreviewProps) {
         </div>
       )}
     </div>
-  );
+  )
 }

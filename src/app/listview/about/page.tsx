@@ -1,51 +1,51 @@
-'use client';
+'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useLocalization } from '@/hooks/use-localization';
-import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
-import { UserProfile } from '@/app/listview/about/components/user-profile';
-import { Heart } from 'lucide-react';
-import { SiGithub, SiDiscord } from '@icons-pack/react-simple-icons';
-import { toast } from 'sonner';
-import { commands } from '@/lib/commands';
-import { error } from '@/lib/services/logger';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useLocalization } from '@/hooks/use-localization'
+import { Button } from '@/components/ui/button'
+import { useEffect, useState } from 'react'
+import { UserProfile } from '@/app/listview/about/components/user-profile'
+import { Heart } from 'lucide-react'
+import { SiGithub, SiDiscord } from '@icons-pack/react-simple-icons'
+import { toast } from 'sonner'
+import { commands } from '@/lib/commands'
+import { error } from '@/lib/services/logger'
 
 export default function AboutSection() {
-  const { t } = useLocalization();
-  const [orderedSupporters, setOrderedSupporters] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? 'unknown';
+  const { t } = useLocalization()
+  const [orderedSupporters, setOrderedSupporters] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? 'unknown'
 
   useEffect(() => {
     async function fetchPatreonData() {
       try {
-        const result = await commands.fetchPatreonData();
+        const result = await commands.fetchPatreonData()
         if (result.status === 'ok') {
-          setOrderedSupporters(sortSupporters(result.data));
+          setOrderedSupporters(sortSupporters(result.data))
         } else {
-          throw new Error(result.error);
+          throw new Error(result.error)
         }
       } catch (e) {
-        error(`Failed to fetch Patreon data: ${e}`);
+        error(`Failed to fetch Patreon data: ${e}`)
         toast('Error', {
           description: 'Failed to load supporter data.',
-        });
+        })
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
 
-    fetchPatreonData();
-  }, []);
+    fetchPatreonData()
+  }, [])
 
   // Helper function to sort supporters
   const sortSupporters = (data: Record<string, string[]>) => {
-    const platinumNames = (data.platinumSupporter || []).sort();
-    const goldNames = (data.goldSupporter || []).sort();
-    const silverNames = (data.silverSupporter || []).sort();
-    const bronzeNames = (data.bronzeSupporter || []).sort();
-    const basicNames = (data.basicSupporter || []).sort();
+    const platinumNames = (data.platinumSupporter || []).sort()
+    const goldNames = (data.goldSupporter || []).sort()
+    const silverNames = (data.silverSupporter || []).sort()
+    const bronzeNames = (data.bronzeSupporter || []).sort()
+    const basicNames = (data.basicSupporter || []).sort()
 
     return [
       ...platinumNames,
@@ -53,8 +53,8 @@ export default function AboutSection() {
       ...silverNames,
       ...bronzeNames,
       ...basicNames,
-    ];
-  };
+    ]
+  }
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">
@@ -278,5 +278,5 @@ export default function AboutSection() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,11 +1,11 @@
-import { Schema } from '@effect/schema';
+import { Schema } from '@effect/schema'
 
 export const platformSchema = Schema.Literal(
   'standalonewindows',
   'android',
   'ios',
   'unknownplatform',
-);
+)
 
 export const worldDisplayDataSchema = Schema.Struct({
   worldId: Schema.String,
@@ -20,24 +20,24 @@ export const worldDisplayDataSchema = Schema.Struct({
   folders: Schema.Array(Schema.String),
   tags: Schema.Array(Schema.String),
   capacity: Schema.Number,
-});
+})
 
 export const folderDataSchema = Schema.Struct({
   name: Schema.String,
   world_count: Schema.Number,
-});
+})
 
 export const backupMetaDataSchema = Schema.Struct({
   date: Schema.String,
   number_of_folders: Schema.Number,
   number_of_worlds: Schema.Number,
   app_version: Schema.String,
-});
+})
 
 export const previousMetadataSchema = Schema.Struct({
   number_of_folders: Schema.Number,
   number_of_worlds: Schema.Number,
-});
+})
 
 export const patreonDataSchema = Schema.Struct({
   platinumSupporter: Schema.Array(Schema.String),
@@ -45,11 +45,11 @@ export const patreonDataSchema = Schema.Struct({
   silverSupporter: Schema.Array(Schema.String),
   bronzeSupporter: Schema.Array(Schema.String),
   basicSupporter: Schema.Array(Schema.String),
-});
+})
 
 export const worldBlacklistSchema = Schema.Struct({
   worlds: Schema.Array(Schema.String),
-});
+})
 
 export const localizedChangesSchema = Schema.Struct({
   version: Schema.String,
@@ -57,7 +57,7 @@ export const localizedChangesSchema = Schema.Struct({
   features: Schema.Array(Schema.String),
   fixes: Schema.Array(Schema.String),
   others: Schema.Array(Schema.String),
-});
+})
 
 export const worldDetailsSchema = Schema.Struct({
   worldId: Schema.String,
@@ -74,7 +74,7 @@ export const worldDetailsSchema = Schema.Struct({
   capacity: Schema.Number,
   recommendedCapacity: Schema.NullOr(Schema.Number),
   publicationDate: Schema.NullOr(Schema.String),
-});
+})
 
 export const backupDataSchema = Schema.Struct({
   metadata: backupMetaDataSchema,
@@ -86,4 +86,4 @@ export const backupDataSchema = Schema.Struct({
     key: Schema.String,
     value: Schema.Array(Schema.String),
   }),
-});
+})

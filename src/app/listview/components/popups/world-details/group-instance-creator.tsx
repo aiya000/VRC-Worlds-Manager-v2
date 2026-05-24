@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Loader2 } from 'lucide-react'
 import {
   GroupInstanceCreatePermission,
   UserGroup,
@@ -8,45 +8,45 @@ import {
   GroupRole,
   GroupInstancePermissionInfo,
   commands,
-} from '@/lib/commands';
-import { GroupInstanceType } from '@/types/instances';
-import { InstanceRegion } from '@/lib/commands';
-import { useState, useEffect } from 'react';
-import { Label } from '../../../../../components/ui/label';
+} from '@/lib/commands'
+import { GroupInstanceType } from '@/types/instances'
+import { InstanceRegion } from '@/lib/commands'
+import { useState, useEffect } from 'react'
+import { Label } from '../../../../../components/ui/label'
 import {
   ToggleGroup,
   ToggleGroupItem,
-} from '../../../../../components/ui/toggle-group';
-import { ChevronRight } from 'lucide-react';
-import { Separator } from '../../../../../components/ui/separator';
-import { useLocalization } from '@/hooks/use-localization';
-import { info, error } from '@/lib/services/logger'; // Add this import
+} from '../../../../../components/ui/toggle-group'
+import { ChevronRight } from 'lucide-react'
+import { Separator } from '../../../../../components/ui/separator'
+import { useLocalization } from '@/hooks/use-localization'
+import { info, error } from '@/lib/services/logger' // Add this import
 
 interface GroupInstanceCreatorProps {
-  groups: UserGroup[];
-  selectedGroupId: string | null;
-  permission: GroupInstanceCreatePermission | null;
-  roles: GroupRole[] | null;
-  onBack: () => void;
-  onGroupSelect: (groupId: string) => Promise<void>;
+  groups: UserGroup[]
+  selectedGroupId: string | null
+  permission: GroupInstanceCreatePermission | null
+  roles: GroupRole[] | null
+  onBack: () => void
+  onGroupSelect: (groupId: string) => Promise<void>
   onCreateInstance: (
     groupId: string,
     instanceType: GroupInstanceType,
     region: InstanceRegion,
     queueEnabled: boolean,
     selectedRoles?: string[],
-  ) => void;
-  isLoading?: boolean;
+  ) => void
+  isLoading?: boolean
 }
 
-type CreationStep = 'group' | 'type' | 'roles' | 'config';
+type CreationStep = 'group' | 'type' | 'roles' | 'config'
 
 interface StepInfo {
-  groupId: string | null;
-  instanceType: GroupInstanceType | null;
-  region: InstanceRegion; // Changed from Region
-  queueEnabled: boolean;
-  selectedRoles: Set<string>;
+  groupId: string | null
+  instanceType: GroupInstanceType | null
+  region: InstanceRegion // Changed from Region
+  queueEnabled: boolean
+  selectedRoles: Set<string>
 }
 
 const mapRegion = {
@@ -57,8 +57,8 @@ const mapRegion = {
       USE: 'use' as InstanceRegion,
       EU: 'eu' as InstanceRegion,
       JP: 'jp' as InstanceRegion,
-    };
-    return mapping[uiRegion] || ('jp' as InstanceRegion);
+    }
+    return mapping[uiRegion] || ('jp' as InstanceRegion)
   },
 
   // Backend to UI mapping
@@ -68,10 +68,10 @@ const mapRegion = {
       use: 'USE',
       eu: 'EU',
       jp: 'JP',
-    };
-    return mapping[backendRegion] || 'JP';
+    }
+    return mapping[backendRegion] || 'JP'
   },
-};
+}
 
 export function GroupInstanceCreator({
   groups,
@@ -83,7 +83,7 @@ export function GroupInstanceCreator({
   onCreateInstance,
   isLoading: externalLoading,
 }: GroupInstanceCreatorProps) {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
 
   const GROUP_INSTANCE_TYPES = [
     {
@@ -104,126 +104,126 @@ export function GroupInstanceCreator({
       description: t('group-instance-creator:group-public-description'),
       requiresPermission: 'public' as const,
     },
-  ] as const;
+  ] as const
 
   const [currentStep, setCurrentStep] = useState<CreationStep>(
     initialGroupId ? 'type' : 'group',
-  );
-  const [isLoading, setIsLoading] = useState(true); // Add internal loading state
+  )
+  const [isLoading, setIsLoading] = useState(true) // Add internal loading state
   const [stepInfo, setStepInfo] = useState<StepInfo>({
     groupId: initialGroupId || null,
     instanceType: null,
     region: 'jp' as InstanceRegion, // Changed from 'JP'
     queueEnabled: false,
     selectedRoles: new Set(),
-  });
+  })
 
-  const [selectingEveryoneRole, setSelectingEveryoneRole] = useState(true);
+  const [selectingEveryoneRole, setSelectingEveryoneRole] = useState(true)
 
   // Add useEffect to update loading state based on groups
   useEffect(() => {
     if (externalLoading) {
-      setIsLoading(true);
+      setIsLoading(true)
     } else {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [groups]);
+  }, [groups])
 
   // Add useEffect to load the saved region preference
   useEffect(() => {
     const loadRegionPreference = async () => {
       try {
-        const regionResult = await commands.getRegion();
+        const regionResult = await commands.getRegion()
         if (regionResult.status === 'ok') {
           setStepInfo((prev) => ({
             ...prev,
             region: regionResult.data,
-          }));
-          info(`Loaded region preference: ${regionResult.data}`);
+          }))
+          info(`Loaded region preference: ${regionResult.data}`)
         }
       } catch (e) {
-        error(`Failed to load region preference: ${e}`);
+        error(`Failed to load region preference: ${e}`)
         // Fall back to JP if we can't load the preference
         setStepInfo((prev) => ({
           ...prev,
           region: 'jp' as InstanceRegion,
-        }));
+        }))
       }
-    };
+    }
 
-    loadRegionPreference();
-  }, []); // Empty dependency array means this runs once on mount
+    loadRegionPreference()
+  }, []) // Empty dependency array means this runs once on mount
 
   const getRoleType = (role: GroupRole) => {
     if (role.isManagementRole) {
-      return 'management';
+      return 'management'
     }
-    return 'normal';
-  };
+    return 'normal'
+  }
 
   const canGateRoles = () => {
-    return permission === 'NotAllowed' ? false : permission?.Allowed.restricted;
-  };
+    return permission === 'NotAllowed' ? false : permission?.Allowed.restricted
+  }
 
   const isEveryoneRole = (role: GroupRole) => {
-    return role.name === 'Everyone';
-  };
+    return role.name === 'Everyone'
+  }
 
   const getNonEveryoneRoles = () => {
-    return roles?.filter((role) => !isEveryoneRole(role)) || [];
-  };
+    return roles?.filter((role) => !isEveryoneRole(role)) || []
+  }
 
   const getEveryoneRole = () => {
-    return roles?.find((role) => isEveryoneRole(role));
-  };
+    return roles?.find((role) => isEveryoneRole(role))
+  }
 
   const handleRoleToggle = (roleId: string, checked: boolean) => {
-    if (!roles) return;
+    if (!roles) return
 
-    const role = roles.find((r) => r.id === roleId);
-    if (!role) return;
+    const role = roles.find((r) => r.id === roleId)
+    if (!role) return
 
-    const newSelectedRoles = new Set(stepInfo.selectedRoles);
-    const everyoneRole = getEveryoneRole();
-    const ownerRole = roles.find((r) => r.permissions.includes('*'));
+    const newSelectedRoles = new Set(stepInfo.selectedRoles)
+    const everyoneRole = getEveryoneRole()
+    const ownerRole = roles.find((r) => r.permissions.includes('*'))
 
     if (isEveryoneRole(role)) {
       if (checked) {
-        newSelectedRoles.clear();
+        newSelectedRoles.clear()
         if (everyoneRole) {
-          newSelectedRoles.add(everyoneRole.id);
+          newSelectedRoles.add(everyoneRole.id)
         }
-        setSelectingEveryoneRole(true);
+        setSelectingEveryoneRole(true)
       }
     } else {
       if (checked) {
         if (everyoneRole) {
-          newSelectedRoles.delete(everyoneRole.id);
+          newSelectedRoles.delete(everyoneRole.id)
         }
-        setSelectingEveryoneRole(false);
+        setSelectingEveryoneRole(false)
 
         // Always add owner role when selecting any other role
         if (ownerRole) {
-          newSelectedRoles.add(ownerRole.id);
+          newSelectedRoles.add(ownerRole.id)
         }
 
         // Handle management role logic
-        const roleType = getRoleType(role);
+        const roleType = getRoleType(role)
         if (roleType === 'normal') {
           roles.forEach((r) => {
             if (r.isManagementRole) {
-              newSelectedRoles.add(r.id);
+              newSelectedRoles.add(r.id)
             }
-          });
+          })
         }
-        newSelectedRoles.add(roleId);
+        newSelectedRoles.add(roleId)
       } else {
-        newSelectedRoles.delete(roleId);
+        newSelectedRoles.delete(roleId)
 
         // If no roles selected, default back to Everyone
         if (newSelectedRoles.size === 0 && everyoneRole) {
-          newSelectedRoles.add(everyoneRole.id);
-          setSelectingEveryoneRole(true);
+          newSelectedRoles.add(everyoneRole.id)
+          setSelectingEveryoneRole(true)
         }
       }
     }
@@ -231,92 +231,92 @@ export function GroupInstanceCreator({
     setStepInfo((prev) => ({
       ...prev,
       selectedRoles: newSelectedRoles,
-    }));
-  };
+    }))
+  }
 
   const isRoleDisabled = (role: GroupRole) => {
-    if (selectingEveryoneRole) return false;
+    if (selectingEveryoneRole) return false
 
     if (role.permissions.includes('*')) {
       // Owner role should be selectable when no other roles are selected
       const hasOtherRolesSelected = Array.from(stepInfo.selectedRoles).some(
         (id) => {
-          const selectedRole = roles?.find((r) => r.id === id);
+          const selectedRole = roles?.find((r) => r.id === id)
           return (
             selectedRole &&
             !isEveryoneRole(selectedRole) &&
             !selectedRole.permissions.includes('*')
-          );
+          )
         },
-      );
-      return hasOtherRolesSelected;
+      )
+      return hasOtherRolesSelected
     }
 
     if (role.isManagementRole) {
       // Management roles are disabled if any non-management role is selected
       return Array.from(stepInfo.selectedRoles).some((id) => {
-        const selectedRole = roles?.find((r) => r.id === id);
+        const selectedRole = roles?.find((r) => r.id === id)
         return (
           selectedRole &&
           !selectedRole.isManagementRole &&
           !isEveryoneRole(selectedRole)
-        );
-      });
+        )
+      })
     }
 
-    return false;
-  };
+    return false
+  }
 
   const isRoleRequired = (role: GroupRole) => {
-    if (selectingEveryoneRole) return false;
+    if (selectingEveryoneRole) return false
 
     if (role.permissions.includes('*')) {
       // Owner is only required when OTHER non-Everyone roles are selected
       return Array.from(stepInfo.selectedRoles).some((id) => {
-        const selectedRole = roles?.find((r) => r.id === id);
+        const selectedRole = roles?.find((r) => r.id === id)
         return (
           selectedRole &&
           !isEveryoneRole(selectedRole) &&
           !selectedRole.permissions.includes('*')
-        ); // Don't count owner role itself
-      });
+        ) // Don't count owner role itself
+      })
     }
 
     // Rest of the function remains the same
     const hasNormalRole = Array.from(stepInfo.selectedRoles).some((id) => {
-      const selectedRole = roles?.find((r) => r.id === id);
+      const selectedRole = roles?.find((r) => r.id === id)
       return (
         selectedRole &&
         !selectedRole.isManagementRole &&
         !isEveryoneRole(selectedRole)
-      );
-    });
+      )
+    })
 
-    return hasNormalRole && role.isManagementRole;
-  };
+    return hasNormalRole && role.isManagementRole
+  }
 
   // Add function to save region preference
   const setRegionPreference = async (region: InstanceRegion) => {
     try {
-      await commands.setRegion(region);
-      info(`Region preference set to ${region}`);
+      await commands.setRegion(region)
+      info(`Region preference set to ${region}`)
     } catch (e) {
-      error(`Failed to set region preference: ${e}`);
+      error(`Failed to set region preference: ${e}`)
     }
-  };
+  }
 
   const handleCreateInstance = () => {
-    if (!stepInfo.instanceType || !stepInfo.groupId) return;
+    if (!stepInfo.instanceType || !stepInfo.groupId) return
 
     const rolesToPass =
       stepInfo.instanceType === 'group' && canGateRoles()
         ? !selectingEveryoneRole
           ? Array.from(stepInfo.selectedRoles)
           : undefined
-        : undefined;
+        : undefined
 
     // Save the region preference before creating the instance
-    setRegionPreference(stepInfo.region);
+    setRegionPreference(stepInfo.region)
 
     onCreateInstance(
       stepInfo.groupId,
@@ -324,81 +324,81 @@ export function GroupInstanceCreator({
       stepInfo.region,
       stepInfo.queueEnabled,
       rolesToPass,
-    );
+    )
 
     // Reset state after creation
-    setCurrentStep('group');
-    setIsLoading(false);
+    setCurrentStep('group')
+    setIsLoading(false)
     setStepInfo({
       groupId: null,
       instanceType: null,
       region: 'jp' as InstanceRegion,
       queueEnabled: false,
       selectedRoles: new Set(),
-    });
-  };
+    })
+  }
 
   const handleInstanceTypeSelect = (type: GroupInstanceType) => {
     setStepInfo((prev) => ({
       ...prev,
       instanceType: type,
-    }));
+    }))
 
     // Skip roles page if not needed
     if (type === 'group' && canGateRoles()) {
-      setCurrentStep('roles');
+      setCurrentStep('roles')
     } else {
-      setCurrentStep('config');
+      setCurrentStep('config')
     }
-  };
+  }
 
   const handleGroupSelect = async (groupId: string) => {
     try {
-      setIsLoading(true);
+      setIsLoading(true)
       setStepInfo((prev) => ({
         ...prev,
         groupId,
         instanceType: null,
         selectedRoles: new Set(),
-      }));
-      setSelectingEveryoneRole(true);
-      await onGroupSelect(groupId);
-      setCurrentStep('type');
+      }))
+      setSelectingEveryoneRole(true)
+      await onGroupSelect(groupId)
+      setCurrentStep('type')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleBack = () => {
     if (currentStep === 'config') {
-      setCurrentStep('type');
+      setCurrentStep('type')
       setStepInfo((prev) => ({
         ...prev,
         instanceType: null,
         selectedRoles: new Set(),
-      }));
+      }))
     } else if (currentStep === 'type') {
-      setCurrentStep('group');
+      setCurrentStep('group')
     } else if (currentStep === 'roles') {
-      setCurrentStep('type');
+      setCurrentStep('type')
       setStepInfo((prev) => ({
         ...prev,
         instanceType: null,
         selectedRoles: new Set(),
-      }));
+      }))
     } else {
-      setCurrentStep('group');
+      setCurrentStep('group')
       setStepInfo({
         groupId: null,
         instanceType: null,
         region: 'jp' as InstanceRegion, // Changed from 'JP' to 'jp'
         queueEnabled: false,
         selectedRoles: new Set(),
-      });
-      setSelectingEveryoneRole(true);
-      onBack();
+      })
+      setSelectingEveryoneRole(true)
+      onBack()
     }
-  };
+  }
 
   const NavigationItem = ({
     label,
@@ -406,10 +406,10 @@ export function GroupInstanceCreator({
     onClick,
     disabled = false,
   }: {
-    label: string;
-    value: string;
-    onClick: () => void;
-    disabled?: boolean;
+    label: string
+    value: string
+    onClick: () => void
+    disabled?: boolean
   }) => (
     <Button
       variant="ghost"
@@ -425,7 +425,7 @@ export function GroupInstanceCreator({
         <ChevronRight className="h-4 w-4" />
       </div>
     </Button>
-  );
+  )
 
   const GroupSelectionPage = () => {
     if (isLoading || !groups) {
@@ -438,7 +438,7 @@ export function GroupInstanceCreator({
             </p>
           </div>
         </div>
-      );
+      )
     }
 
     return (
@@ -470,8 +470,8 @@ export function GroupInstanceCreator({
           {t('general:back')}
         </Button>
       </div>
-    );
-  };
+    )
+  }
 
   const InstanceTypeSelectionPage = () => {
     if (isLoading || !permission) {
@@ -484,7 +484,7 @@ export function GroupInstanceCreator({
             </p>
           </div>
         </div>
-      );
+      )
     }
     return (
       <div className="space-y-4 p-4">
@@ -496,14 +496,14 @@ export function GroupInstanceCreator({
             const hasPermission =
               permission === 'NotAllowed'
                 ? false
-                : permission?.Allowed[option.requiresPermission];
+                : permission?.Allowed[option.requiresPermission]
 
             const description =
               option.type === 'group'
                 ? canGateRoles()
                   ? t('group-instance-creator:selected-roles-description')
                   : t('group-instance-creator:all-roles-description')
-                : option.description;
+                : option.description
 
             return (
               <Button
@@ -527,15 +527,15 @@ export function GroupInstanceCreator({
                   </span>
                 </div>
               </Button>
-            );
+            )
           })}
         </div>
         <Button variant="secondary" onClick={handleBack}>
           {t('general:back')}
         </Button>
       </div>
-    );
-  };
+    )
+  }
 
   const RoleSelectionPage = () => {
     if (isLoading || !roles) {
@@ -544,7 +544,7 @@ export function GroupInstanceCreator({
           <Loader2 className="h-4 w-4 animate-spin mr-2" />{' '}
           {t('group-instance-creator:loading-roles')}
         </div>
-      );
+      )
     }
 
     return (
@@ -604,8 +604,8 @@ export function GroupInstanceCreator({
           </Button>
         </div>
       </div>
-    );
-  };
+    )
+  }
 
   const ConfigurationPage = () => (
     <div className="space-y-1">
@@ -660,7 +660,7 @@ export function GroupInstanceCreator({
               setStepInfo((prev) => ({
                 ...prev,
                 region: mapRegion.toBackend(value),
-              }));
+              }))
           }}
           className="flex gap-2 mt-1"
         >
@@ -703,7 +703,7 @@ export function GroupInstanceCreator({
         </Button>
       </div>
     </div>
-  );
+  )
 
   // Render loading state first
   if (isLoading) {
@@ -723,7 +723,7 @@ export function GroupInstanceCreator({
           </p>
         </div>
       </div>
-    );
+    )
   }
 
   // Permission loading check for type step
@@ -737,7 +737,7 @@ export function GroupInstanceCreator({
           </p>
         </div>
       </div>
-    );
+    )
   }
 
   // Empty state only after loading is complete
@@ -749,22 +749,22 @@ export function GroupInstanceCreator({
           {t('general:back')}
         </Button>
       </div>
-    );
+    )
   }
 
   // Render pages
   switch (currentStep) {
     case 'group':
-      return <GroupSelectionPage />;
+      return <GroupSelectionPage />
     case 'type':
-      return <InstanceTypeSelectionPage />;
+      return <InstanceTypeSelectionPage />
     case 'roles':
       return stepInfo.instanceType === 'group' && canGateRoles() ? (
         <RoleSelectionPage />
-      ) : null;
+      ) : null
     case 'config':
-      return <ConfigurationPage />;
+      return <ConfigurationPage />
     default:
-      return <GroupSelectionPage />;
+      return <GroupSelectionPage />
   }
 }

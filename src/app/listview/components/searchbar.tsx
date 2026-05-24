@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useLocalization } from '@/hooks/use-localization';
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { useLocalization } from '@/hooks/use-localization'
 import {
   CheckSquare,
   SortAsc,
@@ -8,21 +8,21 @@ import {
   Square,
   TextSearch,
   X,
-} from 'lucide-react';
+} from 'lucide-react'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { useSelectedWorldsStore } from '../hook/use-selected-worlds';
-import { useRef, useEffect } from 'react';
-import { usePopupStore } from '../hook/usePopups/store';
-import { useFolders } from '../hook/use-folders';
-import { Badge } from '@/components/ui/badge';
-import { FolderType } from '@/types/folders';
-import { useWorldFiltersStore } from '../hook/use-filters';
+} from '@/components/ui/select'
+import { useSelectedWorldsStore } from '../hook/use-selected-worlds'
+import { useRef, useEffect } from 'react'
+import { usePopupStore } from '../hook/usePopups/store'
+import { useFolders } from '../hook/use-folders'
+import { Badge } from '@/components/ui/badge'
+import { FolderType } from '@/types/folders'
+import { useWorldFiltersStore } from '../hook/use-filters'
 
 type SortField =
   | 'name'
@@ -31,14 +31,14 @@ type SortField =
   | 'favorites'
   | 'capacity'
   | 'dateAdded'
-  | 'lastUpdated';
+  | 'lastUpdated'
 
 interface SearchBarProps {
-  currentFolder: FolderType;
+  currentFolder: FolderType
 }
 
 export function SearchBar({ currentFolder }: SearchBarProps) {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
   const {
     sortField,
     setSortField,
@@ -55,48 +55,48 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
     memoTextFilter,
     setMemoTextFilter,
     clearFilters,
-  } = useWorldFiltersStore();
-  const filterRowRef = useRef<HTMLDivElement>(null);
-  const authorRef = useRef<HTMLDivElement>(null);
-  const tagsRef = useRef<HTMLDivElement>(null);
-  const foldersRef = useRef<HTMLDivElement>(null);
-  const foldersLabelRef = useRef<HTMLSpanElement>(null);
-  const memoTextRef = useRef<HTMLDivElement>(null);
-  const clearRef = useRef<HTMLButtonElement>(null);
-  const wrapFolders = false; // behavior retained but state managed internally no-op
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  } = useWorldFiltersStore()
+  const filterRowRef = useRef<HTMLDivElement>(null)
+  const authorRef = useRef<HTMLDivElement>(null)
+  const tagsRef = useRef<HTMLDivElement>(null)
+  const foldersRef = useRef<HTMLDivElement>(null)
+  const foldersLabelRef = useRef<HTMLSpanElement>(null)
+  const memoTextRef = useRef<HTMLDivElement>(null)
+  const clearRef = useRef<HTMLButtonElement>(null)
+  const wrapFolders = false // behavior retained but state managed internally no-op
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const setPopup = usePopupStore((state) => state.setPopup);
+  const setPopup = usePopupStore((state) => state.setPopup)
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // CTRL + F - Focus search bar
       if (e.ctrlKey && e.key === 'f' && !e.shiftKey) {
-        e.preventDefault();
-        searchInputRef.current?.focus();
+        e.preventDefault()
+        searchInputRef.current?.focus()
       }
       // CTRL + SHIFT + F - Open advanced search
       else if (e.ctrlKey && e.shiftKey && e.key === 'F') {
-        e.preventDefault();
-        setPopup('showAdvancedSearchPanel', true);
+        e.preventDefault()
+        setPopup('showAdvancedSearchPanel', true)
       }
-    };
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setPopup]);
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [setPopup])
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
     } else {
-      setSortField(field);
+      setSortField(field)
     }
-  };
+  }
 
   const { isSelectionMode, toggleSelectionMode, clearFolderSelections } =
-    useSelectedWorldsStore();
+    useSelectedWorldsStore()
 
   return (
     <div className="sticky top-0 z-20 bg-background">
@@ -170,10 +170,10 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
             variant={isSelectionMode ? 'secondary' : 'ghost'}
             onClick={() => {
               if (isSelectionMode) {
-                clearFolderSelections(currentFolder);
-                toggleSelectionMode();
+                clearFolderSelections(currentFolder)
+                toggleSelectionMode()
               } else {
-                toggleSelectionMode();
+                toggleSelectionMode()
               }
             }}
             className="h-9 w-9"
@@ -203,7 +203,7 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
               variant="ghost"
               size="sm"
               onClick={() => {
-                clearFilters();
+                clearFilters()
               }}
               className="h-7 px-2 text-xs"
             >
@@ -263,22 +263,22 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
                 </span>
                 <div className="flex items-center gap-1 overflow-hidden whitespace-nowrap">
                   {(() => {
-                    const reserved = 80; // for “and X more”
-                    const perBadge = 100;
+                    const reserved = 80 // for “and X more”
+                    const perBadge = 100
                     const availW =
                       (tagsRef.current?.parentElement?.clientWidth || 0) -
                       reserved -
                       (clearRef.current?.offsetWidth || 0) -
-                      (authorRef.current?.offsetWidth || 0);
+                      (authorRef.current?.offsetWidth || 0)
                     const maxTags = Math.max(
                       1,
                       Math.min(
                         tagFilters.length,
                         Math.floor(availW / perBadge),
                       ),
-                    );
-                    const visible = tagFilters.slice(0, maxTags);
-                    const hidden = tagFilters.length - maxTags;
+                    )
+                    const visible = tagFilters.slice(0, maxTags)
+                    const hidden = tagFilters.length - maxTags
 
                     return (
                       <>
@@ -299,7 +299,7 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
                               onClick={() => {
                                 setTagFilters(
                                   tagFilters.filter((t) => t !== tag),
-                                );
+                                )
                               }}
                             />
                           </Badge>
@@ -310,7 +310,7 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
                           </span>
                         )}
                       </>
-                    );
+                    )
                   })()}
                 </div>
               </div>
@@ -320,21 +320,21 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
               <div className="flex flex-col self-center gap-2 -mt-2">
                 {/* Row 1: only if ≥ 2 badges fit */}
                 {(() => {
-                  const reserved = 80; // “and X more”
-                  const perBadge = 100; // badge+gap
+                  const reserved = 80 // “and X more”
+                  const perBadge = 100 // badge+gap
                   const parentW =
-                    foldersRef.current?.parentElement?.clientWidth || 0;
+                    foldersRef.current?.parentElement?.clientWidth || 0
                   const usedW =
                     (clearRef.current?.offsetWidth || 0) +
                     (authorRef.current?.offsetWidth || 0) +
-                    (tagsRef.current?.offsetWidth || 0);
-                  const availW = parentW - reserved - usedW;
-                  const fitCount = Math.floor(availW / perBadge);
-                  const showFirst = fitCount >= 2;
-                  if (!showFirst) return null;
+                    (tagsRef.current?.offsetWidth || 0)
+                  const availW = parentW - reserved - usedW
+                  const fitCount = Math.floor(availW / perBadge)
+                  const showFirst = fitCount >= 2
+                  if (!showFirst) return null
 
-                  const visible = folderFilters.slice(0, fitCount);
-                  const hidden = folderFilters.length - fitCount;
+                  const visible = folderFilters.slice(0, fitCount)
+                  const hidden = folderFilters.length - fitCount
 
                   return (
                     <div
@@ -365,7 +365,7 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
                               onClick={() => {
                                 setFolderFilters(
                                   folderFilters.filter((f) => f !== folder),
-                                );
+                                )
                               }}
                             />
                           </Badge>
@@ -377,24 +377,24 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
                         )}
                       </div>
                     </div>
-                  );
+                  )
                 })()}
 
                 {/* Row 2: show when fewer than 2 fit OR when wrapFolders is true */}
                 {(() => {
-                  const reserved = 80; // px for “and X more”
-                  const perBadge = 100; // badge+gap
+                  const reserved = 80 // px for “and X more”
+                  const perBadge = 100 // badge+gap
                   const parentW =
-                    foldersRef.current?.parentElement?.clientWidth || 0;
+                    foldersRef.current?.parentElement?.clientWidth || 0
                   const usedW =
                     (clearRef.current?.offsetWidth || 0) +
                     (authorRef.current?.offsetWidth || 0) +
                     (tagsRef.current?.offsetWidth || 0) +
-                    (foldersLabelRef.current?.offsetWidth || 0);
-                  const availW = parentW - reserved - usedW;
-                  const fitCount = Math.floor(availW / perBadge);
-                  const showFirst = fitCount >= 2;
-                  const overflow = folderFilters.slice(fitCount);
+                    (foldersLabelRef.current?.offsetWidth || 0)
+                  const availW = parentW - reserved - usedW
+                  const fitCount = Math.floor(availW / perBadge)
+                  const showFirst = fitCount >= 2
+                  const overflow = folderFilters.slice(fitCount)
 
                   if (!showFirst || wrapFolders) {
                     return (
@@ -419,15 +419,15 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
                               onClick={() => {
                                 setFolderFilters(
                                   folderFilters.filter((f) => f !== folder),
-                                );
+                                )
                               }}
                             />
                           </Badge>
                         ))}
                       </div>
-                    );
+                    )
                   }
-                  return null;
+                  return null
                 })()}
               </div>
             )}
@@ -435,5 +435,5 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
         </div>
       ) : null}
     </div>
-  );
+  )
 }

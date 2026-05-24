@@ -1,9 +1,9 @@
-import ListViewClientShell from './ListViewClientShell';
+import ListViewClientShell from './ListViewClientShell'
 
 export default function ListViewLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  return <ListViewClientShell>{children}</ListViewClientShell>;
+  return <ListViewClientShell>{children}</ListViewClientShell>
 }

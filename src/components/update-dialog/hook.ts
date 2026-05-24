@@ -1,175 +1,175 @@
-import { useLocalization } from '@/hooks/use-localization';
-import { toast } from 'sonner';
-import { events, commands, LocalizedChanges } from '@/lib/commands';
-import { useCallback, useEffect, useState } from 'react';
+import { useLocalization } from '@/hooks/use-localization'
+import { toast } from 'sonner'
+import { events, commands, LocalizedChanges } from '@/lib/commands'
+import { useCallback, useEffect, useState } from 'react'
 
 type Props = {
-  dialogOpen: boolean;
-  setDialogOpen: (open: boolean) => void;
-  taskId: string | null;
-};
+  dialogOpen: boolean
+  setDialogOpen: (open: boolean) => void
+  taskId: string | null
+}
 
 type ReturnProps = {
-  progress: number;
-  localizedChanges: LocalizedChanges[] | null;
-  onCancelButtonClick: () => Promise<void>;
-  onUpdateButtonClick: () => Promise<void>;
-};
+  progress: number
+  localizedChanges: LocalizedChanges[] | null
+  onCancelButtonClick: () => Promise<void>
+  onUpdateButtonClick: () => Promise<void>
+}
 
 export const useUpdateDialog = ({
   dialogOpen,
   setDialogOpen,
   taskId,
 }: Props): ReturnProps => {
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState(0)
   const [localizedChanges, setLocalizedChanges] = useState<
     LocalizedChanges[] | null
-  >(null);
+  >(null)
 
-  const { t } = useLocalization();
+  const { t } = useLocalization()
 
   const onCancelButtonClick = useCallback(async () => {
     if (taskId !== null) {
-      const result = await commands.cancelTaskRequest(taskId);
+      const result = await commands.cancelTaskRequest(taskId)
       if (result.status === 'error') {
-        console.error('Failed to cancel task:', result.error);
+        console.error('Failed to cancel task:', result.error)
       }
     }
 
-    setDialogOpen(false);
-    toast(t('general:cancelled'));
-  }, [taskId, setDialogOpen, t]);
+    setDialogOpen(false)
+    toast(t('general:cancelled'))
+  }, [taskId, setDialogOpen, t])
 
   const onUpdateButtonClick = async () => {
-    const result = await commands.installUpdate();
+    const result = await commands.installUpdate()
 
     if (result.status === 'error') {
-      console.error('Failed to install update:', result.error);
+      console.error('Failed to install update:', result.error)
     }
-  };
+  }
 
   const getLocalizedChanges = async () => {
-    const result = await commands.getChangelog();
+    const result = await commands.getChangelog()
 
     if (result.status === 'error') {
-      console.error('Failed to get localized changes:', result.error);
-      setLocalizedChanges([]);
-      return;
+      console.error('Failed to get localized changes:', result.error)
+      setLocalizedChanges([])
+      return
     }
 
-    setLocalizedChanges(result.data);
-  };
+    setLocalizedChanges(result.data)
+  }
 
   useEffect(() => {
     if (dialogOpen === true) {
-      getLocalizedChanges();
+      getLocalizedChanges()
     }
-  }, [dialogOpen]);
+  }, [dialogOpen])
 
   useEffect(() => {
-    let isCancelled = false;
-    let callbackExecuted = false;
-    let unlistenProgressFn: (() => void) | undefined = undefined;
-    let unlistenCompleteFn: (() => void) | undefined = undefined;
+    let isCancelled = false
+    let callbackExecuted = false
+    let unlistenProgressFn: (() => void) | undefined = undefined
+    let unlistenCompleteFn: (() => void) | undefined = undefined
 
     const setupListener = async () => {
       try {
         unlistenCompleteFn = await events.taskStatusChanged.listen((e) => {
-          if (isCancelled) return;
+          if (isCancelled) return
 
-          const completedTaskId = e.payload.id;
-          const status = e.payload.status;
+          const completedTaskId = e.payload.id
+          const status = e.payload.status
 
           if (
             callbackExecuted ||
             completedTaskId !== taskId ||
             status === 'Running'
           ) {
-            return;
+            return
           }
 
-          callbackExecuted = true;
+          callbackExecuted = true
           if (status === 'Completed') {
-            setProgress(100);
+            setProgress(100)
           } else if (status === 'Cancelled') {
-            onCancelButtonClick();
+            onCancelButtonClick()
           } else if (status === 'Failed') {
             commands.getTaskError(taskId).then((result) => {
               if (result.status === 'ok') {
                 toast(t('general:failed'), {
                   description: result.data,
-                });
+                })
               } else {
-                console.error('Failed to get task error:', result.error);
+                console.error('Failed to get task error:', result.error)
               }
-            });
+            })
           }
-        });
+        })
 
         if (isCancelled) {
-          unlistenCompleteFn();
-          return;
+          unlistenCompleteFn()
+          return
         }
 
         unlistenProgressFn = await events.updateProgress.listen((e) => {
-          if (isCancelled) return;
+          if (isCancelled) return
 
-          setProgress(e.payload.progress * 100);
-        });
+          setProgress(e.payload.progress * 100)
+        })
 
         if (isCancelled) {
-          unlistenProgressFn();
-          unlistenCompleteFn();
-          return;
+          unlistenProgressFn()
+          unlistenCompleteFn()
+          return
         }
 
         if (taskId === null || callbackExecuted) {
-          return;
+          return
         }
 
-        const result = await commands.getTaskStatus(taskId);
+        const result = await commands.getTaskStatus(taskId)
 
         if (result.status === 'error') {
-          console.error('Failed to get task status:', result.error);
-          return;
+          console.error('Failed to get task status:', result.error)
+          return
         }
 
         if (result.data === 'Completed') {
-          setProgress(100);
+          setProgress(100)
         } else if (result.data === 'Cancelled') {
-          onCancelButtonClick();
+          onCancelButtonClick()
         } else if (result.data === 'Failed') {
-          const result = await commands.getTaskError(taskId);
+          const result = await commands.getTaskError(taskId)
 
           if (result.status === 'ok') {
             toast(t('general:failed'), {
               description: result.data,
-            });
+            })
           } else {
-            console.error('Failed to get task error:', result.error);
+            console.error('Failed to get task error:', result.error)
           }
         }
       } catch (error) {
         console.error(
           'Failed to listen to TaskCompleted and ImportProgress event:',
           error,
-        );
+        )
       }
-    };
+    }
 
-    setupListener();
+    setupListener()
 
     return () => {
-      isCancelled = true;
-      unlistenProgressFn?.();
-      unlistenCompleteFn?.();
-    };
-  }, [taskId, onCancelButtonClick, t, toast]);
+      isCancelled = true
+      unlistenProgressFn?.()
+      unlistenCompleteFn?.()
+    }
+  }, [taskId, onCancelButtonClick, t, toast])
 
   return {
     progress,
     localizedChanges,
     onCancelButtonClick,
     onUpdateButtonClick,
-  };
-};
+  }
+}

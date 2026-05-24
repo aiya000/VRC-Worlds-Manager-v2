@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 export function SaturnIcon({ className }: { className?: string }) {
   return (
@@ -22,5 +22,5 @@ export function SaturnIcon({ className }: { className?: string }) {
         strokeWidth="0"
       />
     </svg>
-  );
+  )
 }

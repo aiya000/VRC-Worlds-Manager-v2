@@ -1,23 +1,23 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { WorldDisplayData } from '@/lib/commands';
-import { WorldGrid } from '../world-grid';
-import { useLocalization } from '@/hooks/use-localization';
-import { useSelectedWorldsStore } from '../../hook/use-selected-worlds';
-import { SpecialFolders } from '@/types/folders';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { WorldDisplayData } from '@/lib/commands'
+import { WorldGrid } from '../world-grid'
+import { useLocalization } from '@/hooks/use-localization'
+import { useSelectedWorldsStore } from '../../hook/use-selected-worlds'
+import { SpecialFolders } from '@/types/folders'
 
 interface ImportedFolderContainsHiddenProps {
-  open: boolean;
-  worlds: WorldDisplayData[];
-  onOpenChange: (open: boolean) => void;
-  onConfirm: (selectedWorldIds: string[]) => void;
+  open: boolean
+  worlds: WorldDisplayData[]
+  onOpenChange: (open: boolean) => void
+  onConfirm: (selectedWorldIds: string[]) => void
 }
 
 export function ImportedFolderContainsHidden({
@@ -26,18 +26,18 @@ export function ImportedFolderContainsHidden({
   onOpenChange,
   onConfirm,
 }: ImportedFolderContainsHiddenProps) {
-  const { t } = useLocalization();
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const { t } = useLocalization()
+  const containerRef = React.useRef<HTMLDivElement | null>(null)
   // Use a synthetic folder key to track selection within the dialog without colliding with real folders
-  const dialogFolderKey = SpecialFolders.NotFolder;
-  const { getSelectedWorlds, clearFolderSelections } = useSelectedWorldsStore();
+  const dialogFolderKey = SpecialFolders.NotFolder
+  const { getSelectedWorlds, clearFolderSelections } = useSelectedWorldsStore()
 
   // Clear selection when dialog closes
   useEffect(() => {
     if (!open) {
-      clearFolderSelections(dialogFolderKey);
+      clearFolderSelections(dialogFolderKey)
     }
-  }, [open, clearFolderSelections]);
+  }, [open, clearFolderSelections])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -74,9 +74,9 @@ export function ImportedFolderContainsHidden({
             onClick={() => {
               const selected = Array.from(
                 getSelectedWorlds(dialogFolderKey) ?? new Set<string>(),
-              );
-              onConfirm(selected);
-              onOpenChange(false);
+              )
+              onConfirm(selected)
+              onOpenChange(false)
             }}
             disabled={getSelectedWorlds(dialogFolderKey).size === 0}
           >
@@ -85,5 +85,5 @@ export function ImportedFolderContainsHidden({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

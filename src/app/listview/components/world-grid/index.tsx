@@ -1,17 +1,17 @@
-import { WorldCardPreview } from '@/components/world-card';
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { FolderType, SpecialFolders } from '@/types/folders';
-import { CardSize, WorldDisplayData } from '@/lib/commands';
-import { useLocalization } from '@/hooks/use-localization';
+import { WorldCardPreview } from '@/components/world-card'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { FolderType, SpecialFolders } from '@/types/folders'
+import { CardSize, WorldDisplayData } from '@/lib/commands'
+import { useLocalization } from '@/hooks/use-localization'
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
   ContextMenuSeparator,
-} from '@/components/ui/context-menu';
-import { Square, Check, Plus, Share2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+} from '@/components/ui/context-menu'
+import { Square, Check, Plus, Share2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import {
   AlertDialog,
   AlertDialogContent,
@@ -20,22 +20,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogCancel,
-} from '@/components/ui/alert-dialog';
-import * as Portal from '@radix-ui/react-portal';
-import { info, error } from '@/lib/services/logger';
-import { commands } from '@/lib/commands';
-import { Badge } from '@/components/ui/badge';
-import { useFolders } from '../../hook/use-folders';
-import { useWorldGrid } from './hook';
+} from '@/components/ui/alert-dialog'
+import * as Portal from '@radix-ui/react-portal'
+import { info, error } from '@/lib/services/logger'
+import { commands } from '@/lib/commands'
+import { Badge } from '@/components/ui/badge'
+import { useFolders } from '../../hook/use-folders'
+import { useWorldGrid } from './hook'
 
 interface WorldGridProps {
-  worlds: WorldDisplayData[];
+  worlds: WorldDisplayData[]
   // Used for virtualized scrolling
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  currentFolder: FolderType;
+  containerRef: React.RefObject<HTMLDivElement | null>
+  currentFolder: FolderType
   // Optional interaction flags for special embeds (e.g., selection-only dialog)
-  disableCardClick?: boolean;
-  alwaysShowSelection?: boolean;
+  disableCardClick?: boolean
+  alwaysShowSelection?: boolean
 }
 
 export function WorldGrid({
@@ -45,7 +45,7 @@ export function WorldGrid({
   disableCardClick = false,
   alwaysShowSelection = false,
 }: WorldGridProps) {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
 
   const {
     cardSize,
@@ -67,37 +67,37 @@ export function WorldGrid({
     isSpecialFolder,
     isHiddenFolder,
     existingWorldIds,
-  } = useWorldGrid(currentFolder, worlds);
+  } = useWorldGrid(currentFolder, worlds)
 
-  const gap = 16;
+  const gap = 16
   const cardWidths: Record<CardSize, number> = {
     Compact: 192, // w-48 = 12rem = 192px
     Normal: 208, // w-52 = 13rem = 208px
     Expanded: 256, // w-64 = 16rem = 256px
     Original: 256, // w-64 = 16rem = 256px
-  };
-  const cardW = cardWidths[cardSize];
+  }
+  const cardW = cardWidths[cardSize]
 
   // Use CSS Grid auto-fill for responsive layout - no manual calculation needed
 
   const [dialogConfig, setDialogConfig] = useState<{
-    type: 'remove' | 'hide';
-    worldId: string;
-    worldName?: string;
-    isOpen: boolean;
-  } | null>(null);
+    type: 'remove' | 'hide'
+    worldId: string
+    worldName?: string
+    isOpen: boolean
+  } | null>(null)
 
   const handleDialogClose = () => {
-    setDialogConfig((prev) => (prev ? { ...prev, isOpen: false } : null));
-    setTimeout(() => setDialogConfig(null), 150);
-  };
+    setDialogConfig((prev) => (prev ? { ...prev, isOpen: false } : null))
+    setTimeout(() => setDialogConfig(null), 150)
+  }
 
   const handleSelect = (worldId: string, event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
+    event.preventDefault()
+    event.stopPropagation()
 
-    toggleWorld(worldId);
-  };
+    toggleWorld(worldId)
+  }
 
   return (
     <div
@@ -111,23 +111,23 @@ export function WorldGrid({
       }}
     >
       {worlds.map((world) => {
-        const isSelected = selectedWorlds.includes(world.worldId);
+        const isSelected = selectedWorlds.includes(world.worldId)
         return (
           <ContextMenu key={world.worldId}>
             <ContextMenuTrigger asChild>
               <div
                 id={world.worldId}
                 onClick={() => {
-                  if (disableCardClick) return;
+                  if (disableCardClick) return
                   if (isFindPage) {
                     // Only set dontSaveToLocal on worlds not already in collection
                     handleOpenWorldDetails(
                       world.worldId,
                       !existingWorldIds.has(world.worldId),
-                    );
+                    )
                   } else {
                     // dontSaveToLocal defaults to false when omitted
-                    handleOpenWorldDetails(world.worldId);
+                    handleOpenWorldDetails(world.worldId)
                   }
                 }}
                 className="group relative w-fit h-fit rounded-lg overflow-hidden"
@@ -149,8 +149,8 @@ export function WorldGrid({
                       <div
                         className="relative w-10 h-10 flex items-center justify-center cursor-pointer"
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelect(world.worldId, e);
+                          e.stopPropagation()
+                          handleSelect(world.worldId, e)
                         }}
                       >
                         <Square className="w-5 h-5 z-10 text-primary" />
@@ -161,8 +161,8 @@ export function WorldGrid({
                       <div
                         className="relative w-10 h-10 flex items-center justify-center cursor-pointer"
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelect(world.worldId, e);
+                          e.stopPropagation()
+                          handleSelect(world.worldId, e)
                         }}
                       >
                         <Square className="w-5 h-5 text-muted-foreground" />
@@ -177,7 +177,7 @@ export function WorldGrid({
                 <>
                   <ContextMenuItem
                     onSelect={(e) => {
-                      handleOpenFolderDialog(world.worldId);
+                      handleOpenFolderDialog(world.worldId)
                     }}
                   >
                     {t('world-grid:add-title')}
@@ -185,7 +185,7 @@ export function WorldGrid({
                   <ContextMenuSeparator />
                   <ContextMenuItem
                     onSelect={(e) => {
-                      handleShareWorld(world.worldId, world.name);
+                      handleShareWorld(world.worldId, world.name)
                     }}
                   >
                     <Share2 className="w-4 h-4 mr-2" />
@@ -196,7 +196,7 @@ export function WorldGrid({
                 <>
                   <ContextMenuItem
                     onSelect={(e) => {
-                      handleOpenFolderDialog(world.worldId);
+                      handleOpenFolderDialog(world.worldId)
                     }}
                   >
                     {t('world-grid:move-title')}
@@ -204,7 +204,7 @@ export function WorldGrid({
                   {!isSpecialFolder && (
                     <ContextMenuItem
                       onSelect={(e) => {
-                        handleRemoveFromCurrentFolder(world.worldId);
+                        handleRemoveFromCurrentFolder(world.worldId)
                       }}
                       className="text-destructive"
                     >
@@ -217,14 +217,14 @@ export function WorldGrid({
                         selectedWorlds.length > 0 &&
                         selectedWorlds.includes(world.worldId)
                           ? Array.from(selectedWorlds)
-                          : [world.worldId];
+                          : [world.worldId]
                       const worldNames = worldsToHide
                         .map(
                           (id) =>
                             worlds.find((w) => w.worldId === id)?.name || '',
                         )
-                        .filter(Boolean);
-                      handleHideWorld(worldsToHide, worldNames);
+                        .filter(Boolean)
+                      handleHideWorld(worldsToHide, worldNames)
                     }}
                     className="text-destructive"
                   >
@@ -233,7 +233,7 @@ export function WorldGrid({
                   <ContextMenuSeparator />
                   <ContextMenuItem
                     onSelect={(e) => {
-                      handleShareWorld(world.worldId, world.name);
+                      handleShareWorld(world.worldId, world.name)
                     }}
                   >
                     <Share2 className="w-4 h-4 mr-2" />
@@ -248,8 +248,8 @@ export function WorldGrid({
                         selectedWorlds.length > 0 &&
                         selectedWorlds.includes(world.worldId)
                           ? Array.from(selectedWorlds)
-                          : [world.worldId];
-                      handleRestoreWorld?.(worldsToRestore);
+                          : [world.worldId]
+                      handleRestoreWorld?.(worldsToRestore)
                     }}
                   >
                     {t('world-grid:restore-world')}
@@ -257,7 +257,7 @@ export function WorldGrid({
                   <ContextMenuSeparator />
                   <ContextMenuItem
                     onSelect={(e) => {
-                      handleShareWorld(world.worldId, world.name);
+                      handleShareWorld(world.worldId, world.name)
                     }}
                   >
                     <Share2 className="w-4 h-4 mr-2" />
@@ -267,7 +267,7 @@ export function WorldGrid({
               )}
             </ContextMenuContent>
           </ContextMenu>
-        );
+        )
       })}
 
       {/* Portaled AlertDialogs */}
@@ -276,7 +276,7 @@ export function WorldGrid({
           <AlertDialog
             open={dialogConfig.isOpen}
             onOpenChange={(open) => {
-              if (!open) handleDialogClose();
+              if (!open) handleDialogClose()
             }}
           >
             <AlertDialogContent onEscapeKeyDown={handleDialogClose}>
@@ -307,14 +307,14 @@ export function WorldGrid({
                   variant="destructive"
                   onClick={() => {
                     if (dialogConfig.type === 'remove') {
-                      removeWorldsFromFolder([dialogConfig.worldId]);
+                      removeWorldsFromFolder([dialogConfig.worldId])
                     } else if (dialogConfig.worldName) {
                       handleHideWorld?.(
                         [dialogConfig.worldId],
                         [dialogConfig.worldName],
-                      );
+                      )
                     }
-                    handleDialogClose();
+                    handleDialogClose()
                   }}
                 >
                   {dialogConfig.type === 'remove'
@@ -354,5 +354,5 @@ export function WorldGrid({
         </div>
       )}
     </div>
-  );
+  )
 }

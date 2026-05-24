@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { useLocalization } from '@/hooks/use-localization';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState, useRef, useCallback } from 'react'
+import { useLocalization } from '@/hooks/use-localization'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
 import {
   CircleHelpIcon,
   Loader2,
@@ -11,64 +11,62 @@ import {
   Search,
   Square,
   CheckSquare,
-} from 'lucide-react';
-import { commands, WorldDisplayData } from '@/lib/commands';
-import { SpecialFolders } from '@/types/folders';
-import { info, error } from '@/lib/services/logger';
-import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from 'lucide-react'
+import { commands, WorldDisplayData } from '@/lib/commands'
+import { SpecialFolders } from '@/types/folders'
+import { info, error } from '@/lib/services/logger'
+import { toast } from 'sonner'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { WorldGrid } from '../../../components/world-grid';
-import { WorldGridSkeleton } from '../../../components/world-grid/skeleton';
-import MultiFilterItemSelector from '@/components/multi-filter-item-selector';
-import { useSelectedWorldsStore } from '../../../hook/use-selected-worlds';
+} from '@/components/ui/select'
+import { Card, CardContent } from '@/components/ui/card'
+import { WorldGrid } from '../../../components/world-grid'
+import { WorldGridSkeleton } from '../../../components/world-grid/skeleton'
+import MultiFilterItemSelector from '@/components/multi-filter-item-selector'
+import { useSelectedWorldsStore } from '../../../hook/use-selected-worlds'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { useFolders } from '@/app/listview/hook/use-folders';
+} from '@/components/ui/tooltip'
+import { useFolders } from '@/app/listview/hook/use-folders'
 
 export default function FindWorldsPage() {
-  const { t } = useLocalization();
-  const [activeTab, setActiveTab] = useState('recently-visited');
+  const { t } = useLocalization()
+  const [activeTab, setActiveTab] = useState('recently-visited')
   const [recentlyVisitedWorlds, setRecentlyVisitedWorlds] = useState<
     WorldDisplayData[]
-  >([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchResults, setSearchResults] = useState<WorldDisplayData[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSort, setSelectedSort] = useState('popularity');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedExcludedTags, setSelectedExcludedTags] = useState<string[]>(
-    [],
-  );
-  const [availableTags, setAvailableTags] = useState<string[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMoreResults, setHasMoreResults] = useState(true);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-  const findGridRef = useRef<HTMLDivElement>(null);
+  >([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [searchResults, setSearchResults] = useState<WorldDisplayData[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedSort, setSelectedSort] = useState('popularity')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [selectedExcludedTags, setSelectedExcludedTags] = useState<string[]>([])
+  const [availableTags, setAvailableTags] = useState<string[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [hasMoreResults, setHasMoreResults] = useState(true)
+  const loadMoreRef = useRef<HTMLDivElement>(null)
+  const findGridRef = useRef<HTMLDivElement>(null)
   const {
     isSelectionMode,
     toggleSelectionMode,
     clearFolderSelections,
     selectAllWorlds,
     getSelectedWorlds,
-  } = useSelectedWorldsStore();
+  } = useSelectedWorldsStore()
 
-  const selectedWorlds = Array.from(getSelectedWorlds(SpecialFolders.Find));
-  const selectedWorldIdSet = new Set(selectedWorlds);
+  const selectedWorlds = Array.from(getSelectedWorlds(SpecialFolders.Find))
+  const selectedWorldIdSet = new Set(selectedWorlds)
 
   // Check if all recently visited worlds are selected
   const allSelected =
@@ -76,28 +74,28 @@ export default function FindWorldsPage() {
     selectedWorlds.length === recentlyVisitedWorlds.length &&
     recentlyVisitedWorlds.every((world) =>
       selectedWorldIdSet.has(world.worldId),
-    );
+    )
 
   const handleSelectAll = () => {
     if (allSelected) {
-      clearFolderSelections(SpecialFolders.Find);
+      clearFolderSelections(SpecialFolders.Find)
     } else {
-      const worldIds = recentlyVisitedWorlds.map((world) => world.worldId);
-      selectAllWorlds(SpecialFolders.Find, worldIds);
+      const worldIds = recentlyVisitedWorlds.map((world) => world.worldId)
+      selectAllWorlds(SpecialFolders.Find, worldIds)
     }
-  };
+  }
 
-  const { importFolder } = useFolders();
+  const { importFolder } = useFolders()
 
   const fetchRecentlyVisitedWorlds = useCallback(async () => {
     try {
-      setIsLoading(true);
-      const worlds = await commands.getRecentlyVisitedWorlds();
+      setIsLoading(true)
+      const worlds = await commands.getRecentlyVisitedWorlds()
       if (worlds.status !== 'ok') {
-        throw new Error(worlds.error);
+        throw new Error(worlds.error)
       } else {
-        info(`Fetched recently visited worlds: ${worlds.data.length}`);
-        setRecentlyVisitedWorlds(worlds.data);
+        info(`Fetched recently visited worlds: ${worlds.data.length}`)
+        setRecentlyVisitedWorlds(worlds.data)
       }
       toast(t('find-page:fetch-recently-visited-worlds'), {
         description: t(
@@ -105,105 +103,105 @@ export default function FindWorldsPage() {
           worlds.data.length,
         ),
         duration: 1000,
-      });
+      })
     } catch (err) {
-      error(`Error fetching recently visited worlds: ${String(err)}`);
+      error(`Error fetching recently visited worlds: ${String(err)}`)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [t]);
+  }, [t])
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // CTRL + R - Reload worlds (only in recently-visited tab)
       if (e.ctrlKey && e.key === 'r' && activeTab === 'recently-visited') {
-        e.preventDefault();
-        fetchRecentlyVisitedWorlds();
+        e.preventDefault()
+        fetchRecentlyVisitedWorlds()
       }
-    };
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeTab, fetchRecentlyVisitedWorlds]);
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [activeTab, fetchRecentlyVisitedWorlds])
 
   // Check for import parameter in URL query string (web deep-link replacement)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const importId = params.get('import');
+    const params = new URLSearchParams(window.location.search)
+    const importId = params.get('import')
     if (importId) {
-      info(`[DeepLink] Detected import parameter: ${importId}`);
-      importFolder(importId);
+      info(`[DeepLink] Detected import parameter: ${importId}`)
+      importFolder(importId)
       // Clean up the URL
-      const url = new URL(window.location.href);
-      url.searchParams.delete('import');
-      window.history.replaceState({}, '', url.toString());
+      const url = new URL(window.location.href)
+      url.searchParams.delete('import')
+      window.history.replaceState({}, '', url.toString())
     }
-  }, [importFolder]);
+  }, [importFolder])
 
   // Add this state variable to track if a search has been performed
-  const [hasSearched, setHasSearched] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false)
 
   // Keep selectedSort in sync: when a search query is present, force sort to 'relevance'
   useEffect(() => {
     if (searchQuery.trim() !== '') {
       // Only update when it's not already 'relevance' to avoid unnecessary state updates
-      setSelectedSort((prev) => (prev === 'relevance' ? prev : 'relevance'));
+      setSelectedSort((prev) => (prev === 'relevance' ? prev : 'relevance'))
     }
-  }, [searchQuery]);
+  }, [searchQuery])
 
   // Backoff control for load-more errors
   const [loadMoreBackoffUntil, setLoadMoreBackoffUntil] = useState<
     number | null
-  >(null);
+  >(null)
 
   // Fetch recently visited worlds on initial load
   useEffect(() => {
     if (recentlyVisitedWorlds.length === 0 && !isLoading) {
-      fetchRecentlyVisitedWorlds();
+      fetchRecentlyVisitedWorlds()
     }
-  }, [recentlyVisitedWorlds.length, isLoading, fetchRecentlyVisitedWorlds]);
+  }, [recentlyVisitedWorlds.length, isLoading, fetchRecentlyVisitedWorlds])
 
   // Load tags when the search tab is active
   useEffect(() => {
     const loadTags = async () => {
       try {
-        const result = await commands.getTagsByCount();
+        const result = await commands.getTagsByCount()
         if (result.status === 'ok') {
-          setAvailableTags(result.data);
+          setAvailableTags(result.data)
         }
       } catch (err) {
-        error(`Failed to load tags: ${err}`);
+        error(`Failed to load tags: ${err}`)
       }
-    };
+    }
 
     if (activeTab === 'search') {
-      loadTags();
+      loadTags()
     }
-  }, [activeTab]);
+  }, [activeTab])
 
   const handleSearch = async (loadMore = false) => {
     // Respect backoff if trying to auto load more
     if (loadMore && loadMoreBackoffUntil && Date.now() < loadMoreBackoffUntil) {
-      return;
+      return
     }
 
     if (!loadMore) {
       // Only set this flag when performing a new search, not when loading more
-      setHasSearched(true);
+      setHasSearched(true)
     }
 
     if (loadMore) {
-      setIsLoadingMore(true);
+      setIsLoadingMore(true)
     } else {
-      setIsSearching(true);
-      setCurrentPage(1); // Reset page when performing a new search
-      setSearchResults([]); // Clear previous results
-      setHasMoreResults(true); // Assume there are more results
+      setIsSearching(true)
+      setCurrentPage(1) // Reset page when performing a new search
+      setSearchResults([]) // Clear previous results
+      setHasMoreResults(true) // Assume there are more results
     }
 
     try {
-      const page = loadMore ? currentPage + 1 : 1;
+      const page = loadMore ? currentPage + 1 : 1
 
       const result = await commands.searchWorlds(
         selectedSort,
@@ -211,59 +209,59 @@ export default function FindWorldsPage() {
         selectedExcludedTags,
         searchQuery,
         page,
-      );
+      )
 
       if (result.status === 'ok') {
-        info(`Search results: ${result.data.length} worlds found`);
+        info(`Search results: ${result.data.length} worlds found`)
         if (loadMore) {
           // Append new results to existing ones
-          setSearchResults((prev) => [...prev, ...result.data]);
-          setCurrentPage(currentPage + 1);
-          setLoadMoreBackoffUntil(null); // reset backoff after success
+          setSearchResults((prev) => [...prev, ...result.data])
+          setCurrentPage(currentPage + 1)
+          setLoadMoreBackoffUntil(null) // reset backoff after success
         } else {
           // Replace results for new search
-          setSearchResults(result.data);
-          setCurrentPage(1);
+          setSearchResults(result.data)
+          setCurrentPage(1)
         }
 
         // Check if we've reached the end of results
-        setHasMoreResults(result.data.length > 0);
+        setHasMoreResults(result.data.length > 0)
 
         if (result.data.length === 0 && !loadMore) {
           toast(t('find-page:no-more-results'), {
             description: t('find-page:try-different-search'),
-          });
+          })
         }
       } else {
-        throw new Error(result.error);
+        throw new Error(result.error)
       }
     } catch (err) {
-      error(`Search error: ${err}`);
+      error(`Search error: ${err}`)
       toast(t('find-page:search-error'), {
         description: String(err),
-      });
+      })
 
       // Apply a brief backoff and nudge scroll up so the sentinel isn't intersecting
       if (loadMore) {
-        const backoffMs = 2500; // 2-3 seconds backoff
-        setLoadMoreBackoffUntil(Date.now() + backoffMs);
-        info(`Load-more backoff applied for ${backoffMs}ms; nudging scroll up`);
-        const scroller = findGridRef.current;
+        const backoffMs = 2500 // 2-3 seconds backoff
+        setLoadMoreBackoffUntil(Date.now() + backoffMs)
+        info(`Load-more backoff applied for ${backoffMs}ms; nudging scroll up`)
+        const scroller = findGridRef.current
         try {
           if (scroller) {
-            scroller.scrollBy({ top: -100, behavior: 'smooth' });
+            scroller.scrollBy({ top: -100, behavior: 'smooth' })
           } else if (typeof window !== 'undefined') {
-            window.scrollBy({ top: -100, behavior: 'smooth' });
+            window.scrollBy({ top: -100, behavior: 'smooth' })
           }
         } catch (_) {
           // noop
         }
       }
     } finally {
-      setIsLoadingMore(false);
-      setIsSearching(false);
+      setIsLoadingMore(false)
+      setIsSearching(false)
     }
-  };
+  }
 
   // Add this useEffect to observe when user scrolls to bottom
   useEffect(() => {
@@ -274,25 +272,25 @@ export default function FindWorldsPage() {
       isLoadingMore ||
       isSearching
     ) {
-      return;
+      return
     }
 
     const observer = new IntersectionObserver(
       (entries) => {
         // When the load more indicator comes into view
         if (entries[0].isIntersecting) {
-          handleSearch(true);
+          handleSearch(true)
         }
       },
       { threshold: 0.5 }, // Trigger when element is 50% visible
-    );
+    )
 
     if (loadMoreRef.current) {
-      observer.observe(loadMoreRef.current);
+      observer.observe(loadMoreRef.current)
     }
 
-    return () => observer.disconnect();
-  }, [searchResults, hasMoreResults, isLoadingMore, isSearching]);
+    return () => observer.disconnect()
+  }, [searchResults, hasMoreResults, isLoadingMore, isSearching])
 
   // no external select-all; handled by grid internally when needed
 
@@ -337,10 +335,10 @@ export default function FindWorldsPage() {
             size="icon"
             onClick={() => {
               if (isSelectionMode) {
-                clearFolderSelections(SpecialFolders.Find);
-                toggleSelectionMode();
+                clearFolderSelections(SpecialFolders.Find)
+                toggleSelectionMode()
               } else {
-                toggleSelectionMode();
+                toggleSelectionMode()
               }
             }}
             className={`ml-2 h-9 w-9 ${
@@ -616,5 +614,5 @@ export default function FindWorldsPage() {
         )}
       </div>
     </div>
-  );
+  )
 }
