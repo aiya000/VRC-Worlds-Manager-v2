@@ -15,6 +15,7 @@ export default function AboutSection() {
   const { t } = useLocalization();
   const [orderedSupporters, setOrderedSupporters] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? 'unknown';
 
   useEffect(() => {
     async function fetchPatreonData() {
@@ -230,7 +231,7 @@ export default function AboutSection() {
       <div className="w-full border-t bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
           <div className="text-sm text-muted-foreground">
-            VRChat Worlds Manager Web 2.0.0
+            VRChat Worlds Manager Web {appVersion}
           </div>
 
           <div className="flex gap-4">
@@ -257,6 +258,23 @@ export default function AboutSection() {
               </a>
             </Button>
           </div>
+        </div>
+        <div className="container mx-auto px-4 pb-3">
+          <p className="text-xs text-muted-foreground">
+            {t('about-section:fork-attribution:foretext')}
+            <a
+              href="https://github.com/Raifa21/VRC-Worlds-Manager-v2"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground/80 underline-offset-2 hover:underline hover:text-foreground"
+            >
+              {t('about-section:fork-attribution:link-text')}
+            </a>
+            {t('about-section:fork-attribution:posttext')}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {t('about-section:fork-attribution:thanks')}
+          </p>
         </div>
       </div>
     </div>
