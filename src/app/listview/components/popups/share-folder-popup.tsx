@@ -76,7 +76,9 @@ export function ShareFolderPopup({
               setErrorMessage(t('share-folder:error-message', shareRes.error));
             }
           } catch {
-            setErrorMessage('Failed to create share');
+            setErrorMessage(
+              t('share-folder:error-message', 'Failed to create share')
+            );
           } finally {
             setShareLoading(false);
           }
