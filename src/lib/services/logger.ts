@@ -1,19 +1,19 @@
-export function info(message: string): void {
-  console.info(`[INFO] ${message}`)
+export function info(...args: unknown[]): void {
+  console.info(...args)
 }
 
-export function error(message: string): void {
-  console.error(`[ERROR] ${message}`)
+export function error(...args: unknown[]): void {
+  console.error(...args)
 }
 
-export function warn(message: string): void {
-  console.warn(`[WARN] ${message}`)
+export function warn(...args: unknown[]): void {
+  console.warn(...args)
 }
 
-export function debug(message: string): void {
-  console.debug(`[DEBUG] ${message}`)
+export function debug(...args: unknown[]): void {
+  console.debug(...args)
 }
 
-export function trace(message: string): void {
-  console.trace(`[TRACE] ${message}`)
+export function trace(...args: unknown[]): void {
+  console.trace(...args)
 }
