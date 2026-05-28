@@ -64,7 +64,9 @@ export const useAddToFolderPopup = ({
 
   // IME composition tracking: prevent Enter during composition from submitting
   const composingRef = useRef(false);
-  const [_isComposing, setIsComposing] = useState(false);
+  const setIsComposing = (isComposing: boolean) => {
+    composingRef.current = isComposing;
+  };
 
   // scroll to bottom when starting to create
   useEffect(() => {
