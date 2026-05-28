@@ -54,7 +54,6 @@ const WelcomePage: React.FC = () => {
     false,
     false,
   ]);
-  const [_isLoading, setIsLoading] = useState<boolean>(false);
   const [alreadyMigrated, setAlreadyMigrated] = useState<boolean>(false);
   const [hasExistingData, setHasExistingData] = useState<[boolean, boolean]>([
     false,
@@ -138,9 +137,7 @@ const WelcomePage: React.FC = () => {
         setShowMigrationConfirm(true);
         return;
       }
-      setIsLoading(true);
       await migrate();
-      setIsLoading(false);
       setAlreadyMigrated(true);
     }
     if (page === 5) {
