@@ -29,24 +29,17 @@ export const LocalizationContextProvider: FC<Props> = ({ children }) => {
   const [localizationData, setLocalizationData] =
     useState<Partial<{ [key in string]: string }>>(enUS);
 
-  const setLanguage = useCallback(
-    (language: string) => {
-      if (language === languageCode) {
-        return;
-      }
+  const setLanguage = useCallback((language: string) => {
+    if (language === 'ja-JP') {
+      setLocalizationData(jaJP);
+    } else if (language === 'en-US') {
+      setLocalizationData(enUS);
+    } else {
+      return;
+    }
 
-      if (language === 'ja-JP') {
-        setLocalizationData(jaJP);
-      } else if (language === 'en-US') {
-        setLocalizationData(enUS);
-      } else {
-        return;
-      }
-
-      setLanguageCode(language);
-    },
-    [languageCode],
-  );
+    setLanguageCode(language);
+  }, []);
 
   useEffect(() => {
     commands.getLanguage().then((result) => {
