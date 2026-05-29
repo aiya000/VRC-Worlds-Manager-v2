@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/dialog'
 import { commands } from '@/lib/commands'
 import { useLocalization } from '@/hooks/use-localization'
-import { info, error } from '@/lib/services/logger'
 import { Loader2 } from 'lucide-react'
 export default function Login() {
   const router = useRouter()
@@ -33,25 +32,25 @@ export default function Login() {
 
       if (result.status === 'error') {
         if (result.error == '2fa-required') {
-          info('2FA required, showing 2FA dialog')
+          console.info('2FA required, showing 2FA dialog')
           setShow2FA(true)
           setE(null)
           setTwoFactorCodeType('totp')
         } else if (result.error == 'email-2fa-required') {
-          info('Email 2FA required, showing 2FA dialog')
+          console.info('Email 2FA required, showing 2FA dialog')
           setShow2FA(true)
           setE(null)
           setTwoFactorCodeType('emailOtp')
         } else {
           const errorMessage =
             result.error || t('login-page:error-invalid-credentials')
-          error(`Login failed: ${errorMessage}`)
+          console.error(`Login failed: ${errorMessage}`)
           setE(errorMessage)
         }
         return
       }
 
-      info('Login successful, redirecting to listview')
+      console.info('Login successful, redirecting to listview')
       router.push('/listview/folders/special/all')
     } finally {
       setLoading(false)
@@ -69,15 +68,15 @@ export default function Login() {
 
       if (result.status === 'error') {
         const errorMessage = result.error || t('login-page:error-invalid-2fa')
-        error(`2FA verification failed: ${errorMessage}`)
+        console.error(`2FA verification failed: ${errorMessage}`)
         setE(errorMessage)
         return
       }
-      info('2FA verification successful, redirecting to listview')
+      console.info('2FA verification successful, redirecting to listview')
       router.push('/listview/folders/special/all')
     } catch (e) {
       const errorMessage = (e as string) || t('login-page:error-invalid-2fa')
-      error(`2FA error: ${errorMessage}`)
+      console.error(`2FA error: ${errorMessage}`)
       setE(errorMessage)
     } finally {
       setLoading2FA(false)

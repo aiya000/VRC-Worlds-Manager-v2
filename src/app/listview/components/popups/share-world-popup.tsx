@@ -1,6 +1,5 @@
 import React from 'react'
 import { useLocalization } from '@/hooks/use-localization'
-import { info, error } from '@/lib/services/logger'
 import { Copy, Twitter } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -41,22 +40,22 @@ export function ShareWorldPopup({
   const handleCopyUrl = async () => {
     try {
       await navigator.clipboard.writeText(worldUrl)
-      info('Copied world URL to clipboard')
+      console.info('Copied world URL to clipboard')
       toast.success(t('share-world:toast-url-copied', worldName))
       onOpenChange(false)
     } catch (e) {
-      error(`Clipboard copy failed: ${e}`)
+      console.error(`Clipboard copy failed: ${e}`)
     }
   }
 
   const handleCopyText = async () => {
     try {
       await navigator.clipboard.writeText(shareText)
-      info('Copied share text to clipboard')
+      console.info('Copied share text to clipboard')
       toast.success(t('share-world:toast-share-text-copied', worldName))
       onOpenChange(false)
     } catch (e) {
-      error(`Clipboard copy failed: ${e}`)
+      console.error(`Clipboard copy failed: ${e}`)
     }
   }
   const handleTweetShare = async () => {
@@ -66,7 +65,7 @@ export function ShareWorldPopup({
       toast.success(t('share-world:toast-twitter-opened', worldName))
       onOpenChange(false)
     } catch (e) {
-      error(`Twitter share failed: ${e}`)
+      console.error(`Twitter share failed: ${e}`)
     }
   }
 

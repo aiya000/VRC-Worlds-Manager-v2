@@ -14,7 +14,6 @@ import { useSearchParams, usePathname } from 'next/navigation'
 import { SpecialFolders, FolderType, isUserFolder } from '@/types/folders'
 import { useWorlds } from '../use-worlds'
 import { commands } from '@/lib/commands'
-import { error, info } from '@/lib/services/logger'
 import { useLocalization } from '@/hooks/use-localization'
 import { toast } from 'sonner'
 
@@ -109,7 +108,7 @@ export function PopupManager() {
               })
               setPopup('showImportedFolderContainsHidden', null)
             } catch (e) {
-              error(`[PopupManager] restore hidden during import failed: ${e}`)
+              console.error(`[PopupManager] restore hidden during import failed: ${e}`)
               toast(t('general:error-title'), {
                 description: t('listview-page:error-restore-hidden-worlds'),
               })

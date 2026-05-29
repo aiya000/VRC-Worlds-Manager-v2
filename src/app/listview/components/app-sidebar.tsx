@@ -12,7 +12,6 @@ import { useLocalization } from '@/hooks/use-localization'
 import { Separator } from '@/components/ui/separator'
 
 import { SidebarGroup } from '@/components/ui/sidebar'
-import { error } from '@/lib/services/logger'
 
 import {
   ContextMenu,
@@ -83,7 +82,7 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
     } catch (e) {
       // Revert on error
       setLocalFolders(folders)
-      error(`Error moving folder: ${e}`)
+      console.error(`Error moving folder: ${e}`)
     }
   }
 

@@ -9,7 +9,6 @@ import {
   WorldDisplayData,
 } from '@/lib/commands'
 import { FolderType, isUserFolder, SpecialFolders } from '@/types/folders'
-import { error, info } from '@/lib/services/logger'
 import { mutate as mutateFoldersCache } from 'swr'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
@@ -85,13 +84,13 @@ export const useAddToFolderPopup = ({
               if (res.status === 'ok') {
                 return [w.worldId, new Set<string>(res.data)] as const
               }
-              error(
+              console.error(
                 `[AddToFolder] getFoldersForWorld failed for ${w.worldId}: ${res.error}`,
               )
               // fallback to provided world.folders if available
               return [w.worldId, new Set<string>(w.folders ?? [])] as const
             } catch (e) {
-              error(
+              console.error(
                 `[AddToFolder] getFoldersForWorld threw for ${w.worldId}: ${e}`,
               )
               return [w.worldId, new Set<string>(w.folders ?? [])] as const
@@ -101,12 +100,12 @@ export const useAddToFolderPopup = ({
         if (!cancelled) {
           const map = new Map<string, Set<string>>(entries)
           setMembershipByWorld(map)
-          info(
+          console.info(
             `[AddToFolder] Loaded membership for ${entries.length} selected worlds`,
           )
         }
       } catch (e) {
-        error(`[AddToFolder] Failed to load memberships: ${e}`)
+        console.error(`[AddToFolder] Failed to load memberships: ${e}`)
       }
     }
     if (selectedWorlds?.length) loadMembership()
@@ -119,7 +118,7 @@ export const useAddToFolderPopup = ({
     if (e.key !== 'Enter') return
     const name = newFolderName.trim()
     if (!name) return
-    info(`[AddToFolder] Creating new folder via Enter key, name="${name}"`)
+    console.info(`[AddToFolder] Creating new folder via Enter key, name="${name}"`)
     setIsLoading(true)
     await createFolder(name)
     setIsLoading(false)
@@ -131,7 +130,7 @@ export const useAddToFolderPopup = ({
   // whenever `folders` changes after we created one, scroll it into view
   useEffect(() => {
     if (!createdFolder) return
-    info(
+    console.info(
       `[AddToFolder] New folder created, scrolling into view: ${createdFolder}`,
     )
     const container = listRef.current
@@ -177,7 +176,7 @@ export const useAddToFolderPopup = ({
   const handleClick = (folder: string) => {
     const currentState = getFolderState(folder)
     const initialState = getInitialState(folder)
-    info(
+    console.info(
       `[AddToFolder] handleClick(folder="${folder}") current=${currentState}, initial=${initialState}`,
     )
 
@@ -188,7 +187,7 @@ export const useAddToFolderPopup = ({
         setFoldersToAdd((prev) => {
           const next = new Set(prev)
           next.add(folder)
-          info(
+          console.info(
             `[AddToFolder] queued ADD folder="${folder}"; addSet=[${Array.from(
               next,
             ).join(', ')}]`,
@@ -198,7 +197,7 @@ export const useAddToFolderPopup = ({
         setFoldersToRemove((prev) => {
           const next = new Set(prev)
           next.delete(folder)
-          info(
+          console.info(
             `[AddToFolder] unqueue REMOVE folder="${folder}"; removeSet=[${Array.from(
               next,
             ).join(', ')}]`,
@@ -210,7 +209,7 @@ export const useAddToFolderPopup = ({
         setFoldersToAdd((prev) => {
           const next = new Set(prev)
           next.delete(folder)
-          info(
+          console.info(
             `[AddToFolder] unqueue ADD folder="${folder}"; addSet=[${Array.from(
               next,
             ).join(', ')}]`,
@@ -220,7 +219,7 @@ export const useAddToFolderPopup = ({
         setFoldersToRemove((prev) => {
           const next = new Set(prev)
           next.add(folder)
-          info(
+          console.info(
             `[AddToFolder] queued REMOVE folder="${folder}"; removeSet=[${Array.from(
               next,
             ).join(', ')}]`,
@@ -275,7 +274,7 @@ export const useAddToFolderPopup = ({
         const result = await commands.getFolderRemovalPreference()
         if (result.status === 'ok') {
           setFolderRemovalPreference(result.data)
-          info(
+          console.info(
             `[AddToFolder] Loaded folderRemovalPreference=${result.data} currentFolder="${currentFolder}" isSpecial=${isSpecialFolder}`,
           )
 
@@ -288,7 +287,7 @@ export const useAddToFolderPopup = ({
             setFoldersToRemove((prev) => {
               const next = new Set(prev)
               next.add(currentFolder.toString())
-              info(
+              console.info(
                 `[AddToFolder] Auto-queue remove currentFolder="${currentFolder}" due to preference alwaysRemove`,
               )
               return next
@@ -296,7 +295,7 @@ export const useAddToFolderPopup = ({
           }
         }
       } catch (e) {
-        error(`Failed to load folder removal preference: ${e}`)
+        console.error(`Failed to load folder removal preference: ${e}`)
       }
     }
 
@@ -304,7 +303,7 @@ export const useAddToFolderPopup = ({
   }, [currentFolder, isSpecialFolder])
 
   const handleConfirmButtonClick = () => {
-    info(
+    console.info(
       `[AddToFolder] Confirm clicked. currentFolder="${currentFolder}" isSpecial=${isSpecialFolder} queuedAdd=[${Array.from(
         foldersToAdd,
       ).join(', ')}] queuedRemove=[${Array.from(foldersToRemove).join(', ')}]`,
@@ -315,21 +314,21 @@ export const useAddToFolderPopup = ({
       !foldersToRemove.has(currentFolder.toString())
     ) {
       if (folderRemovalPreference === 'ask') {
-        info('[AddToFolder] Switching to removeConfirm page')
+        console.info('[AddToFolder] Switching to removeConfirm page')
         setDialogPage('removeConfirm')
       } else if (folderRemovalPreference === 'alwaysRemove') {
-        info('[AddToFolder] Auto-removing based on preference')
+        console.info('[AddToFolder] Auto-removing based on preference')
         const next = new Set(foldersToRemove)
         next.add(currentFolder.toString())
         setFoldersToRemove(next)
         handleConfirm()
       } else {
-        info('[AddToFolder] Auto-keeping based on preference')
+        console.info('[AddToFolder] Auto-keeping based on preference')
         handleConfirm()
       }
     } else {
       // No need for confirmation, proceed
-      info('[AddToFolder] No confirmation needed, proceeding directly')
+      console.info('[AddToFolder] No confirmation needed, proceeding directly')
       handleConfirm()
     }
   }
@@ -341,15 +340,15 @@ export const useAddToFolderPopup = ({
     try {
       const preference = action === 'keep' ? 'neverRemove' : 'alwaysRemove'
       await commands.setFolderRemovalPreference(preference)
-      info(`Saved folder removal preference: ${preference}`)
+      console.info(`Saved folder removal preference: ${preference}`)
     } catch (e) {
-      error(`Failed to save folder removal preference: ${e}`)
+      console.error(`Failed to save folder removal preference: ${e}`)
     }
   }
 
   // Handle removing from current folder
   const handleRemoveFromCurrentFolder = async () => {
-    info('[AddToFolder] Remove from current folder clicked')
+    console.info('[AddToFolder] Remove from current folder clicked')
     setIsLoading(true)
     try {
       if (rememberChoice) {
@@ -376,10 +375,10 @@ export const useAddToFolderPopup = ({
       setFoldersToAdd(new Set())
       setFoldersToRemove(new Set())
       setDialogPage('folders')
-      info('[AddToFolder] remove done. Closing dialog')
+      console.info('[AddToFolder] remove done. Closing dialog')
       onClose()
     } catch (e) {
-      error(`[AddToFolder] Error during folder operations: ${e}`)
+      console.error(`[AddToFolder] Error during folder operations: ${e}`)
     } finally {
       setIsLoading(false)
     }
@@ -387,7 +386,7 @@ export const useAddToFolderPopup = ({
 
   // Handle keeping in current folder
   const handleKeepInCurrentFolder = async () => {
-    info('[AddToFolder] Keep in current folder clicked')
+    console.info('[AddToFolder] Keep in current folder clicked')
     setIsLoading(true)
     try {
       if (rememberChoice) {
@@ -404,10 +403,10 @@ export const useAddToFolderPopup = ({
       setFoldersToAdd(new Set())
       setFoldersToRemove(new Set())
       setDialogPage('folders')
-      info('[AddToFolder] keep done. Closing dialog')
+      console.info('[AddToFolder] keep done. Closing dialog')
       onClose()
     } catch (e) {
-      error(`[AddToFolder] Error during folder operations: ${e}`)
+      console.error(`[AddToFolder] Error during folder operations: ${e}`)
     } finally {
       setIsLoading(false)
     }
@@ -415,7 +414,7 @@ export const useAddToFolderPopup = ({
 
   // Regular confirmation without special handling for current folder
   const handleConfirm = async () => {
-    info(
+    console.info(
       `[AddToFolder] handleConfirm executing with add=[${Array.from(
         foldersToAdd,
       ).join(', ')}] remove=[${Array.from(foldersToRemove).join(', ')}]`,
@@ -428,10 +427,10 @@ export const useAddToFolderPopup = ({
       )
       setFoldersToAdd(new Set())
       setFoldersToRemove(new Set())
-      info('[AddToFolder] confirm done. Closing dialog')
+      console.info('[AddToFolder] confirm done. Closing dialog')
       onClose()
     } catch (e) {
-      error(`[AddToFolder] Error during confirmation: ${e}`)
+      console.error(`[AddToFolder] Error during confirmation: ${e}`)
     } finally {
       setIsLoading(false)
     }
@@ -440,7 +439,7 @@ export const useAddToFolderPopup = ({
   // reset on close
   const handleCancel = (next: boolean) => {
     if (!next) {
-      info('[AddToFolder] Dialog cancelled/closed by user')
+      console.info('[AddToFolder] Dialog cancelled/closed by user')
       setFoldersToAdd(new Set())
       setFoldersToRemove(new Set())
       setIsCreatingNew(false)
@@ -457,7 +456,7 @@ export const useAddToFolderPopup = ({
     foldersToRemove: string[],
   ) => {
     try {
-      info(
+      console.info(
         `[AddToFolder] handleAddToFolders start isFindPage=${isFindPage} add=[${foldersToAdd.join(
           ', ',
         )}] remove=[${foldersToRemove.join(', ')}] selected=${
@@ -480,7 +479,7 @@ export const useAddToFolderPopup = ({
         if (errorResult) {
           throw new Error(errorResult.error)
         }
-        info('[AddToFolder] Verified worlds exist from search results')
+        console.info('[AddToFolder] Verified worlds exist from search results')
         toast(t('listview-page:worlds-added-title'), {
           description:
             selectedWorlds.length > 1
@@ -505,7 +504,7 @@ export const useAddToFolderPopup = ({
           ),
         }
       })
-      info(
+      console.info(
         `[AddToFolder] OriginalStates prepared for ${originalStates.length} worlds`,
       )
 
@@ -549,7 +548,7 @@ export const useAddToFolderPopup = ({
         if (hasErrors) {
           throw new Error('One or more folder operations failed')
         }
-        info(
+        console.info(
           `[AddToFolder] Folder ops completed: add=${addPromises.length} remove=${removePromises.length}`,
         )
 
@@ -579,7 +578,7 @@ export const useAddToFolderPopup = ({
             { revalidate: true },
           )
 
-          info(
+          console.info(
             `[AddToFolder] Optimistic folder count delta applied: ${Array.from(
               folderDelta.entries(),
             )
@@ -588,7 +587,7 @@ export const useAddToFolderPopup = ({
           )
         }
       } catch (e) {
-        error(`Failed during folder operations: ${e}`)
+        console.error(`Failed during folder operations: ${e}`)
         throw e // Re-throw to be caught by the outer try/catch
       }
 
@@ -629,7 +628,7 @@ export const useAddToFolderPopup = ({
                   description: t('listview-page:folder-changes-undone'),
                 })
               } catch (e) {
-                error(`Failed to undo folder changes: ${e}`)
+                console.error(`Failed to undo folder changes: ${e}`)
                 toast(t('general:error-title'), {
                   description: t('listview-page:error-undo-folder-changes'),
                 })
@@ -646,11 +645,11 @@ export const useAddToFolderPopup = ({
       }
       // Refresh folders list to update world counts in sidebar
       await refreshFolders()
-      info('[AddToFolder] handleAddToFolders completed successfully')
+      console.info('[AddToFolder] handleAddToFolders completed successfully')
       // Closing is handled by caller paths (confirm/keep/remove) too; still close here to be safe.
       onClose()
     } catch (e) {
-      error(`Failed to update folders: ${e}`)
+      console.error(`Failed to update folders: ${e}`)
       toast(t('general:error-title'), {
         description: t('listview-page:error-update-folders'),
       })
