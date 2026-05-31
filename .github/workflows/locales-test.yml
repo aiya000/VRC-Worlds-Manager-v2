@@ -6,8 +6,8 @@ on:
       - ".github/workflows/locales-test.yml"
     branches:
       - "main"
-      - "pre-release"
       - "develop"
+      - "feature/web"
   pull_request:
     types:
       - reopened

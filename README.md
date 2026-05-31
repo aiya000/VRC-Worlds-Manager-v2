@@ -6,7 +6,7 @@
 ![GitHub Release](https://img.shields.io/github/v/release/Raifa21/VRC-Worlds-Manager-v2?label=Stable)
 ![GitHub Release](https://img.shields.io/github/v/release/Raifa21/VRC-Worlds-Manager-v2?include_prereleases&label=Pre-Release)
 
-VRC Worlds Manager is a Windows application designed to help VRChat users organize and store their favorite worlds more easily.
+VRC Worlds Manager is a web application designed to help VRChat users organize and store their favorite worlds more easily.
 
 ---
 
@@ -58,17 +58,16 @@ VRC Worlds Manager is a Windows application designed to help VRChat users organi
 
 ---
 
-## Installation
+## Usage
 
-Download the latest release from the [Releases page](https://github.com/Raifa21/VRC-Worlds-Manager-v2/releases) and run the `.exe` file.  
-No additional setup is required.
+Access the application at the deployed URL. No installation is required.
 
 ---
 
 ## Build/Release
 
-This project uses [Tauri](https://tauri.app/) and [Next.js](https://nextjs.org/).  
-To build from source, clone the repository and follow the instructions in the [Tauri documentation](https://tauri.app/v1/guides/getting-started/prerequisites/) and [Next.js documentation](https://nextjs.org/docs).
+This project uses [Next.js](https://nextjs.org/) and deploys to [Cloudflare Pages](https://pages.cloudflare.com/).  
+To build from source, clone the repository and follow the instructions in the [Next.js documentation](https://nextjs.org/docs).
 
 ---
 
