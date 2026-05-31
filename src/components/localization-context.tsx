@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, FC, useEffect, useState } from 'react';
+import { createContext, FC, useCallback, useEffect, useState } from 'react';
 
 import jaJP from '../../locales/ja-JP.json';
 import enUS from '../../locales/en-US.json';
@@ -29,11 +29,7 @@ export const LocalizationContextProvider: FC<Props> = ({ children }) => {
   const [localizationData, setLocalizationData] =
     useState<Partial<{ [key in string]: string }>>(enUS);
 
-  const setLanguage = (language: string) => {
-    if (language === languageCode) {
-      return;
-    }
-
+  const setLanguage = useCallback((language: string) => {
     if (language === 'ja-JP') {
       setLocalizationData(jaJP);
     } else if (language === 'en-US') {
@@ -43,7 +39,7 @@ export const LocalizationContextProvider: FC<Props> = ({ children }) => {
     }
 
     setLanguageCode(language);
-  };
+  }, []);
 
   useEffect(() => {
     commands.getLanguage().then((result) => {
@@ -53,7 +49,7 @@ export const LocalizationContextProvider: FC<Props> = ({ children }) => {
         console.error('Failed to get language:', result.error);
       }
     });
-  }, []);
+  }, [setLanguage]);
 
   const contextValue: LocalizationContextType = {
     language: languageCode,

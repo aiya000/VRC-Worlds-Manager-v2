@@ -1,15 +1,39 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLocalization } from '@/hooks/use-localization';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { UserProfile } from '@/app/listview/about/components/user-profile';
-import { ExternalLink, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { SiGithub, SiDiscord } from '@icons-pack/react-simple-icons';
 import { toast } from 'sonner';
 import { commands } from '@/lib/bindings';
-import { info, error } from '@tauri-apps/plugin-log';
+import { error } from '@tauri-apps/plugin-log';
+
+type PatreonData = {
+  platinumSupporter?: string[];
+  goldSupporter?: string[];
+  silverSupporter?: string[];
+  bronzeSupporter?: string[];
+  basicSupporter?: string[];
+};
+
+function sortSupporters(data: PatreonData): string[] {
+  const platinumNames = (data.platinumSupporter || []).sort();
+  const goldNames = (data.goldSupporter || []).sort();
+  const silverNames = (data.silverSupporter || []).sort();
+  const bronzeNames = (data.bronzeSupporter || []).sort();
+  const basicNames = (data.basicSupporter || []).sort();
+
+  return [
+    ...platinumNames,
+    ...goldNames,
+    ...silverNames,
+    ...bronzeNames,
+    ...basicNames,
+  ];
+}
 
 export default function AboutSection() {
   const { t } = useLocalization();
@@ -36,24 +60,7 @@ export default function AboutSection() {
     }
 
     fetchPatreonData();
-  }, [toast]);
-
-  // Helper function to sort supporters
-  const sortSupporters = (data: any) => {
-    const platinumNames = (data.platinumSupporter || []).sort();
-    const goldNames = (data.goldSupporter || []).sort();
-    const silverNames = (data.silverSupporter || []).sort();
-    const bronzeNames = (data.bronzeSupporter || []).sort();
-    const basicNames = (data.basicSupporter || []).sort();
-
-    return [
-      ...platinumNames,
-      ...goldNames,
-      ...silverNames,
-      ...bronzeNames,
-      ...basicNames,
-    ];
-  };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">

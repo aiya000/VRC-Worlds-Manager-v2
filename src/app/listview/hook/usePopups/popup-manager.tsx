@@ -14,7 +14,7 @@ import { useSearchParams, usePathname } from 'next/navigation';
 import { SpecialFolders, FolderType, isUserFolder } from '@/types/folders';
 import { useWorlds } from '../use-worlds';
 import { commands } from '@/lib/bindings';
-import { error, info } from '@tauri-apps/plugin-log';
+import { error } from '@tauri-apps/plugin-log';
 import { useLocalization } from '@/hooks/use-localization';
 import { toast } from 'sonner';
 

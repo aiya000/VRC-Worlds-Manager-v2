@@ -52,7 +52,6 @@ export const useWorldFolderPage = (
   const {
     getSelectedWorlds,
     isSelectionMode,
-    selectAllWorlds,
     setSelection,
     clearFolderSelections,
   } = useSelectedWorldsStore();

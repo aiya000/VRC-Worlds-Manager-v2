@@ -3,8 +3,7 @@
 import { SaturnIcon } from '../../../components/icons/saturn-icon';
 import { GearIcon } from '../../../components/icons/gear-icon';
 import { Info, FileQuestion, History, Plus } from 'lucide-react';
-import { SpecialFolders } from '@/types/folders';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { FolderData } from '@/lib/bindings';
 import { useState, useEffect, useRef } from 'react';
 import { useLocalization } from '@/hooks/use-localization';
@@ -46,7 +45,7 @@ interface AppSidebarProps {
 
 export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
   const { t } = useLocalization();
-  const { folders, moveFolder, createFolder, deleteFolder, renameFolder } =
+  const { folders, moveFolder, deleteFolder, renameFolder } =
     useFolders();
   const setPopup = usePopupStore((state) => state.setPopup);
 
@@ -67,7 +66,7 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
     setLocalFolders(folders);
   }, [folders]);
 
-  const handleDragEnd = async (result: any) => {
+  const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
 
     const { source, destination } = result;

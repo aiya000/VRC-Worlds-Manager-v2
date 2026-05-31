@@ -14,7 +14,6 @@ import { useRouter } from 'next/navigation';
 import { LocalizationContext } from '../../../components/localization-context';
 import { useFolders } from '../hook/use-folders';
 import { useTheme } from 'next-themes';
-import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
 
 export const useSettingsPage = () => {
   const [cardSize, setCardSize] = useState<CardSize>('Normal');
@@ -82,6 +81,8 @@ export const useSettingsPage = () => {
     }
   };
 
+  const { t } = useLocalization();
+
   useEffect(() => {
     const loadPreferences = async () => {
       try {
@@ -142,9 +143,7 @@ export const useSettingsPage = () => {
     };
 
     loadPreferences();
-  }, [setTheme]);
-
-  const { t } = useLocalization();
+  }, [setTheme, t]);
 
   const handleBackup = async () => {
     try {

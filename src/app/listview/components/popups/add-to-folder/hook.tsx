@@ -11,7 +11,6 @@ import {
 import { FolderType, isUserFolder, SpecialFolders } from '@/types/folders';
 import { error, info } from '@tauri-apps/plugin-log';
 import { mutate as mutateFoldersCache } from 'swr';
-import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { usePopupStore } from '@/app/listview/hook/usePopups/store';
@@ -31,7 +30,7 @@ export const useAddToFolderPopup = ({
 
   const { folders, createFolder, refresh: refreshFolders } = useFolders();
 
-  const { worlds, refresh } = useWorlds(currentFolder);
+  const { refresh } = useWorlds(currentFolder);
 
   const isSpecialFolder = !isUserFolder(currentFolder);
   const isFindPage = currentFolder === SpecialFolders.Find;
@@ -65,7 +64,9 @@ export const useAddToFolderPopup = ({
 
   // IME composition tracking: prevent Enter during composition from submitting
   const composingRef = useRef(false);
-  const [isComposing, setIsComposing] = useState(false);
+  const setIsComposing = (isComposing: boolean) => {
+    composingRef.current = isComposing;
+  };
 
   // scroll to bottom when starting to create
   useEffect(() => {

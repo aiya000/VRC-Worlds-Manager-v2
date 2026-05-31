@@ -54,7 +54,6 @@ const WelcomePage: React.FC = () => {
     false,
     false,
   ]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [alreadyMigrated, setAlreadyMigrated] = useState<boolean>(false);
   const [hasExistingData, setHasExistingData] = useState<[boolean, boolean]>([
     false,
@@ -138,9 +137,7 @@ const WelcomePage: React.FC = () => {
         setShowMigrationConfirm(true);
         return;
       }
-      setIsLoading(true);
       await migrate();
-      setIsLoading(false);
       setAlreadyMigrated(true);
     }
     if (page === 5) {
@@ -212,29 +209,30 @@ const WelcomePage: React.FC = () => {
   };
 
   // Fetch migration metadata when both paths are valid
+  const migrationPath0 = migrationPaths[0];
+  const migrationPath1 = migrationPaths[1];
+  const pathValid0 = pathValidation[0];
+  const pathValid1 = pathValidation[1];
   useEffect(() => {
     const fetchMeta = async () => {
-      if (
-        pathValidation[0] &&
-        pathValidation[1] &&
-        migrationPaths[0] &&
-        migrationPaths[1]
-      ) {
+      if (pathValid0 && pathValid1 && migrationPath0 && migrationPath1) {
         setMigrationMetaLoading(true);
         setMigrationMetaError(null);
         setMigrationMeta(null);
         try {
           const result = await commands.getMigrationMetadata(
-            migrationPaths[0],
-            migrationPaths[1],
+            migrationPath0,
+            migrationPath1,
           );
           if (result.status === 'ok') {
             setMigrationMeta(result.data);
           } else {
             setMigrationMetaError(result.error);
           }
-        } catch (e: any) {
-          setMigrationMetaError(e?.message || 'Unknown error');
+        } catch (e: unknown) {
+          setMigrationMetaError(
+            e instanceof Error ? e.message : 'Unknown error',
+          );
         } finally {
           setMigrationMetaLoading(false);
         }
@@ -245,13 +243,7 @@ const WelcomePage: React.FC = () => {
       }
     };
     fetchMeta();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    migrationPaths[0],
-    migrationPaths[1],
-    pathValidation[0],
-    pathValidation[1],
-  ]);
+  }, [migrationPath0, migrationPath1, pathValid0, pathValid1]);
 
   const handleMigrationConfirm = () => {
     setShowMigrationConfirm(false);

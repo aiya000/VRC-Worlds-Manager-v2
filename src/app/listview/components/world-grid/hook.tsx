@@ -2,13 +2,10 @@ import { CardSize, commands, WorldDisplayData } from '@/lib/bindings';
 import { usePopupStore } from '../../hook/usePopups/store';
 import { toast } from 'sonner';
 import { useLocalization } from '@/hooks/use-localization';
-import { use, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { error } from '@tauri-apps/plugin-log';
 import { useSelectedWorldsStore } from '../../hook/use-selected-worlds';
-import { useFolders } from '../../hook/use-folders';
 import { useWorlds } from '../../hook/use-worlds';
-import { usePathname } from 'next/navigation';
-import path from 'path';
 import { FolderType, isUserFolder, SpecialFolders } from '@/types/folders';
 
 export function useWorldGrid(
@@ -21,7 +18,6 @@ export function useWorldGrid(
   const {
     getSelectedWorlds,
     isSelectionMode,
-    toggleSelectionMode,
     toggleWorldSelection,
     selectAllWorlds,
     clearFolderSelections,
@@ -31,11 +27,7 @@ export function useWorldGrid(
 
   const [cardSize, setCardSize] = useState<CardSize>('Normal');
 
-  useEffect(() => {
-    loadCardSize();
-  }, []);
-
-  const loadCardSize = async () => {
+  const loadCardSize = useCallback(async () => {
     try {
       const result = await commands.getCardSize();
       if (result.status === 'ok') {
@@ -47,7 +39,11 @@ export function useWorldGrid(
         description: t('listview-page:error-load-card-size'),
       });
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    loadCardSize();
+  }, [loadCardSize]);
 
   const selectedWorlds = Array.from(getSelectedWorlds(currentFolder));
 

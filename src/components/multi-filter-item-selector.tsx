@@ -115,13 +115,6 @@ export default function MultiFilterItemSelector({
     // Keep popover open for multiple selections
   };
 
-  // Filter candidates that aren't already selected
-  const filteredItems = candidates.filter(
-    (item) =>
-      !values.includes(item.value) &&
-      item.label.toLowerCase().includes(inputValue.toLowerCase()),
-  );
-
   // Set starred items based on the provided ID
   useEffect(() => {
     const fetchStarredItems = async () => {

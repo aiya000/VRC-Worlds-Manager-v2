@@ -37,7 +37,7 @@ export function ImportedFolderContainsHidden({
     if (!open) {
       clearFolderSelections(dialogFolderKey);
     }
-  }, [open, clearFolderSelections]);
+  }, [open, clearFolderSelections, dialogFolderKey]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
