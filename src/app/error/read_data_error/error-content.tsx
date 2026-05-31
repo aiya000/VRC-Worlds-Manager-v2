@@ -4,10 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { useLocalization } from '@/hooks/use-localization';
 import { Button } from '@/components/ui/button';
 import { SiDiscord } from '@icons-pack/react-simple-icons';
-import { FolderOpen, Globe } from 'lucide-react';
-import { commands } from '@/lib/bindings';
-import { toast } from 'sonner';
-import { info, error } from '@tauri-apps/plugin-log';
+import { Globe } from 'lucide-react';
 import { useState, useContext } from 'react';
 import { LocalizationContext } from '@/components/localization-context';
 import {
@@ -37,45 +34,6 @@ export function ErrorContent() {
     return t('error-page:unknown-error');
   })();
 
-  const handleOpenLogs = async () => {
-    try {
-      const result = await commands.openLogsDirectory();
-
-      if (result.status === 'ok') {
-        info('Opened logs directory');
-      } else {
-        error(`Failed to open logs directory: ${result.error}`);
-        toast(t('general:error-title'), {
-          description: t('general:error-open-logs'),
-        });
-      }
-    } catch (e) {
-      error(`Failed to open logs directory: ${e}`);
-      toast(t('general:error-title'), {
-        description: t('general:error-open-logs'),
-      });
-    }
-  };
-
-  const handleOpenFolder = async () => {
-    try {
-      const result = await commands.openFolderDirectory();
-
-      if (result.status === 'ok') {
-        info('Opened folder directory');
-      } else {
-        error(`Failed to open folder directory: ${result.error}`);
-        toast(t('general:error-title'), {
-          description: t('general:error-open-folder'),
-        });
-      }
-    } catch (e) {
-      error(`Failed to open folder directory: ${e}`);
-      toast(t('general:error-title'), {
-        description: t('general:error-open-folder'),
-      });
-    }
-  };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen p-6 relative">
@@ -120,25 +78,6 @@ export function ErrorContent() {
         </p>
 
         <div className="flex flex-col gap-4 items-center">
-          <div className="flex flex-row gap-2 w-full">
-            <Button
-              variant="outline"
-              onClick={handleOpenLogs}
-              className="gap-2 w-full"
-            >
-              <FolderOpen className="h-4 w-4" />
-              <span>{t('error-page:logs')}</span>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleOpenFolder}
-              className="gap-2 w-full"
-            >
-              <FolderOpen className="h-4 w-4" />
-              <span>{t('general:open-folder')}</span>
-            </Button>
-          </div>
-
           <Button variant="secondary" className="gap-2 w-full" asChild>
             <a
               href="https://discord.gg/gNzbpux5xW"

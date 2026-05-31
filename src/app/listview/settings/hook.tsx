@@ -1,10 +1,5 @@
 import { useLocalization } from '@/hooks/use-localization';
-import {
-  CardSize,
-  commands,
-  FolderRemovalPreference,
-  UpdateChannel,
-} from '@/lib/bindings';
+import { CardSize, commands, FolderRemovalPreference } from '@/lib/bindings';
 import { error, info } from '@tauri-apps/plugin-log';
 import { useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -20,9 +15,6 @@ export const useSettingsPage = () => {
   const [language, setLanguage] = useState<string>('en-US');
   const [folderRemovalPreference, setFolderRemovalPreference] =
     useState<FolderRemovalPreference | null>(null);
-  const [updateChannel, setUpdateChannel] = useState<UpdateChannel | null>(
-    null,
-  );
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showMigrateDialog, setShowMigrateDialog] = useState(false);
@@ -89,7 +81,6 @@ export const useSettingsPage = () => {
         const themeResult = await commands.getTheme();
         const languageResult = await commands.getLanguage();
         const cardSizeResult = await commands.getCardSize();
-        const updateChannelResult = await commands.getUpdateChannel();
         const folderRemovalPreferenceResult =
           await commands.getFolderRemovalPreference();
         const theme = themeResult.status === 'ok' ? themeResult.data : 'system';
@@ -97,10 +88,6 @@ export const useSettingsPage = () => {
           languageResult.status === 'ok' ? languageResult.data : 'en-US';
         const cardSize =
           cardSizeResult.status === 'ok' ? cardSizeResult.data : 'Normal';
-        const updateChannel =
-          updateChannelResult.status === 'ok'
-            ? updateChannelResult.data
-            : 'stable';
 
         const folderRemovalPreference =
           folderRemovalPreferenceResult.status === 'ok'
@@ -110,13 +97,11 @@ export const useSettingsPage = () => {
         setLanguage(language);
         setCardSize(cardSize);
         setFolderRemovalPreference(folderRemovalPreference);
-        setUpdateChannel(updateChannel);
         // put a toast if commands fail
         if (
           themeResult.status === 'error' ||
           languageResult.status === 'error' ||
           cardSizeResult.status === 'error' ||
-          updateChannelResult.status === 'error' ||
           folderRemovalPreferenceResult.status === 'error'
         ) {
           toast(t('general:error-title'), {
@@ -126,9 +111,6 @@ export const useSettingsPage = () => {
               (themeResult.status === 'error' ? themeResult.error : '') +
               (languageResult.status === 'error' ? languageResult.error : '') +
               (cardSizeResult.status === 'error' ? cardSizeResult.error : '') +
-              (updateChannelResult.status === 'error'
-                ? updateChannelResult.error
-                : '') +
               (folderRemovalPreferenceResult.status === 'error'
                 ? folderRemovalPreferenceResult.error
                 : ''),
@@ -291,23 +273,6 @@ export const useSettingsPage = () => {
     }
   };
 
-  const handleOpenLogs = async () => {
-    try {
-      const result = await commands.openLogsDirectory();
-
-      if (result.status === 'ok') {
-        info('Opened logs directory');
-      } else {
-        error(`Failed to open logs directory: ${result.error}`);
-      }
-    } catch (e) {
-      error(`Failed to open logs directory: ${e}`);
-      toast(t('general:error-title'), {
-        description: t('general:error-open-logs'),
-      });
-    }
-  };
-
   const handleThemeChange = async (value: string) => {
     try {
       info(`Setting theme to: ${value}`);
@@ -401,28 +366,6 @@ export const useSettingsPage = () => {
     }
   };
 
-  const handleUpdateChannelChange = async (value: UpdateChannel) => {
-    try {
-      info(`Setting update channel to: ${value}`);
-      const result = await commands.setUpdateChannel(value);
-      if (result.status === 'ok') {
-        setUpdateChannel(value);
-        info(`Update channel set to: ${value}`);
-      } else {
-        error(`Failed to set update channel: ${result.error}`);
-        toast(t('general:error-title'), {
-          description:
-            t('settings-page:error-save-preferences') + ': ' + result.error,
-        });
-      }
-    } catch (e) {
-      error(`Failed to save update channel: ${e}`);
-      toast(t('general:error-title'), {
-        description: t('settings-page:error-save-preferences'),
-      });
-    }
-  };
-
   const openHiddenFolder = () => {
     router.push('/listview/folders/hidden');
   };
@@ -431,7 +374,6 @@ export const useSettingsPage = () => {
     cardSize,
     language,
     folderRemovalPreference,
-    updateChannel,
     showDeleteConfirm,
     setShowDeleteConfirm,
     showMigrateDialog,
@@ -446,12 +388,10 @@ export const useSettingsPage = () => {
     handleMigrationConfirm,
     handleDeleteConfirm,
     handleLogout,
-    handleOpenLogs,
     handleThemeChange,
     handleLanguageChange,
     handleCardSizeChange,
     handleFolderRemovalPreferenceChange,
-    handleUpdateChannelChange,
     openHiddenFolder,
     t,
   };
