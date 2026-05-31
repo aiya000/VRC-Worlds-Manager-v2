@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { info } from '@/lib/services/logger'
 
 interface SetupLayoutProps {
   title: string

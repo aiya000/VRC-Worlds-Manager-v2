@@ -26,7 +26,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { info, error } from '@/lib/services/logger'
 import { SaturnIcon } from '@/components/icons/saturn-icon'
 import { FolderOpen, Info } from 'lucide-react'
 import { MigrationConfirmationPopup } from '@/app/listview/settings/components/popups/migration-confirmation-popup'
@@ -68,7 +67,7 @@ const WelcomePage: React.FC = () => {
   const [showMigrationConfirm, setShowMigrationConfirm] = useState(false)
 
   useEffect(() => {
-    info(`Theme changed to: ${preferences.theme}`)
+    console.info(`Theme changed to: ${preferences.theme}`)
   }, [preferences.theme])
 
   const migrate = async (): Promise<boolean> => {
@@ -101,14 +100,14 @@ const WelcomePage: React.FC = () => {
         if (hasDataResult.status === 'ok') {
           setHasExistingData(hasDataResult.data)
         } else {
-          error(`Failed to fetch existing data: ${hasDataResult.error}`)
+          console.error(`Failed to fetch existing data: ${hasDataResult.error}`)
         }
 
         // Web version: no auto-detection of old installation paths.
         // User must manually select files.
         setPathValidation([false, false])
       } catch (e) {
-        error(`Failed to check existing data: ${e}`)
+        console.error(`Failed to check existing data: ${e}`)
         setPathValidation([false, false])
       }
     }
@@ -155,7 +154,7 @@ const WelcomePage: React.FC = () => {
           ),
         })
 
-        error(`Failed to save preferences: ${errorResult.error}`)
+        console.error(`Failed to save preferences: ${errorResult.error}`)
         setPage(5)
         return
       }
@@ -184,7 +183,7 @@ const WelcomePage: React.FC = () => {
       setPage(4)
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e)
-      error(`Migration failed unexpectedly: ${message}`)
+      console.error(`Migration failed unexpectedly: ${message}`)
       toast(t('general:error-title'), {
         description: t('setup-page:toast:error:migrate:message', message),
       })
@@ -205,7 +204,7 @@ const WelcomePage: React.FC = () => {
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) {
-        info('File selection cancelled')
+        console.info('File selection cancelled')
         return
       }
 
@@ -217,7 +216,7 @@ const WelcomePage: React.FC = () => {
       newValidation[index] = true
       setPathValidation(newValidation)
 
-      info(`Selected file: ${file.name}`)
+      console.info(`Selected file: ${file.name}`)
     }
     input.click()
   }
@@ -272,7 +271,7 @@ const WelcomePage: React.FC = () => {
       await runMigration()
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e)
-      error(`Migration confirmation failed: ${message}`)
+      console.error(`Migration confirmation failed: ${message}`)
       toast(t('general:error-title'), {
         description: t('setup-page:toast:error:migrate:message', message),
       })

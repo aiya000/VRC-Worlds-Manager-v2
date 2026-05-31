@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { useLocalization } from '@/hooks/use-localization'
 import { commands } from '@/lib/commands'
-import { info, error } from '@/lib/services/logger'
 import { FolderOpen } from 'lucide-react'
 import { Calendar, Info, AlertTriangle, Loader2, Folder } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -53,7 +52,7 @@ export function RestoreBackupDialog({
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) {
-        info('Backup selection cancelled')
+        console.info('Backup selection cancelled')
         return
       }
 
@@ -80,7 +79,7 @@ export function RestoreBackupDialog({
         setMetadata(meta)
         setIsLoading(false)
       } catch (e) {
-        error(`Failed to select backup: ${e}`)
+        console.error(`Failed to select backup: ${e}`)
         setErrorMessage(t('settings-page:error-read-backup'))
         setIsLoading(false)
       }

@@ -2,7 +2,6 @@ import { commands, WorldDisplayData } from '@/lib/commands'
 import { create } from 'zustand'
 import { useEffect, useRef } from 'react'
 import { toRomaji } from 'wanakana'
-import { error, info } from '@/lib/services/logger'
 import { toast } from 'sonner'
 import { useLocalization } from '@/hooks/use-localization'
 
@@ -55,7 +54,7 @@ export const useWorldFiltersStore = create<FilterState>((set) => ({
       const newDirection = getDefaultDirection(field)
       // Save to backend
       commands.setSortPreferences(field, newDirection).catch((e) => {
-        error(`Failed to save sort preferences: ${e}`)
+        console.error(`Failed to save sort preferences: ${e}`)
       })
       return {
         sortField: field,
@@ -66,7 +65,7 @@ export const useWorldFiltersStore = create<FilterState>((set) => ({
     set((state) => {
       // Save to backend
       commands.setSortPreferences(state.sortField, dir).catch((e) => {
-        error(`Failed to save sort preferences: ${e}`)
+        console.error(`Failed to save sort preferences: ${e}`)
       })
       return { sortDirection: dir }
     })
@@ -147,13 +146,13 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
               sortField: field as SortField,
               sortDirection: direction as 'asc' | 'desc',
             })
-            info(
+            console.info(
               `[useWorldFilters] Loaded sort preferences: field=${field} direction=${direction}`,
             )
           }
         })
         .catch((e) => {
-          error(`Failed to load sort preferences: ${e}`)
+          console.error(`Failed to load sort preferences: ${e}`)
         })
     }
   }, [])
@@ -247,7 +246,7 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
             toast(t('general:error-title'), { description: result.error })
           }
         } catch (e) {
-          error(`Error searching memo text: ${e}`)
+          console.error(`Error searching memo text: ${e}`)
           toast(t('general:error-title'), {
             description: t('listview-page:error-search-memo-text'),
           })
@@ -258,7 +257,7 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
         (w) => !memoIdSet || memoIdSet.has(w.worldId),
       )
       if (hasMemoFilter) {
-        info(
+        console.info(
           `[useWorldFilters] Memo filter applied memoIds=${memoIdSet ? memoIdSet.size : 0} afterMemo=${finalList.length}`,
         )
       }
@@ -293,11 +292,11 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
         if (sortRes.status === 'ok') {
           sortedList = sortRes.data
         } else {
-          error(`[useWorldFilters] Backend sort failed: ${sortRes.error}`)
+          console.error(`[useWorldFilters] Backend sort failed: ${sortRes.error}`)
           sortedList = fallbackSort()
         }
       } catch (e) {
-        error(`[useWorldFilters] Exception during backend sort: ${e}`)
+        console.error(`[useWorldFilters] Exception during backend sort: ${e}`)
         sortedList = fallbackSort()
       }
       finalList = sortedList
@@ -341,15 +340,15 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
                   a.localeCompare(b, undefined, { sensitivity: 'base' }),
                 )
               } else {
-                info('[useWorldFilters] Fallback returned empty tag list')
+                console.info('[useWorldFilters] Fallback returned empty tag list')
               }
             } else {
-              error(
+              console.error(
                 `[useWorldFilters] Fallback getTagsByCount error=${fallbackRes.error}`,
               )
             }
           } catch (e) {
-            error(
+            console.error(
               `[useWorldFilters] Exception in fallback getTagsByCount: ${e}`,
             )
           }
@@ -370,7 +369,7 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
             state.filteredWorlds.map((w) => w.worldId),
           )
         ) {
-          info(
+          console.info(
             `[useWorldFilters] Updating filteredWorlds newLength=${finalList.length}`,
           )
           setFilteredWorlds(finalList)

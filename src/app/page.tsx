@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { commands } from '@/lib/commands'
 import { useLocalization } from '@/hooks/use-localization'
-import { info, error } from '@/lib/services/logger'
 
 export default function Home() {
   const router = useRouter()
@@ -21,7 +20,7 @@ export default function Home() {
           const result = await commands.checkFilesLoaded()
 
           if (result.status === 'error') {
-            error(`Error loading files: ${result.error}`)
+            console.error(`Error loading files: ${result.error}`)
             router.push(
               `${'/error/read_data_error'}?${encodeURIComponent(result.error)}`,
             )
@@ -32,7 +31,7 @@ export default function Home() {
           const authResult = await commands.tryLogin()
 
           if (authResult.status === 'ok') {
-            info('User is authenticated')
+            console.info('User is authenticated')
             router.push('/listview/folders/special/all')
           } else {
             router.push('/login')

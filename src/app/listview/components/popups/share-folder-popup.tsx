@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useLocalization } from '@/hooks/use-localization'
 import { commands } from '@/lib/commands'
-import { info, error } from '@/lib/services/logger'
 import {
   FolderOpen,
   Loader2,
@@ -57,10 +56,10 @@ export function ShareFolderPopup({
     setInfoLoading(true)
 
     const fetchFolderInfo = async () => {
-      info(`Fetching folder info for: ${folderName}`)
+      console.info(`Fetching folder info for: ${folderName}`)
       try {
         const result = await commands.getWorlds(folderName)
-        info(`getWorlds result: ${JSON.stringify(result)}`)
+        console.info(`getWorlds result: ${JSON.stringify(result)}`)
 
         if (result.status === 'ok') {
           setFolderInfo(result.data.length)
@@ -80,11 +79,11 @@ export function ShareFolderPopup({
             setShareLoading(false)
           }
         } else {
-          error(`getWorlds error: ${result.error}`)
+          console.error(`getWorlds error: ${result.error}`)
           setErrorMessage(t('share-folder:error-message', result.error))
         }
       } catch (e) {
-        error(`Failed to fetch folder info: ${e}`)
+        console.error(`Failed to fetch folder info: ${e}`)
         setErrorMessage(t('share-folder:error-message', e))
       } finally {
         setInfoLoading(false)
@@ -99,7 +98,7 @@ export function ShareFolderPopup({
     setShareLoading(true)
     const id = await commands.shareFolder(folderName)
     if (id.status === 'ok') {
-      info(`Shared folder "${folderName}" as ${id.data}`)
+      console.info(`Shared folder "${folderName}" as ${id.data}`)
       setShareId(id.data)
     } else {
       setErrorMessage(t('share-folder:error-message', id.error))
@@ -112,11 +111,11 @@ export function ShareFolderPopup({
     if (shareId) {
       try {
         await navigator.clipboard.writeText(shareId)
-        info('Copied share ID to clipboard')
+        console.info('Copied share ID to clipboard')
         toast.success(t('share-folder:toast-id-copied'))
         onOpenChange(false)
       } catch (e) {
-        error(`Clipboard copy failed: ${e}`)
+        console.error(`Clipboard copy failed: ${e}`)
       }
     }
   }
@@ -142,11 +141,11 @@ export function ShareFolderPopup({
     if (shareLink) {
       try {
         await navigator.clipboard.writeText(shareLink)
-        info('Copied share link to clipboard')
+        console.info('Copied share link to clipboard')
         toast.success(t('share-folder:toast-link-copied', folderName))
         onOpenChange(false)
       } catch (e) {
-        error(`Clipboard copy failed: ${e}`)
+        console.error(`Clipboard copy failed: ${e}`)
       }
     }
   }
@@ -155,11 +154,11 @@ export function ShareFolderPopup({
     if (shareText) {
       try {
         await navigator.clipboard.writeText(shareText)
-        info('Copied share text to clipboard')
+        console.info('Copied share text to clipboard')
         toast.success(t('share-folder:toast-text-copied', folderName))
         onOpenChange(false)
       } catch (e) {
-        error(`Clipboard copy failed: ${e}`)
+        console.error(`Clipboard copy failed: ${e}`)
       }
     }
   }
@@ -171,7 +170,7 @@ export function ShareFolderPopup({
       toast.success(t('share-folder:toast-twitter-opened', folderName))
       onOpenChange(false)
     } catch (e) {
-      error(`Failed to open Twitter share: ${e}`)
+      console.error(`Failed to open Twitter share: ${e}`)
     }
   }
 
@@ -180,9 +179,9 @@ export function ShareFolderPopup({
     if (shareLink) {
       try {
         window.open(shareLink, '_blank')
-        info('Opened folder preview in browser')
+        console.info('Opened folder preview in browser')
       } catch (e) {
-        error(`Failed to open browser: ${e}`)
+        console.error(`Failed to open browser: ${e}`)
       }
     }
   }

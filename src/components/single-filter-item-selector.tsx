@@ -26,7 +26,6 @@ import { cn } from '@/lib/utils'
 import { useLocalization } from '@/hooks/use-localization'
 import { commands } from '@/lib/commands'
 import { FilterItemSelectorStarredType } from '@/lib/commands'
-import { info } from '@/lib/services/logger'
 
 export type Option = {
   value: string
@@ -65,7 +64,7 @@ export default function SingleFilterItemSelector({
   // Clear the selection
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation()
-    info('Clearing selection')
+    console.info('Clearing selection')
     onValueChange('')
   }
 

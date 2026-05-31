@@ -3,7 +3,6 @@ import { commands } from '@/lib/commands'
 import { InstanceRegion } from '@/lib/commands'
 import { GroupInstanceType, InstanceType } from '@/types/instances'
 import { toast } from 'sonner'
-import { error } from '@/lib/services/logger'
 import { useWorldFiltersStore } from '@/app/listview/hook/use-filters'
 import { UserGroup, GroupInstancePermissionInfo } from '@/lib/commands'
 
@@ -42,13 +41,13 @@ export function useWorldDetailsActions(onOpenChange: (open: boolean) => void) {
                 toast(t('general:error-title'), { description: openRes.error })
               }
             } catch (e) {
-              error(`Failed to open instance in client: ${e}`)
+              console.error(`Failed to open instance in client: ${e}`)
             }
           },
         },
       })
     } catch (e) {
-      error(`Failed to create instance: ${e}`)
+      console.error(`Failed to create instance: ${e}`)
       toast(t('general:error-title'), {
         description: t('listview-page:error-create-instance'),
       })
@@ -91,13 +90,13 @@ export function useWorldDetailsActions(onOpenChange: (open: boolean) => void) {
                 toast(t('general:error-title'), { description: openRes.error })
               }
             } catch (e) {
-              error(`Failed to open instance in client: ${e}`)
+              console.error(`Failed to open instance in client: ${e}`)
             }
           },
         },
       })
     } catch (e) {
-      error(`Failed to create group instance: ${e}`)
+      console.error(`Failed to create group instance: ${e}`)
       toast(t('general:error-title'), {
         description: t('listview-page:error-create-group-instance'),
       })
@@ -112,7 +111,7 @@ export function useWorldDetailsActions(onOpenChange: (open: boolean) => void) {
       }
       return result.data
     } catch (e) {
-      error(`Failed to get groups: ${e}`)
+      console.error(`Failed to get groups: ${e}`)
       toast(t('general:error-title'), {
         description: t('listview-page:error-get-groups'),
       })
@@ -130,7 +129,7 @@ export function useWorldDetailsActions(onOpenChange: (open: boolean) => void) {
       }
       return result.data
     } catch (e) {
-      error(`Failed to get group permissions: ${e}`)
+      console.error(`Failed to get group permissions: ${e}`)
       toast(t('general:error-title'), {
         description: t('listview-page:error-get-group-permissions'),
       })
@@ -152,7 +151,7 @@ export function useWorldDetailsActions(onOpenChange: (open: boolean) => void) {
       })
       onOpenChange(false)
     } catch (e) {
-      error(`Failed to delete world: ${e}`)
+      console.error(`Failed to delete world: ${e}`)
       toast(t('general:error-title'), {
         description: t('listview-page:error-delete-world'),
       })

@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { useLocalization } from '@/hooks/use-localization'
 import { commands } from '@/lib/commands'
-import { info, error } from '@/lib/services/logger'
 import {
   FolderOpen,
   ArrowRightLeft,
@@ -56,7 +55,7 @@ export function MigrationPopup({
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) {
-        info('File selection cancelled')
+        console.info('File selection cancelled')
         return
       }
 
@@ -69,7 +68,7 @@ export function MigrationPopup({
           await validateAndLoadMetadata(newFiles[0], newFiles[1])
         }
       } catch (e) {
-        error(`Failed to select file: ${e}`)
+        console.error(`Failed to select file: ${e}`)
         setErrorMessage(t('settings-page:error-select-file'))
       }
     }
@@ -102,7 +101,7 @@ export function MigrationPopup({
       setMigrationData(data)
       setIsLoading(false)
     } catch (e) {
-      error(`Failed to read migration data: ${e}`)
+      console.error(`Failed to read migration data: ${e}`)
       setErrorMessage(t('settings-page:error-read-migration-files'))
       setMigrationData(null)
     } finally {
@@ -122,7 +121,7 @@ export function MigrationPopup({
       setMigrationData(null)
       onOpenChange(false)
     } catch (e) {
-      error(`Migration confirmation error: ${e}`)
+      console.error(`Migration confirmation error: ${e}`)
     }
   }
 

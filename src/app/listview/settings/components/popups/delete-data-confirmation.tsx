@@ -10,7 +10,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { info } from '@/lib/services/logger'
 
 interface DeleteDataConfirmationDialogProps {
   open: boolean
@@ -37,7 +36,7 @@ export function DeleteDataConfirmationDialog({
           const newProgress = prev + (stepInterval / holdDuration) * 100
           if (newProgress >= 100) {
             // Clear interval when reaching 100%
-            info('Deleting data...')
+            console.info('Deleting data...')
             if (intervalRef.current) clearInterval(intervalRef.current)
             setIsHolding(false)
             handleConfirm()

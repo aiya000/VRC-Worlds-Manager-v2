@@ -27,7 +27,6 @@ import {
 } from '@/components/ui/card'
 import { WorldCardPreview } from '@/components/world-card'
 import { useLocalization } from '@/hooks/use-localization'
-import { info, error as logError } from '@/lib/services/logger'
 import { useWorlds } from '../../hook/use-worlds'
 import { FolderType } from '@/types/folders'
 
@@ -103,13 +102,13 @@ export function AddWorldPopup({ onClose, currentFolder }: AddWorldPopupProps) {
     setIsDuplicate(false)
 
     const parsedWorldId = parseWorldId(input)
-    info(`Checking world ID: ${parsedWorldId}`)
+    console.info(`Checking world ID: ${parsedWorldId}`)
 
     if (!parsedWorldId) {
       setError(
         'Invalid world ID format. Please enter a valid VRChat world ID (wrld_...)',
       )
-      logError('Invalid world ID format')
+      console.error('Invalid world ID format')
       setIsLoading(false)
       return
     }

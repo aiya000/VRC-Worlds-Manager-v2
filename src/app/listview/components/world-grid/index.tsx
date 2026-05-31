@@ -22,7 +22,6 @@ import {
   AlertDialogCancel,
 } from '@/components/ui/alert-dialog'
 import * as Portal from '@radix-ui/react-portal'
-import { info, error } from '@/lib/services/logger'
 import { commands } from '@/lib/commands'
 import { Badge } from '@/components/ui/badge'
 import { useFolders } from '../../hook/use-folders'

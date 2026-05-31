@@ -1,6 +1,5 @@
 import { useLocalization } from '@/hooks/use-localization'
 import { CardSize, commands, FolderRemovalPreference } from '@/lib/commands'
-import { error, info } from '@/lib/services/logger'
 import { useContext, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { ExportType } from './components/popups/export'
@@ -54,7 +53,7 @@ export const useSettingsPage = () => {
       let result
       switch (exportType) {
         case ExportType.PLS:
-          info('Exporting to Portal Library System...')
+          console.info('Exporting to Portal Library System...')
           result = await commands.exportToPortalLibrarySystem(
             folders,
             sortField,
@@ -62,25 +61,25 @@ export const useSettingsPage = () => {
           )
           break
         default:
-          error(`Unknown export type: ${exportType}`)
+          console.error(`Unknown export type: ${exportType}`)
           toast(t('general:error-title'), {
             description: t('settings-page:error-unknown-export-type'),
           })
           return
       }
       if (result.status === 'error') {
-        error(`Export failed: ${result.error}`)
+        console.error(`Export failed: ${result.error}`)
         toast(t('general:error-title'), {
           description: t('settings-page:error-export-data'),
         })
         return
       }
-      info('Export completed successfully')
+      console.info('Export completed successfully')
       toast(t('settings-page:export-success-title'), {
         description: t('settings-page:export-success-description'),
       })
     } catch (e) {
-      error(`Export error: ${e}`)
+      console.error(`Export error: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-export-data'),
       })
@@ -132,7 +131,7 @@ export const useSettingsPage = () => {
           })
         }
       } catch (e) {
-        error(`Failed to load preferences: ${e}`)
+        console.error(`Failed to load preferences: ${e}`)
         toast(t('general:error-title'), {
           description: t('settings-page:error-load-preferences'),
         })
@@ -146,23 +145,23 @@ export const useSettingsPage = () => {
 
   const handleBackup = async () => {
     try {
-      info('Creating backup...')
+      console.info('Creating backup...')
       const result = await commands.createBackup()
 
       if (result.status === 'error') {
-        error(`Backup creation failed: ${result.error}`)
+        console.error(`Backup creation failed: ${result.error}`)
         toast(t('general:error-title'), {
           description: t('settings-page:error-create-backup'),
         })
         return
       }
 
-      info('Backup created successfully')
+      console.info('Backup created successfully')
       toast(t('settings-page:backup-success-title'), {
         description: t('settings-page:backup-success-description'),
       })
     } catch (e) {
-      error(`Backup error: ${e}`)
+      console.error(`Backup error: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-create-backup'),
       })
@@ -171,24 +170,24 @@ export const useSettingsPage = () => {
 
   const handleRestoreConfirm = async (file: File) => {
     try {
-      info(`Restoring from backup: ${file.name}`)
+      console.info(`Restoring from backup: ${file.name}`)
       const result = await commands.restoreFromBackupFile(file)
 
       if (result.status === 'error') {
-        error(`Restore failed: ${result.error}`)
+        console.error(`Restore failed: ${result.error}`)
         toast(t('general:error-title'), {
           description: t('settings-page:error-restore-backup'),
         })
         return
       }
 
-      info('Restore completed successfully')
+      console.info('Restore completed successfully')
       toast(t('settings-page:restore-success-title'), {
         description: t('settings-page:restore-success-description'),
       })
       onDataChange()
     } catch (e) {
-      error(`Restore error: ${e}`)
+      console.error(`Restore error: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-restore-backup'),
       })
@@ -200,27 +199,27 @@ export const useSettingsPage = () => {
     foldersFile: File,
   ) => {
     try {
-      info(`Migrating data from ${worldsFile.name} and ${foldersFile.name}`)
+      console.info(`Migrating data from ${worldsFile.name} and ${foldersFile.name}`)
       const result = await commands.migrateOldDataFromFiles(
         worldsFile,
         foldersFile,
       )
 
       if (result.status === 'error') {
-        error(`Migration failed: ${result.error}`)
+        console.error(`Migration failed: ${result.error}`)
         toast(t('general:error-title'), {
           description: t('settings-page:error-migrate-data'),
         })
         return
       }
 
-      info('Migration completed successfully')
+      console.info('Migration completed successfully')
       toast(t('settings-page:migration-success-title'), {
         description: t('settings-page:migration-success-description'),
       })
       onDataChange()
     } catch (e) {
-      error(`Migration error: ${e}`)
+      console.error(`Migration error: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-migrate-data'),
       })
@@ -229,16 +228,16 @@ export const useSettingsPage = () => {
 
   const handleDeleteConfirm = async () => {
     try {
-      info('Deleting all data...')
+      console.info('Deleting all data...')
       const result = await commands.deleteData()
       if (result.status === 'error') {
-        error(`Data deletion failed: ${result.error}`)
+        console.error(`Data deletion failed: ${result.error}`)
         toast(t('general:error-title'), {
           description: t('settings-page:error-delete-data'),
         })
         return
       }
-      info('Data deleted successfully')
+      console.info('Data deleted successfully')
       toast(t('settings-page:delete-success-title'), {
         description: t('settings-page:delete-success-description'),
       })
@@ -246,7 +245,7 @@ export const useSettingsPage = () => {
       setShowDeleteConfirm(false)
       onDataChange()
     } catch (e) {
-      error(`Data deletion error: ${e}`)
+      console.error(`Data deletion error: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-delete-data'),
       })
@@ -255,21 +254,21 @@ export const useSettingsPage = () => {
 
   const handleLogout = async () => {
     try {
-      info('Logging out...')
+      console.info('Logging out...')
       const result = await commands.logout()
 
       if (result.status === 'error') {
-        error(`Logout failed: ${result.error}`)
+        console.error(`Logout failed: ${result.error}`)
         toast(t('general:error-title'), {
           description: t('settings-page:error-logout'),
         })
         return
       }
 
-      info('Logged out successfully')
+      console.info('Logged out successfully')
       router.push('/login')
     } catch (e) {
-      error(`Logout error: ${e}`)
+      console.error(`Logout error: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-logout'),
       })
@@ -279,21 +278,21 @@ export const useSettingsPage = () => {
   const handleThemeChange = async (value: string) => {
     try {
       const normalizedTheme = normalizeThemeValue(value)
-      info(`Setting theme to: ${normalizedTheme}`)
+      console.info(`Setting theme to: ${normalizedTheme}`)
       const result = await commands.setTheme(normalizedTheme)
 
       if (result.status === 'ok') {
         setTheme(normalizedTheme)
-        info(`Theme set to: ${normalizedTheme}`)
+        console.info(`Theme set to: ${normalizedTheme}`)
       } else {
-        error(`Failed to set theme: ${result.error}`)
+        console.error(`Failed to set theme: ${result.error}`)
         toast(t('general:error-title'), {
           description:
             t('settings-page:error-save-preferences') + ': ' + result.error,
         })
       }
     } catch (e) {
-      error(`Failed to save theme: ${e}`)
+      console.error(`Failed to save theme: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-save-preferences'),
       })
@@ -302,21 +301,21 @@ export const useSettingsPage = () => {
 
   const handleLanguageChange = async (value: string) => {
     try {
-      info(`Setting language to: ${value}`)
+      console.info(`Setting language to: ${value}`)
       const result = await commands.setLanguage(value)
       if (result.status === 'ok') {
         changeLanguage(value)
         setLanguage(value)
-        info(`Language set to: ${value}`)
+        console.info(`Language set to: ${value}`)
       } else {
-        error(`Failed to set language: ${result.error}`)
+        console.error(`Failed to set language: ${result.error}`)
         toast(t('general:error-title'), {
           description:
             t('settings-page:error-save-preferences') + ': ' + result.error,
         })
       }
     } catch (e) {
-      error(`Failed to save language: ${e}`)
+      console.error(`Failed to save language: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-save-preferences'),
       })
@@ -325,13 +324,13 @@ export const useSettingsPage = () => {
 
   const handleCardSizeChange = async (value: CardSize) => {
     try {
-      info(`Setting card size to: ${value}`)
+      console.info(`Setting card size to: ${value}`)
       const result = await commands.setCardSize(value)
       if (result.status === 'ok') {
         setCardSize(value)
-        info(`Card size set to: ${value}`)
+        console.info(`Card size set to: ${value}`)
       } else {
-        error(`Failed to set card size: ${result.error}`)
+        console.error(`Failed to set card size: ${result.error}`)
         toast(t('general:error-title'), {
           description:
             t('settings-page:error-save-preferences') + ': ' + result.error,
@@ -339,7 +338,7 @@ export const useSettingsPage = () => {
         return
       }
     } catch (e) {
-      error(`Failed to save card size: ${e}`)
+      console.error(`Failed to save card size: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-save-preferences'),
       })
@@ -350,20 +349,20 @@ export const useSettingsPage = () => {
     value: FolderRemovalPreference,
   ) => {
     try {
-      info(`Setting folder removal preference to: ${value}`)
+      console.info(`Setting folder removal preference to: ${value}`)
       const result = await commands.setFolderRemovalPreference(value)
       if (result.status === 'ok') {
-        info(`Folder removal preference set to: ${value}`)
+        console.info(`Folder removal preference set to: ${value}`)
         setFolderRemovalPreference(value)
       } else {
-        error(`Failed to set folder removal preference: ${result.error}`)
+        console.error(`Failed to set folder removal preference: ${result.error}`)
         toast(t('general:error-title'), {
           description:
             t('settings-page:error-save-preferences') + ': ' + result.error,
         })
       }
     } catch (e) {
-      error(`Failed to save folder removal preference: ${e}`)
+      console.error(`Failed to save folder removal preference: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-save-preferences'),
       })

@@ -8,7 +8,6 @@ import { useSelectedWorldsStore } from './use-selected-worlds'
 import { useWorlds } from './use-worlds'
 import { commands, WorldDisplayData } from '@/lib/commands'
 import { toast } from 'sonner'
-import { error } from '@/lib/services/logger'
 
 export type UseWorldFolderPageOptions = {
   folderId: string
@@ -106,7 +105,7 @@ export const useWorldFolderPage = (
         description: t('listview-page:worlds-fetched'),
       })
     } catch (e) {
-      error(`[${reloadLogScope}] reload failed: ${e}`)
+      console.error(`[${reloadLogScope}] reload failed: ${e}`)
       toast.error(t('general:error-title'), {
         description: t('listview-page:error-refresh-worlds'),
       })

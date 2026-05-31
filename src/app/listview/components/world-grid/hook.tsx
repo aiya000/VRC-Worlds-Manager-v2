@@ -3,7 +3,6 @@ import { usePopupStore } from '../../hook/usePopups/store'
 import { toast } from 'sonner'
 import { useLocalization } from '@/hooks/use-localization'
 import { use, useEffect, useState } from 'react'
-import { error } from '@/lib/services/logger'
 import { useSelectedWorldsStore } from '../../hook/use-selected-worlds'
 import { useFolders } from '../../hook/use-folders'
 import { useWorlds } from '../../hook/use-worlds'
@@ -42,7 +41,7 @@ export function useWorldGrid(
         setCardSize(result.data)
       }
     } catch (e) {
-      error(`Failed to load card size: ${e}`)
+      console.error(`Failed to load card size: ${e}`)
       toast(t('general:error-title'), {
         description: t('listview-page:error-load-card-size'),
       })
@@ -92,14 +91,14 @@ export function useWorldGrid(
 
         const existingWorldsResult = await commands.getAllWorlds()
         if (existingWorldsResult.status !== 'ok') {
-          error(`Error fetching worlds: ${existingWorldsResult.error}`)
+          console.error(`Error fetching worlds: ${existingWorldsResult.error}`)
           throw new Error(existingWorldsResult.error)
         }
         const existingWorlds = existingWorldsResult.data
 
         const hiddenWorldsResult = await commands.getHiddenWorlds()
         if (hiddenWorldsResult.status !== 'ok') {
-          error(`Error fetching hidden worlds: ${hiddenWorldsResult.error}`)
+          console.error(`Error fetching hidden worlds: ${hiddenWorldsResult.error}`)
           throw new Error(hiddenWorldsResult.error)
         }
         const hiddenWorlds = hiddenWorldsResult.data
@@ -112,7 +111,7 @@ export function useWorldGrid(
 
         setExistingWorldIds(new Set(existingIds))
       } catch (err) {
-        error(`Error checking world existence: ${err}`)
+        console.error(`Error checking world existence: ${err}`)
       }
     }
 
@@ -169,7 +168,7 @@ export function useWorldGrid(
         description: t('listview-page:world-deleted-success'),
       })
     } catch (e) {
-      error(`Failed to delete world: ${e}`)
+      console.error(`Failed to delete world: ${e}`)
       toast(t('general:error-title'), {
         description: t('listview-page:error-delete-world'),
       })
@@ -214,7 +213,7 @@ export function useWorldGrid(
                 description: t('listview-page:worlds-restored-to-folder'),
               })
             } catch (e) {
-              error(`Failed to restore worlds: ${e}`)
+              console.error(`Failed to restore worlds: ${e}`)
               toast(t('general:error-title'), {
                 description: t('listview-page:error-restore-worlds'),
               })
@@ -225,7 +224,7 @@ export function useWorldGrid(
 
       await refresh()
     } catch (e) {
-      error(`Failed to remove worlds from folder: ${e}`)
+      console.error(`Failed to remove worlds from folder: ${e}`)
       toast(t('general:error-title'), {
         description: t('listview-page:error-remove-from-folder'),
       })
@@ -283,7 +282,7 @@ export function useWorldGrid(
                 description: t('listview-page:worlds-restored'),
               })
             } catch (e) {
-              error(`Failed to restore worlds: ${e}`)
+              console.error(`Failed to restore worlds: ${e}`)
               toast(t('general:error-title'), {
                 description: t('listview-page:error-restore-worlds'),
               })
@@ -294,7 +293,7 @@ export function useWorldGrid(
 
       await refresh()
     } catch (e) {
-      error(`Failed to hide world: ${e}`)
+      console.error(`Failed to hide world: ${e}`)
       toast(t('general:error-title'), {
         description: t('listview-page:error-hide-world'),
       })
@@ -324,7 +323,7 @@ export function useWorldGrid(
                 description: t('listview-page:worlds-hidden-again'),
               })
             } catch (e) {
-              error(`Failed to restore worlds: ${e}`)
+              console.error(`Failed to restore worlds: ${e}`)
               toast(t('general:error-title'), {
                 description: t('listview-page:error-hide-world'),
               })
@@ -335,7 +334,7 @@ export function useWorldGrid(
 
       await refresh()
     } catch (e) {
-      error(`Failed to restore worlds: ${e}`)
+      console.error(`Failed to restore worlds: ${e}`)
       toast(t('general:error-title'), {
         description: t('listview-page:error-restore-worlds'),
       })

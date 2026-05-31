@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, Fragment } from 'react'
-import { info, error } from '@/lib/services/logger'
 import { toast } from 'sonner'
 import Image from 'next/image'
 import { mutate as mutateFoldersCache } from 'swr'
@@ -181,7 +180,7 @@ export function WorldDetailPopup({
         )
       }
     } catch (e) {
-      error(`Unable to load custom tags for ${worldId}: ${e}`)
+      console.error(`Unable to load custom tags for ${worldId}: ${e}`)
     }
   }, [mergeCustomTagsIntoTags, worldId])
 
@@ -205,7 +204,7 @@ export function WorldDetailPopup({
           toast(t('general:error-title'), { description: result.error })
         }
       } catch (e) {
-        error(`Failed to save custom tags: ${e}`)
+        console.error(`Failed to save custom tags: ${e}`)
         toast(t('general:error-title'), {
           description: t('world-detail:custom-tags-save-error'),
         })
@@ -272,7 +271,7 @@ export function WorldDetailPopup({
       setCustomTagInput('')
 
       try {
-        info(`Is dontSaveToLocal: ${dontSaveToLocal}`)
+        console.info(`Is dontSaveToLocal: ${dontSaveToLocal}`)
         const result = await commands.getWorld(
           worldId,
           dontSaveToLocal ?? false,
@@ -308,7 +307,7 @@ export function WorldDetailPopup({
                 setCachedWorldData(cachedWorld)
               }
             } catch (cacheError) {
-              error(`Failed to fetch cached world data: ${cacheError}`)
+              console.error(`Failed to fetch cached world data: ${cacheError}`)
             }
 
             // Check blacklist status separately
@@ -323,16 +322,16 @@ export function WorldDetailPopup({
                   setIsCountdownActive(true) // Start the countdown only if blacklisted
                 }
               } else {
-                error(`Failed to fetch blacklist: ${blacklistResult.error}`)
+                console.error(`Failed to fetch blacklist: ${blacklistResult.error}`)
               }
             } catch (blacklistError) {
-              error(`Failed to fetch blacklist: ${blacklistError}`)
+              console.error(`Failed to fetch blacklist: ${blacklistError}`)
             }
           }
           setErrorState(result.error)
         }
       } catch (e) {
-        error(`Failed to fetch world details: ${e}`)
+        console.error(`Failed to fetch world details: ${e}`)
         setErrorState(e as string)
       } finally {
         setIsLoading(false)
@@ -357,10 +356,10 @@ export function WorldDetailPopup({
         if (result.status === 'ok') {
           setWorldFolders(result.data)
         } else {
-          error(`Failed to fetch folders for world: ${result.error}`)
+          console.error(`Failed to fetch folders for world: ${result.error}`)
         }
       } catch (e) {
-        error(`Error fetching folders for world: ${e}`)
+        console.error(`Error fetching folders for world: ${e}`)
       }
     }
 
@@ -380,10 +379,10 @@ export function WorldDetailPopup({
         const regionResult = await commands.getRegion()
         if (regionResult.status === 'ok') {
           setSelectedRegion(regionResult.data)
-          info(`Loaded region preference: ${regionResult.data}`)
+          console.info(`Loaded region preference: ${regionResult.data}`)
         }
       } catch (e) {
-        error(`Failed to load region preference: ${e}`)
+        console.error(`Failed to load region preference: ${e}`)
         // Fall back to JP if we can't load the preference
         setSelectedRegion('jp' as InstanceRegion)
       }
@@ -395,9 +394,9 @@ export function WorldDetailPopup({
   const setRegionPreference = async (region: InstanceRegion) => {
     try {
       await commands.setRegion(region)
-      info(`Region preference set to ${region}`)
+      console.info(`Region preference set to ${region}`)
     } catch (e) {
-      error(`Failed to set region preference: ${e}`)
+      console.error(`Failed to set region preference: ${e}`)
     }
   }
 
@@ -411,7 +410,7 @@ export function WorldDetailPopup({
       )
       setRegionPreference(selectedRegion)
     } catch (e) {
-      error(`Failed to create instance: ${e}`)
+      console.error(`Failed to create instance: ${e}`)
       setErrorState(`Failed to create instance: ${e}`)
     }
   }
@@ -443,7 +442,7 @@ export function WorldDetailPopup({
         isLoading: true,
       }))
       const groups = await getGroups()
-      info(`Loaded ${groups.length} groups`)
+      console.info(`Loaded ${groups.length} groups`)
       setGroupInstanceState((prev) => ({
         ...prev,
         groups,
@@ -451,7 +450,7 @@ export function WorldDetailPopup({
       }))
       setRegionPreference(selectedRegion)
     } catch (e) {
-      error(`Failed to load groups: ${e}`)
+      console.error(`Failed to load groups: ${e}`)
       setGroupInstanceState((prev) => ({
         ...prev,
         isLoading: false,
@@ -527,7 +526,7 @@ export function WorldDetailPopup({
         // Remove folder
         const result = await commands.removeWorldFromFolder(folder, worldId)
         if (result.status !== 'ok') {
-          error(
+          console.error(
             `Failed to remove world from folder "${folder}" for world ID "${worldId}": ${result.error}`,
           )
           return
@@ -537,7 +536,7 @@ export function WorldDetailPopup({
         // Add folder
         const result = await commands.addWorldToFolder(folder, worldId)
         if (result.status !== 'ok') {
-          error(
+          console.error(
             `Failed to add world to folder "${folder}" for world ID "${worldId}": ${result.error}`,
           )
           return
@@ -559,12 +558,12 @@ export function WorldDetailPopup({
         },
         { revalidate: true },
       )
-      info(
+      console.info(
         `[WorldDetails] Optimistic folder count delta applied: ${folder}:${delta}`,
       )
       refresh()
     } catch (e) {
-      error(`Error toggling world folder: ${e}`)
+      console.error(`Error toggling world folder: ${e}`)
     }
   }
   return (

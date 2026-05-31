@@ -1,7 +1,6 @@
 import { commands, WorldDisplayData } from '@/lib/commands'
 import { FolderType, isUserFolder, SpecialFolders } from '@/types/folders'
 import { create } from 'zustand'
-import { error, info } from '@/lib/services/logger'
 import { useEffect } from 'react'
 import { useLocalization } from '@/hooks/use-localization'
 import { toast } from 'sonner'
@@ -88,10 +87,10 @@ export const useWorldsStore = create<WorldsStoreState>((set, get) => ({
             [key]: { worlds: data, isLoading: false, error: undefined },
           },
         }))
-        info(`[useWorldsStore] Loaded ${data.length} worlds for key=${key}`)
+        console.info(`[useWorldsStore] Loaded ${data.length} worlds for key=${key}`)
       } catch (e) {
         const msg = String(e)
-        error(`[useWorldsStore] Failed to load worlds for key=${key}: ${msg}`)
+        console.error(`[useWorldsStore] Failed to load worlds for key=${key}: ${msg}`)
         set((s) => ({
           byKey: {
             ...s.byKey,
@@ -156,7 +155,7 @@ export function useWorlds(folder: FolderType) {
 
   useEffect(() => {
     store.load(folder).catch((e) => {
-      error(`[useWorlds] load failed: ${String(e)}`)
+      console.error(`[useWorlds] load failed: ${String(e)}`)
       toast.error(t('general:error-title'), {
         description: t('listview-page:error-fetch-worlds'),
       })
@@ -175,7 +174,7 @@ export function useWorlds(folder: FolderType) {
         description: t('listview-page:world-added-description'),
       })
     } catch (e) {
-      error(`Failed to add world: ${e}`)
+      console.error(`Failed to add world: ${e}`)
       toast(t('general:error-title'), {
         description: t('listview-page:error-add-world'),
       })
