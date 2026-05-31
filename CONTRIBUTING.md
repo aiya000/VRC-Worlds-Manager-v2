@@ -63,13 +63,11 @@ See the [LICENSE](LICENSE) file for details.
 
 Install the following dependencies:
 
-- [Rust](https://www.rust-lang.org/tools/install)
-- [Next.js](https://nextjs.org/docs/app/getting-started/installation)
-- [Bun](https://bun.sh/docs/installation)
+- [Bun](https://bun.sh/)
 
 We recommend using [VSCode](https://code.visualstudio.com/), but you can use any editor you prefer.
 
-### Installing Frontend Packages
+### Installing Packages
 
 Run the following command to install packages:
 
@@ -77,20 +75,12 @@ Run the following command to install packages:
 bun install
 ```
 
-Rust dependencies will be installed automatically when running Tauri.
-
 ### Running in Dev Mode
 
-Run `bun run tauri dev` to start the application.
+Run `bun run dev` to start the application.
 
 Frontend code changes will trigger automatic updates.  
 If updates do not appear, try refreshing with `Ctrl-R`.
-
-Backend code changes will trigger an automatic restart.
-
-> [!NOTE]
-> Modifying backend code triggers a dev build on every save, which can slow development.  
-> It is recommended to restart only when necessary.
 
 ### Useful Commands
 
@@ -111,9 +101,7 @@ git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -n 1 git branch -d
 Use the following commands to format the code:
 
 ```
-bunx prettier --write "src/**/*.{ts,tsx}"
-
-(cd src-tauri && cargo fmt)
+bun run format
 ```
 
 ---
