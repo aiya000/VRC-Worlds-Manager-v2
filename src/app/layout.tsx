@@ -9,12 +9,12 @@ import { DeepLinkProvider } from '@/components/deep-link-provider'
 import { PatreonProvider } from '@/contexts/patreon-context'
 import { SwRegister } from '@/components/sw-register'
 
-const geistSans = Geist({
+const _geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
 })
 
-const geistMono = Geist_Mono({
+const _geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 })

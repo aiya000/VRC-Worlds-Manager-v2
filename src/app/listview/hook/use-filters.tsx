@@ -50,7 +50,7 @@ export const useWorldFiltersStore = create<FilterState>((set) => ({
   availableAuthors: [],
   availableTags: [],
   setSortField: (field) =>
-    set((state) => {
+    set((_state) => {
       const newDirection = getDefaultDirection(field)
       // Save to backend
       commands.setSortPreferences(field, newDirection).catch((e) => {
@@ -268,9 +268,9 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
         return finalList.slice().sort((a, b) => {
           const av = getSortValue(a, sortField)
           const bv = getSortValue(b, sortField)
-          if (av == null && bv == null) return 0
-          if (av == null) return 1
-          if (bv == null) return -1
+          if (av === null && bv === null) {return 0}
+          if (av === null) {return 1}
+          if (bv === null) {return -1}
           if (typeof av === 'number' && typeof bv === 'number') {
             return (av - bv) * dirFactor
           }
@@ -361,7 +361,7 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
       // 5. Commit if still latest & not cancelled (avoid redundant updates)
       if (!cancelled && seq === requestSeq.current) {
         const state = useWorldFiltersStore.getState()
-        const arraysEqual = (a: any[], b: any[]) =>
+        const arraysEqual = (a: unknown[], b: unknown[]) =>
           a.length === b.length && a.every((v, i) => v === b[i])
         if (
           !arraysEqual(
@@ -425,7 +425,7 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
 }
 
 // Helper to extract value for sorting
-function getSortValue(world: WorldDisplayData, field: SortField): any {
+function getSortValue(world: WorldDisplayData, field: SortField): string | number | undefined {
   switch (field) {
     case 'name':
       return world.name

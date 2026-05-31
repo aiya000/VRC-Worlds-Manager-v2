@@ -19,7 +19,6 @@ import {
 import { useSelectedWorldsStore } from '../hook/use-selected-worlds'
 import { useRef, useEffect } from 'react'
 import { usePopupStore } from '../hook/usePopups/store'
-import { useFolders } from '../hook/use-folders'
 import { Badge } from '@/components/ui/badge'
 import { FolderType } from '@/types/folders'
 import { useWorldFiltersStore } from '../hook/use-filters'
@@ -262,8 +261,9 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
                   {t('general:tags')}:
                 </span>
                 <div className="flex items-center gap-1 overflow-hidden whitespace-nowrap">
+                  {/* eslint-disable-next-line react-hooks/refs */}
                   {(() => {
-                    const reserved = 80 // for “and X more”
+                    const reserved = 80 // for "and X more"
                     const perBadge = 100
                     const availW =
                       (tagsRef.current?.parentElement?.clientWidth || 0) -
@@ -319,6 +319,7 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
             {folderFilters.length > 0 && (
               <div className="flex flex-col self-center gap-2 -mt-2">
                 {/* Row 1: only if ≥ 2 badges fit */}
+                {/* eslint-disable-next-line react-hooks/refs */}
                 {(() => {
                   const reserved = 80 // “and X more”
                   const perBadge = 100 // badge+gap
@@ -331,7 +332,7 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
                   const availW = parentW - reserved - usedW
                   const fitCount = Math.floor(availW / perBadge)
                   const showFirst = fitCount >= 2
-                  if (!showFirst) return null
+                  if (!showFirst) {return null}
 
                   const visible = folderFilters.slice(0, fitCount)
                   const hidden = folderFilters.length - fitCount
@@ -381,6 +382,7 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
                 })()}
 
                 {/* Row 2: show when fewer than 2 fit OR when wrapFolders is true */}
+                {/* eslint-disable-next-line react-hooks/refs */}
                 {(() => {
                   const reserved = 80 // px for “and X more”
                   const perBadge = 100 // badge+gap

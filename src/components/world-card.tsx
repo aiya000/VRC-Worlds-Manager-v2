@@ -1,4 +1,3 @@
-import React from 'react'
 import { Heart } from 'lucide-react'
 import { CardSize, WorldDisplayData } from '@/lib/commands'
 import { useLocalization } from '@/hooks/use-localization'
@@ -31,6 +30,7 @@ export function WorldCardPreview(props: WorldCardPreviewProps) {
           <PlatformIndicator platform={world.platform} />
         </div>
       </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={world.thumbnailUrl}
         alt={world.name}

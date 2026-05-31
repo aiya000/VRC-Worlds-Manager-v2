@@ -16,6 +16,23 @@ export default function AboutSection() {
   const [isLoading, setIsLoading] = useState(true)
   const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? 'unknown'
 
+  // Helper function to sort supporters
+  const sortSupporters = (data: Record<string, string[]>) => {
+    const platinumNames = (data.platinumSupporter || []).sort()
+    const goldNames = (data.goldSupporter || []).sort()
+    const silverNames = (data.silverSupporter || []).sort()
+    const bronzeNames = (data.bronzeSupporter || []).sort()
+    const basicNames = (data.basicSupporter || []).sort()
+
+    return [
+      ...platinumNames,
+      ...goldNames,
+      ...silverNames,
+      ...bronzeNames,
+      ...basicNames,
+    ]
+  }
+
   useEffect(() => {
     async function fetchPatreonData() {
       try {
@@ -36,24 +53,7 @@ export default function AboutSection() {
     }
 
     fetchPatreonData()
-  }, [])
-
-  // Helper function to sort supporters
-  const sortSupporters = (data: Record<string, string[]>) => {
-    const platinumNames = (data.platinumSupporter || []).sort()
-    const goldNames = (data.goldSupporter || []).sort()
-    const silverNames = (data.silverSupporter || []).sort()
-    const bronzeNames = (data.bronzeSupporter || []).sort()
-    const basicNames = (data.basicSupporter || []).sort()
-
-    return [
-      ...platinumNames,
-      ...goldNames,
-      ...silverNames,
-      ...bronzeNames,
-      ...basicNames,
-    ]
-  }
+  }, [])  
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">

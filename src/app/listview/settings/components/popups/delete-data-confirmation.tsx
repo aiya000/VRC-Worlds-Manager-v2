@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useLocalization } from '@/hooks/use-localization'
 import { AlertCircle, Trash2 } from 'lucide-react'
 import {
@@ -29,6 +29,15 @@ export function DeleteDataConfirmationDialog({
   const holdDuration = 3000 // 3 seconds in milliseconds
   const stepInterval = 50 // Update every 50ms
 
+  const handleConfirm = async () => {
+    try {
+      await onConfirm()
+    } catch (error) {
+      console.error('Error during data deletion:', error)
+    }
+  }
+
+   
   useEffect(() => {
     if (isHolding) {
       intervalRef.current = setInterval(() => {
@@ -37,7 +46,7 @@ export function DeleteDataConfirmationDialog({
           if (newProgress >= 100) {
             // Clear interval when reaching 100%
             console.info('Deleting data...')
-            if (intervalRef.current) clearInterval(intervalRef.current)
+            if (intervalRef.current) {clearInterval(intervalRef.current)}
             setIsHolding(false)
             handleConfirm()
             return 100
@@ -52,21 +61,21 @@ export function DeleteDataConfirmationDialog({
         intervalRef.current = null
       }
       // Only reset progress if we haven't completed
-      if (progress < 100) setProgress(0)
+      if (progress < 100) {setProgress(0)}
     }
 
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
+      if (intervalRef.current) {clearInterval(intervalRef.current)}
     }
-  }, [isHolding])
+  }, [isHolding])  
 
   useEffect(() => {
     if (!open) {
       setProgress(0)
       setIsHolding(false)
-      if (intervalRef.current) clearInterval(intervalRef.current)
+      if (intervalRef.current) {clearInterval(intervalRef.current)}
     }
-  }, [open])
+  }, [open])  
 
   const handleMouseDown = () => {
     setIsHolding(true)
@@ -78,14 +87,6 @@ export function DeleteDataConfirmationDialog({
 
   const handleMouseLeave = () => {
     setIsHolding(false)
-  }
-
-  const handleConfirm = async () => {
-    try {
-      await onConfirm()
-    } catch (error) {
-      console.error('Error during data deletion:', error)
-    }
   }
 
   return (

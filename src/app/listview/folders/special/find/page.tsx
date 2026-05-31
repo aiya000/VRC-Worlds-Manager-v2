@@ -147,9 +147,7 @@ export default function FindWorldsPage() {
       // Only update when it's not already 'relevance' to avoid unnecessary state updates
       setSelectedSort((prev) => (prev === 'relevance' ? prev : 'relevance'))
     }
-  }, [searchQuery])
-
-  // Backoff control for load-more errors
+  }, [searchQuery])  
   const [loadMoreBackoffUntil, setLoadMoreBackoffUntil] = useState<
     number | null
   >(null)
@@ -159,7 +157,7 @@ export default function FindWorldsPage() {
     if (recentlyVisitedWorlds.length === 0 && !isLoading) {
       fetchRecentlyVisitedWorlds()
     }
-  }, [recentlyVisitedWorlds.length, isLoading, fetchRecentlyVisitedWorlds])
+  }, [recentlyVisitedWorlds.length, isLoading, fetchRecentlyVisitedWorlds])  
 
   // Load tags when the search tab is active
   useEffect(() => {
@@ -252,7 +250,7 @@ export default function FindWorldsPage() {
           } else if (typeof window !== 'undefined') {
             window.scrollBy({ top: -100, behavior: 'smooth' })
           }
-        } catch (_) {
+        } catch (_e) {
           // noop
         }
       }
@@ -289,7 +287,7 @@ export default function FindWorldsPage() {
     }
 
     return () => observer.disconnect()
-  }, [searchResults, hasMoreResults, isLoadingMore, isSearching])
+  }, [searchResults, hasMoreResults, isLoadingMore, isSearching]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // no external select-all; handled by grid internally when needed
 

@@ -31,23 +31,23 @@ async function fetchWorldsImpl(
 ): Promise<WorldDisplayData[]> {
   if (isUserFolder(folder)) {
     const res = await commands.getWorlds(folder as string)
-    if (res.status === 'ok') return res.data
+    if (res.status === 'ok') {return res.data}
     throw new Error(res.error)
   }
   switch (folder) {
     case SpecialFolders.All: {
       const res = await commands.getAllWorlds()
-      if (res.status === 'ok') return res.data
+      if (res.status === 'ok') {return res.data}
       throw new Error(res.error)
     }
     case SpecialFolders.Unclassified: {
       const res = await commands.getUnclassifiedWorlds()
-      if (res.status === 'ok') return res.data
+      if (res.status === 'ok') {return res.data}
       throw new Error(res.error)
     }
     case SpecialFolders.Hidden: {
       const res = await commands.getHiddenWorlds()
-      if (res.status === 'ok') return res.data
+      if (res.status === 'ok') {return res.data}
       throw new Error(res.error)
     }
     case SpecialFolders.Find:
@@ -117,7 +117,7 @@ export const useWorldsStore = create<WorldsStoreState>((set, get) => ({
   async addWorldToFolder(folder, worldId) {
     const key = folderKey(folder)
     const res = await commands.getWorld(worldId, null)
-    if (res.status === 'error') throw new Error(res.error)
+    if (res.status === 'error') {throw new Error(res.error)}
 
     // Only call addWorldToFolder command for user folders
     if (isUserFolder(folder)) {
@@ -131,17 +131,17 @@ export const useWorldsStore = create<WorldsStoreState>((set, get) => ({
       const next = exists ? entry.worlds : [res.data, ...entry.worlds]
       return {
         byKey: { ...s.byKey, [key]: { ...entry, worlds: next } },
-      } as any
+      } as Partial<typeof s>
     })
   },
   async getAllWorlds() {
     const res = await commands.getAllWorlds()
-    if (res.status === 'ok') return res.data
+    if (res.status === 'ok') {return res.data}
     throw new Error(res.error)
   },
   async getFavoriteWorlds() {
     const res = await commands.getFavoriteWorlds()
-    if (res.status === 'ok') return res.data
+    if (res.status === 'ok') {return res.data}
     throw new Error(res.error)
   },
 }))
@@ -160,7 +160,7 @@ export function useWorlds(folder: FolderType) {
         description: t('listview-page:error-fetch-worlds'),
       })
     })
-  }, [key])
+  }, [key]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const refresh = () => store.load(folder, { force: true })
   const addWorld = async (worldId: string) => {

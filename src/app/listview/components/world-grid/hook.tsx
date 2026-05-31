@@ -2,12 +2,9 @@ import { CardSize, commands, WorldDisplayData } from '@/lib/commands'
 import { usePopupStore } from '../../hook/usePopups/store'
 import { toast } from 'sonner'
 import { useLocalization } from '@/hooks/use-localization'
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelectedWorldsStore } from '../../hook/use-selected-worlds'
-import { useFolders } from '../../hook/use-folders'
 import { useWorlds } from '../../hook/use-worlds'
-import { usePathname } from 'next/navigation'
-import path from 'path'
 import { FolderType, isUserFolder, SpecialFolders } from '@/types/folders'
 
 export function useWorldGrid(
@@ -20,19 +17,14 @@ export function useWorldGrid(
   const {
     getSelectedWorlds,
     isSelectionMode,
-    toggleSelectionMode,
     toggleWorldSelection,
-    selectAllWorlds,
+    selectAllWorlds: _selectAllWorlds,
     clearFolderSelections,
   } = useSelectedWorldsStore()
 
   const { refresh } = useWorlds(currentFolder)
 
   const [cardSize, setCardSize] = useState<CardSize>('Normal')
-
-  useEffect(() => {
-    loadCardSize()
-  }, [])
 
   const loadCardSize = async () => {
     try {
@@ -47,6 +39,10 @@ export function useWorldGrid(
       })
     }
   }
+
+  useEffect(() => {
+    loadCardSize()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectedWorlds = Array.from(getSelectedWorlds(currentFolder))
 
@@ -83,7 +79,7 @@ export function useWorldGrid(
   // respond to membership changes triggered by dialogs
   const membershipVersion = usePopupStore((s) => s.membershipVersion)
   useEffect(() => {
-    if (!isFindPage) return // Only needed for find page
+    if (!isFindPage) {return} // Only needed for find page
 
     const checkWorldsExistence = async () => {
       try {

@@ -50,7 +50,7 @@ const WelcomePage: React.FC = () => {
     false,
     false,
   ])
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [_isLoading, setIsLoading] = useState<boolean>(false)
   const [alreadyMigrated, setAlreadyMigrated] = useState<boolean>(false)
   const [hasExistingData, setHasExistingData] = useState<[boolean, boolean]>([
     false,
@@ -257,13 +257,14 @@ const WelcomePage: React.FC = () => {
       }
     }
     fetchMeta()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     migrationFiles[0],
     migrationFiles[1],
     pathValidation[0],
     pathValidation[1],
   ])
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const handleMigrationConfirm = async () => {
     setShowMigrationConfirm(false)
@@ -291,7 +292,7 @@ const WelcomePage: React.FC = () => {
         <MigrationConfirmationPopup
           open={showMigrationConfirm}
           onOpenChange={(open) => {
-            if (!open) setShowMigrationConfirm(false)
+            if (!open) {setShowMigrationConfirm(false)}
           }}
           onCancel={handleMigrationCancel}
           onConfirm={handleMigrationConfirm}

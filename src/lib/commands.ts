@@ -35,9 +35,9 @@ import type {
   TaskStatusChanged,
 } from '@/lib/types'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function run<A>(
-  effect: Effect.Effect<A, any, any>,
+  effect: Effect.Effect<A, unknown, unknown>,
 ): Promise<Result<A, string>> {
   const provided = Effect.provide(effect, AppLayer) as Effect.Effect<
     A,
@@ -57,9 +57,9 @@ function run<A>(
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function runVoid(
-  effect: Effect.Effect<void, any, any>,
+  effect: Effect.Effect<void, unknown, unknown>,
 ): Promise<Result<null, string>> {
   const provided = Effect.provide(effect, AppLayer) as Effect.Effect<
     void,

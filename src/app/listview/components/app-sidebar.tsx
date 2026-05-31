@@ -3,8 +3,7 @@
 import { SaturnIcon } from '../../../components/icons/saturn-icon'
 import { GearIcon } from '../../../components/icons/gear-icon'
 import { Info, FileQuestion, History, Plus } from 'lucide-react'
-import { SpecialFolders } from '@/types/folders'
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { FolderData } from '@/lib/commands'
 import { useState, useEffect, useRef } from 'react'
 import { useLocalization } from '@/hooks/use-localization'
@@ -45,7 +44,7 @@ interface AppSidebarProps {
 
 export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
   const { t } = useLocalization()
-  const { folders, moveFolder, createFolder, deleteFolder, renameFolder } =
+  const { folders, moveFolder, createFolder: _createFolder, deleteFolder, renameFolder } =
     useFolders()
   const setPopup = usePopupStore((state) => state.setPopup)
 
@@ -63,11 +62,11 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
 
   // Update local folders when prop changes
   useEffect(() => {
-    setLocalFolders(folders)
-  }, [folders])
+    setLocalFolders(folders) // eslint-disable-line react-hooks/set-state-in-effect
+  }, [folders])  
 
-  const handleDragEnd = async (result: any) => {
-    if (!result.destination) return
+  const handleDragEnd = async (result: DropResult) => {
+    if (!result.destination) {return}
 
     const { source, destination } = result
     const newFolders = Array.from(localFolders)
@@ -154,7 +153,7 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       // Skip if no active editing or during composition
-      if (!editingFolder || isComposing) return
+      if (!editingFolder || isComposing) {return}
 
       // Get the clicked element
       const target = event.target as HTMLElement
@@ -202,7 +201,7 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
               ${pathname === '/listview/folders/special/all' ? sidebarStyles.activeLink : 'hover:bg-accent/50 hover:text-accent-foreground'}
             `}
             onClick={() => {
-              if (pathname === '/listview/folders/special/all') return
+              if (pathname === '/listview/folders/special/all') {return}
               router.push('/listview/folders/special/all')
             }}
           >
@@ -221,7 +220,7 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
               ${pathname === '/listview/folders/special/find' ? sidebarStyles.activeLink : 'hover:bg-accent/50 hover:text-accent-foreground'}
             `}
             onClick={() => {
-              if (pathname === '/listview/folders/special/find') return
+              if (pathname === '/listview/folders/special/find') {return}
               router.push('/listview/folders/special/find')
             }}
           >
@@ -242,7 +241,7 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
               }
             `}
             onClick={() => {
-              if (pathname === '/listview/folders/special/unclassified') return
+              if (pathname === '/listview/folders/special/unclassified') {return}
               router.push('/listview/folders/special/unclassified')
             }}
           >
@@ -296,7 +295,7 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
                                   pathname ===
                                   `/listview/folders/userFolder?folderName=${folder.name}`
                                 )
-                                  return
+                                  {return}
                                 router.push(
                                   `/listview/folders/userFolder?folderName=${folder.name}`,
                                 )
@@ -431,7 +430,7 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
               }
             `}
             onClick={() => {
-              if (pathname === `/listview/about`) return
+              if (pathname === `/listview/about`) {return}
               router.push('/listview/about')
             }}
           >
@@ -448,7 +447,7 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
               }
             `}
             onClick={() => {
-              if (pathname === `/listview/settings`) return
+              if (pathname === `/listview/settings`) {return}
               router.push('/listview/settings')
             }}
           >
