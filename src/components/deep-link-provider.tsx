@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect } from 'react'
-import { info } from '@/lib/services/logger'
 import { useFolders } from '@/app/listview/hook/use-folders'
 
 export const DeepLinkProvider = ({
@@ -16,7 +15,7 @@ export const DeepLinkProvider = ({
     const params = new URLSearchParams(window.location.search)
     const importId = params.get('import')
     if (importId) {
-      info(`[DeepLink] Detected import parameter: ${importId}`)
+      console.info(`[DeepLink] Detected import parameter: ${importId}`)
       importFolder(importId)
       // Clean up the URL to remove the query parameter
       const url = new URL(window.location.href)

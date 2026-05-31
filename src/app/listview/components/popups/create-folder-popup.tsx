@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import { info, error } from '@/lib/services/logger'
 import {
   Dialog,
   DialogContent,
@@ -42,7 +41,7 @@ export function CreateFolderDialog({
       setImportUUID('')
       onOpenChange(false)
     } catch (e) {
-      error(`Failed to import folder: ${e}`)
+      console.error(`Failed to import folder: ${e}`)
     } finally {
       setIsLoading(false)
     }
@@ -56,7 +55,7 @@ export function CreateFolderDialog({
       setFolderName('')
       onOpenChange(false)
     } catch (e) {
-      error(`Failed to create folder: ${e}`)
+      console.error(`Failed to create folder: ${e}`)
     } finally {
       setIsLoading(false)
     }

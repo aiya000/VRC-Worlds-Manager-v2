@@ -19,8 +19,7 @@ import {
 } from '../../../../../components/ui/toggle-group'
 import { ChevronRight } from 'lucide-react'
 import { Separator } from '../../../../../components/ui/separator'
-import { useLocalization } from '@/hooks/use-localization'
-import { info, error } from '@/lib/services/logger' // Add this import
+import { useLocalization } from '@/hooks/use-localization' // Add this import
 
 interface GroupInstanceCreatorProps {
   groups: UserGroup[]
@@ -139,10 +138,10 @@ export function GroupInstanceCreator({
             ...prev,
             region: regionResult.data,
           }))
-          info(`Loaded region preference: ${regionResult.data}`)
+          console.info(`Loaded region preference: ${regionResult.data}`)
         }
       } catch (e) {
-        error(`Failed to load region preference: ${e}`)
+        console.error(`Failed to load region preference: ${e}`)
         // Fall back to JP if we can't load the preference
         setStepInfo((prev) => ({
           ...prev,
@@ -299,9 +298,9 @@ export function GroupInstanceCreator({
   const setRegionPreference = async (region: InstanceRegion) => {
     try {
       await commands.setRegion(region)
-      info(`Region preference set to ${region}`)
+      console.info(`Region preference set to ${region}`)
     } catch (e) {
-      error(`Failed to set region preference: ${e}`)
+      console.error(`Failed to set region preference: ${e}`)
     }
   }
 

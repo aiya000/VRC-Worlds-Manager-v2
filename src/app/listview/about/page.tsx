@@ -9,7 +9,6 @@ import { Heart } from 'lucide-react'
 import { SiGithub, SiDiscord } from '@icons-pack/react-simple-icons'
 import { toast } from 'sonner'
 import { commands } from '@/lib/commands'
-import { error } from '@/lib/services/logger'
 
 export default function AboutSection() {
   const { t } = useLocalization()
@@ -27,7 +26,7 @@ export default function AboutSection() {
           throw new Error(result.error)
         }
       } catch (e) {
-        error(`Failed to fetch Patreon data: ${e}`)
+        console.error(`Failed to fetch Patreon data: ${e}`)
         toast('Error', {
           description: 'Failed to load supporter data.',
         })

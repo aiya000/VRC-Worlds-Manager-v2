@@ -14,7 +14,6 @@ import {
 } from 'lucide-react'
 import { commands, WorldDisplayData } from '@/lib/commands'
 import { SpecialFolders } from '@/types/folders'
-import { info, error } from '@/lib/services/logger'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -94,7 +93,7 @@ export default function FindWorldsPage() {
       if (worlds.status !== 'ok') {
         throw new Error(worlds.error)
       } else {
-        info(`Fetched recently visited worlds: ${worlds.data.length}`)
+        console.info(`Fetched recently visited worlds: ${worlds.data.length}`)
         setRecentlyVisitedWorlds(worlds.data)
       }
       toast(t('find-page:fetch-recently-visited-worlds'), {
@@ -105,7 +104,7 @@ export default function FindWorldsPage() {
         duration: 1000,
       })
     } catch (err) {
-      error(`Error fetching recently visited worlds: ${String(err)}`)
+      console.error(`Error fetching recently visited worlds: ${String(err)}`)
     } finally {
       setIsLoading(false)
     }
@@ -130,7 +129,7 @@ export default function FindWorldsPage() {
     const params = new URLSearchParams(window.location.search)
     const importId = params.get('import')
     if (importId) {
-      info(`[DeepLink] Detected import parameter: ${importId}`)
+      console.info(`[DeepLink] Detected import parameter: ${importId}`)
       importFolder(importId)
       // Clean up the URL
       const url = new URL(window.location.href)
@@ -171,7 +170,7 @@ export default function FindWorldsPage() {
           setAvailableTags(result.data)
         }
       } catch (err) {
-        error(`Failed to load tags: ${err}`)
+        console.error(`Failed to load tags: ${err}`)
       }
     }
 
@@ -212,7 +211,7 @@ export default function FindWorldsPage() {
       )
 
       if (result.status === 'ok') {
-        info(`Search results: ${result.data.length} worlds found`)
+        console.info(`Search results: ${result.data.length} worlds found`)
         if (loadMore) {
           // Append new results to existing ones
           setSearchResults((prev) => [...prev, ...result.data])
@@ -236,7 +235,7 @@ export default function FindWorldsPage() {
         throw new Error(result.error)
       }
     } catch (err) {
-      error(`Search error: ${err}`)
+      console.error(`Search error: ${err}`)
       toast(t('find-page:search-error'), {
         description: String(err),
       })
@@ -245,7 +244,7 @@ export default function FindWorldsPage() {
       if (loadMore) {
         const backoffMs = 2500 // 2-3 seconds backoff
         setLoadMoreBackoffUntil(Date.now() + backoffMs)
-        info(`Load-more backoff applied for ${backoffMs}ms; nudging scroll up`)
+        console.info(`Load-more backoff applied for ${backoffMs}ms; nudging scroll up`)
         const scroller = findGridRef.current
         try {
           if (scroller) {

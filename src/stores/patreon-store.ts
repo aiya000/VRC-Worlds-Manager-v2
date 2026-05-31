@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { commands } from '@/lib/commands'
-import { error } from '@/lib/services/logger'
 
 interface PatreonState {
   supporters: Set<string>
@@ -61,7 +60,7 @@ export const usePatreonStore = create<PatreonState>((set, get) => ({
       }
     } catch (e) {
       const errorMessage = `Failed to fetch Patreon VRChat names: ${e}`
-      error(errorMessage)
+      console.error(errorMessage)
       set({
         isLoading: false,
         error: errorMessage,
