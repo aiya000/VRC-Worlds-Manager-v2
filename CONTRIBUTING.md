@@ -63,7 +63,6 @@ See the [LICENSE](LICENSE) file for details.
 
 Install the following dependencies:
 
-- [Node.js](https://nodejs.org/)
 - [Bun](https://bun.sh/)
 
 We recommend using [VSCode](https://code.visualstudio.com/), but you can use any editor you prefer.
