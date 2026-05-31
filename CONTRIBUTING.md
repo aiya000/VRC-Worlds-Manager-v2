@@ -69,7 +69,7 @@ We recommend using [VSCode](https://code.visualstudio.com/), but you can use any
 
 ### Installing Packages
 
-Run the following command to install Node.js packages:
+Run the following command to install packages:
 
 ```
 bun install
