@@ -65,23 +65,23 @@ Install the following dependencies:
 
 - [Rust](https://www.rust-lang.org/tools/install)
 - [Next.js](https://nextjs.org/docs/app/getting-started/installation)
-- [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
+- [Bun](https://bun.sh/docs/installation)
 
 We recommend using [VSCode](https://code.visualstudio.com/), but you can use any editor you prefer.
 
 ### Installing Frontend Packages
 
-Run the following command to install Node.js packages:
+Run the following command to install packages:
 
 ```
-npm i
+bun install
 ```
 
 Rust dependencies will be installed automatically when running Tauri.
 
 ### Running in Dev Mode
 
-Run `npm run tauri dev` to start the application.
+Run `bun run tauri dev` to start the application.
 
 Frontend code changes will trigger automatic updates.  
 If updates do not appear, try refreshing with `Ctrl-R`.
@@ -111,7 +111,7 @@ git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -n 1 git branch -d
 Use the following commands to format the code:
 
 ```
-npx prettier --write "src/**/*.{ts,tsx}"
+bunx prettier --write "src/**/*.{ts,tsx}"
 
 (cd src-tauri && cargo fmt)
 ```
