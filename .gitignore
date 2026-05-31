@@ -56,3 +56,6 @@ pnpm-lock.yaml
 /.claude/worktrees/
 /feature/
 /pr-conversation-summary.md
+
+# npm lock file (using bun.lock instead)
+package-lock.json
