@@ -37,7 +37,7 @@ export function ImportedFolderContainsHidden({
     if (!open) {
       clearFolderSelections(dialogFolderKey)
     }
-  }, [open, clearFolderSelections])
+  }, [open, clearFolderSelections]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

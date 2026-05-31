@@ -27,7 +27,7 @@ export function ListViewClientShell({
     if (saved) {
       const width = parseInt(saved, 10)
       if (width >= MIN_SIDEBAR_WIDTH && width <= MAX_SIDEBAR_WIDTH) {
-        setSidebarWidth(width)
+        setSidebarWidth(width) // eslint-disable-line react-hooks/set-state-in-effect
       }
     }
   }, [])
@@ -35,7 +35,7 @@ export function ListViewClientShell({
   // Handle mouse move during resize
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing) return
+      if (!isResizing) {return}
 
       // Clamp the width to min/max boundaries to prevent sticking
       const newWidth = Math.max(

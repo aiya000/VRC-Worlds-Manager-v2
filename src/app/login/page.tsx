@@ -31,12 +31,12 @@ export default function Login() {
       const result = await commands.loginWithCredentials(username, password)
 
       if (result.status === 'error') {
-        if (result.error == '2fa-required') {
+        if (result.error === '2fa-required') {
           console.info('2FA required, showing 2FA dialog')
           setShow2FA(true)
           setE(null)
           setTwoFactorCodeType('totp')
-        } else if (result.error == 'email-2fa-required') {
+        } else if (result.error === 'email-2fa-required') {
           console.info('Email 2FA required, showing 2FA dialog')
           setShow2FA(true)
           setE(null)

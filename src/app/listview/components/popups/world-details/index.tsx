@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback, Fragment } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import Image from 'next/image'
 import { mutate as mutateFoldersCache } from 'swr'
 import {
   Dialog,
@@ -14,14 +13,10 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle, ExternalLink, Pencil, Plus, X } from 'lucide-react'
-import QPc from '@/../public/icons/VennColorQPc.svg'
-import QPcQ from '@/../public/icons/VennColorQPcQ.svg'
-import QQ from '@/../public/icons/VennColorQQ.svg'
 import { ChevronRight } from 'lucide-react'
 import {
   GroupInstanceCreatePermission,
   UserGroup,
-  GroupInstancePermissionInfo,
   GroupRole,
   commands,
   FolderData,
@@ -154,14 +149,14 @@ export function WorldDetailPopup({
 
   const normalizeCustomTag = useCallback((raw: string): string | null => {
     const trimmed = raw.trim()
-    if (!trimmed) return null
+    if (!trimmed) {return null}
 
     const withoutPrefix = trimmed.startsWith('custom:')
       ? trimmed.slice('custom:'.length)
       : trimmed
     const cleaned = withoutPrefix.trim()
 
-    if (!cleaned) return null
+    if (!cleaned) {return null}
     return `custom:${cleaned}`
   }, [])
 
@@ -258,7 +253,7 @@ export function WorldDetailPopup({
 
   useEffect(() => {
     const fetchWorldDetails = async () => {
-      if (!open) return
+      if (!open) {return}
 
       // Reset all state when opening the dialog with a new world
       setIsLoading(true)
@@ -349,7 +344,7 @@ export function WorldDetailPopup({
       }
     }
     const fetchWorldFolders = async () => {
-      if (!worldId) return
+      if (!worldId) {return}
 
       try {
         const result = await commands.getFoldersForWorld(worldId)
@@ -363,7 +358,7 @@ export function WorldDetailPopup({
       }
     }
 
-    if (!open) return
+    if (!open) {return}
 
     fetchWorldDetails()
     if (!dontSaveToLocal) {
@@ -371,7 +366,7 @@ export function WorldDetailPopup({
       fetchWorldFolders()
     }
     loadCustomTags()
-  }, [dontSaveToLocal, loadCustomTags, open, worldId])
+  }, [dontSaveToLocal, loadCustomTags, open, worldId])  
 
   useEffect(() => {
     const loadRegionPreference = async () => {
@@ -428,7 +423,7 @@ export function WorldDetailPopup({
     } else {
       console.error(result.error)
     }
-  }, [worldId, memoInput])
+  }, [worldId, memoInput]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleGroupInstanceClick = async () => {
     try {
@@ -516,7 +511,7 @@ export function WorldDetailPopup({
     isCountdownActive,
     onOpenChange,
     worldId,
-  ])
+  ])  
 
   async function toggleWorldFolder(folder: string): Promise<void> {
     try {
@@ -549,9 +544,9 @@ export function WorldDetailPopup({
       await mutateFoldersCache<FolderData[]>(
         'folders',
         (current) => {
-          if (!current) return current
+          if (!current) {return current}
           return current.map((f) => {
-            if (f.name !== folder) return f
+            if (f.name !== folder) {return f}
             const nextCount = Math.max(0, f.world_count + delta)
             return { ...f, world_count: nextCount }
           })
@@ -801,6 +796,7 @@ export function WorldDetailPopup({
                               platform={worldDetails.platform}
                             />
                           </div>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={worldDetails.thumbnailUrl}
                             alt={worldDetails.name}
@@ -840,7 +836,7 @@ export function WorldDetailPopup({
                             value={selectedInstanceType}
                             onValueChange={(value) => {
                               if (value)
-                                setSelectedInstanceType(value as InstanceType)
+                                {setSelectedInstanceType(value as InstanceType)}
                             }}
                             className="grid grid-cols-2 gap-2"
                           >
@@ -900,7 +896,7 @@ export function WorldDetailPopup({
                             value={mapRegion.toUI(selectedRegion)}
                             onValueChange={(value) => {
                               if (value)
-                                setSelectedRegion(mapRegion.toBackend(value))
+                                {setSelectedRegion(mapRegion.toBackend(value))}
                             }}
                             className="flex gap-2"
                           >

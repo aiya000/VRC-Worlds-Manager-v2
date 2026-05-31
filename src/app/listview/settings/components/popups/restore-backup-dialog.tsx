@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useLocalization } from '@/hooks/use-localization'
 import { commands } from '@/lib/commands'
 import { FolderOpen } from 'lucide-react'

@@ -42,6 +42,8 @@ export const useSettingsPage = () => {
 
   const { setTheme } = useTheme()
 
+  const { t } = useLocalization()
+
   // Add missing export confirm handler
   const handleExportConfirm = async (
     folders: string[],
@@ -139,9 +141,7 @@ export const useSettingsPage = () => {
     }
 
     loadPreferences()
-  }, [setTheme])
-
-  const { t } = useLocalization()
+  }, [setTheme]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBackup = async () => {
     try {

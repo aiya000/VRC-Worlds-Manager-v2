@@ -2,12 +2,12 @@ import useSWR, { mutate } from 'swr'
 import { commands, FolderData } from '@/lib/commands'
 import { toast } from 'sonner'
 import { useLocalization } from '../../../hooks/use-localization'
-import { usePathname, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { usePopupStore } from './usePopups/store'
 
 const fetchFolders = async (): Promise<FolderData[]> => {
   const result = await commands.getFolders()
-  if (result.status === 'ok') return result.data
+  if (result.status === 'ok') {return result.data}
   throw new Error(result.error)
 }
 

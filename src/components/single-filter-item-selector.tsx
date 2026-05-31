@@ -102,7 +102,7 @@ export default function SingleFilterItemSelector({
 
   // Save starred items when they change
   useEffect(() => {
-    if (!id) return
+    if (!id) {return}
 
     const saveTimeout = setTimeout(() => {
       if (starredItems.length > 0) {
