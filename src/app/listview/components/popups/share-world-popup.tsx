@@ -1,4 +1,3 @@
-import React from 'react'
 import { useLocalization } from '@/hooks/use-localization'
 import { Copy, Twitter } from 'lucide-react'
 import { toast } from 'sonner'
@@ -59,7 +58,7 @@ export function ShareWorldPopup({
     }
   }
   const handleTweetShare = async () => {
-    if (!tweetIntentUrl) return
+    if (!tweetIntentUrl) {return}
     try {
       window.open(tweetIntentUrl, '_blank')
       toast.success(t('share-world:toast-twitter-opened', worldName))

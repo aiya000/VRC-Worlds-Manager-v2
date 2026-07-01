@@ -1,6 +1,6 @@
 import { WorldCardPreview } from '@/components/world-card'
-import { useState, useEffect, useMemo, useCallback } from 'react'
-import { FolderType, SpecialFolders } from '@/types/folders'
+import { useState } from 'react'
+import { FolderType } from '@/types/folders'
 import { CardSize, WorldDisplayData } from '@/lib/commands'
 import { useLocalization } from '@/hooks/use-localization'
 import {
@@ -22,9 +22,7 @@ import {
   AlertDialogCancel,
 } from '@/components/ui/alert-dialog'
 import * as Portal from '@radix-ui/react-portal'
-import { commands } from '@/lib/commands'
 import { Badge } from '@/components/ui/badge'
-import { useFolders } from '../../hook/use-folders'
 import { useWorldGrid } from './hook'
 
 interface WorldGridProps {
@@ -49,15 +47,15 @@ export function WorldGrid({
   const {
     cardSize,
     selectedWorlds,
-    selectAllWorlds,
+    selectAllWorlds: _selectAllWorlds,
     toggleWorld,
-    clearSelection,
+    clearSelection: _clearSelection,
     isSelectionMode,
-    selectAllFindPage,
+    selectAllFindPage: _selectAllFindPage,
     handleOpenFolderDialog,
     handleOpenWorldDetails,
     handleShareWorld,
-    handleDeleteWorld,
+    handleDeleteWorld: _handleDeleteWorld,
     handleRemoveFromCurrentFolder,
     removeWorldsFromFolder,
     handleHideWorld,
@@ -117,7 +115,7 @@ export function WorldGrid({
               <div
                 id={world.worldId}
                 onClick={() => {
-                  if (disableCardClick) return
+                  if (disableCardClick) {return}
                   if (isFindPage) {
                     // Only set dontSaveToLocal on worlds not already in collection
                     handleOpenWorldDetails(
@@ -175,7 +173,7 @@ export function WorldGrid({
               {isFindPage ? (
                 <>
                   <ContextMenuItem
-                    onSelect={(e) => {
+                    onSelect={(_e) => {
                       handleOpenFolderDialog(world.worldId)
                     }}
                   >
@@ -183,7 +181,7 @@ export function WorldGrid({
                   </ContextMenuItem>
                   <ContextMenuSeparator />
                   <ContextMenuItem
-                    onSelect={(e) => {
+                    onSelect={(_e) => {
                       handleShareWorld(world.worldId, world.name)
                     }}
                   >
@@ -194,7 +192,7 @@ export function WorldGrid({
               ) : !isHiddenFolder ? (
                 <>
                   <ContextMenuItem
-                    onSelect={(e) => {
+                    onSelect={(_e) => {
                       handleOpenFolderDialog(world.worldId)
                     }}
                   >
@@ -202,7 +200,7 @@ export function WorldGrid({
                   </ContextMenuItem>
                   {!isSpecialFolder && (
                     <ContextMenuItem
-                      onSelect={(e) => {
+                      onSelect={(_e) => {
                         handleRemoveFromCurrentFolder(world.worldId)
                       }}
                       className="text-destructive"
@@ -211,7 +209,7 @@ export function WorldGrid({
                     </ContextMenuItem>
                   )}
                   <ContextMenuItem
-                    onSelect={(e) => {
+                    onSelect={(_e) => {
                       const worldsToHide =
                         selectedWorlds.length > 0 &&
                         selectedWorlds.includes(world.worldId)
@@ -231,7 +229,7 @@ export function WorldGrid({
                   </ContextMenuItem>
                   <ContextMenuSeparator />
                   <ContextMenuItem
-                    onSelect={(e) => {
+                    onSelect={(_e) => {
                       handleShareWorld(world.worldId, world.name)
                     }}
                   >
@@ -242,7 +240,7 @@ export function WorldGrid({
               ) : (
                 <>
                   <ContextMenuItem
-                    onSelect={(e) => {
+                    onSelect={(_e) => {
                       const worldsToRestore =
                         selectedWorlds.length > 0 &&
                         selectedWorlds.includes(world.worldId)
@@ -255,7 +253,7 @@ export function WorldGrid({
                   </ContextMenuItem>
                   <ContextMenuSeparator />
                   <ContextMenuItem
-                    onSelect={(e) => {
+                    onSelect={(_e) => {
                       handleShareWorld(world.worldId, world.name)
                     }}
                   >
@@ -275,7 +273,7 @@ export function WorldGrid({
           <AlertDialog
             open={dialogConfig.isOpen}
             onOpenChange={(open) => {
-              if (!open) handleDialogClose()
+              if (!open) {handleDialogClose()}
             }}
           >
             <AlertDialogContent onEscapeKeyDown={handleDialogClose}>

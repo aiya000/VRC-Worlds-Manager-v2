@@ -80,7 +80,7 @@ async function checkIpRateLimit(env: Env, ip: string): Promise<boolean> {
   const hour = new Date().toISOString().slice(0, 13); // "2025-05-03T12"
   const key = `ip:${ip}:${hour}`;
   const current = parseInt((await env.QUOTA.get(key)) || '0', 10);
-  if (current >= IP_HOURLY_LIMIT) return false;
+  if (current >= IP_HOURLY_LIMIT) {return false;}
   await env.QUOTA.put(key, String(current + 1), { expirationTtl: 7200 });
   return true;
 }

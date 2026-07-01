@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { commands } from '@/lib/commands'
@@ -41,7 +41,7 @@ export default function Home() {
       }
     }
     checkFirstTime()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="h-screen w-screen flex flex-col items-center justify-center gap-4">

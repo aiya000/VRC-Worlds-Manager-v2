@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocalization } from '@/hooks/use-localization'
-import { X, FileJson, ChevronDown, SortAsc, SortDesc } from 'lucide-react'
+import { FileJson, ChevronDown, SortAsc, SortDesc } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -80,7 +80,7 @@ export function ExportPopup({
   }, [open])
 
   useEffect(() => {
-    if (!open) return
+    if (!open) {return}
     commands
       .getSortPreferences()
       .then((result) => {

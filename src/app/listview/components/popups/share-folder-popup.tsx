@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocalization } from '@/hooks/use-localization'
 import { commands } from '@/lib/commands'
 import {
@@ -40,13 +40,14 @@ export function ShareFolderPopup({
   const [shareLoading, setShareLoading] = useState(false)
   const [shareId, setShareId] = useState<string | null>(null)
 
+   
   useEffect(() => {
     if (!open) {
       // Reset state when dialog closes
-      setShareId(null)
+      setShareId(null) // eslint-disable-line react-hooks/set-state-in-effect
       setErrorMessage(null)
       setShareLoading(false)
-      setInfoLoading(false) // Add this
+      setInfoLoading(false)
       return
     }
 
@@ -73,7 +74,7 @@ export function ShareFolderPopup({
             } else {
               setErrorMessage(t('share-folder:error-message', shareRes.error))
             }
-          } catch (e) {
+          } catch (_e) {
             setErrorMessage('Failed to create share')
           } finally {
             setShareLoading(false)
@@ -164,7 +165,7 @@ export function ShareFolderPopup({
   }
 
   const handleTweetShare = async () => {
-    if (!tweetIntentUrl) return
+    if (!tweetIntentUrl) {return}
     try {
       window.open(tweetIntentUrl, '_blank')
       toast.success(t('share-folder:toast-twitter-opened', folderName))

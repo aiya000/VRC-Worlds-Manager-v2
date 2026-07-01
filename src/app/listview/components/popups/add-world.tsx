@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -9,19 +9,15 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { AlertCircle, Check, Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2 } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   commands,
   WorldDetails,
-  CardSize,
-  WorldDisplayData,
 } from '@/lib/commands'
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
@@ -52,8 +48,7 @@ export function AddWorldPopup({ onClose, currentFolder }: AddWorldPopupProps) {
       try {
         const worlds = await getAllWorlds()
         setExistingWorlds(worlds.map((world) => world.worldId))
-      } catch (e) {
-        // handle error if needed
+      } catch (_e) {
       } finally {
         setIsLoading(false)
       }
@@ -161,7 +156,7 @@ export function AddWorldPopup({ onClose, currentFolder }: AddWorldPopupProps) {
     <Dialog
       open
       onOpenChange={(open) => {
-        if (!open) handleCancel()
+        if (!open) {handleCancel()}
       }}
     >
       <DialogContent className="sm:max-w-lg">

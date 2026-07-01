@@ -53,7 +53,7 @@ export const LocalizationContextProvider: FC<Props> = ({ children }) => {
         console.error('Failed to get language:', result.error)
       }
     })
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const contextValue: LocalizationContextType = {
     language: languageCode,

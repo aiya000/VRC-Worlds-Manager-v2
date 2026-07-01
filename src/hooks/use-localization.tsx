@@ -2,13 +2,13 @@ import { LocalizationContext } from '@/components/localization-context'
 import { useContext } from 'react'
 
 type Props = {
-  t: (key: string, ...args: any[]) => string
+  t: (key: string, ...args: (string | number)[]) => string
 }
 
 export const useLocalization = (): Props => {
   const { data, fallbackData } = useContext(LocalizationContext)
 
-  const t = (key: string, ...args: any[]) => {
+  const t = (key: string, ...args: (string | number)[]) => {
     const template = data[key] ?? fallbackData[key] ?? key
 
     if (args.length === 0) {

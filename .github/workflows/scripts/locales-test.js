@@ -52,7 +52,7 @@ export default function checkLocaleKeys() {
 
   const keyMap = new Map();
 
-  Object.entries(locales).forEach(([filename, locale]) => {
+  Object.entries(locales).forEach(([_filename, locale]) => {
     if (!locale.data) {
       return;
     }

@@ -37,12 +37,12 @@ export function PopupManager() {
 
   const currentFolder: FolderType = (() => {
     // Special folders by path
-    if (pathname?.includes('/folders/special/all')) return SpecialFolders.All
+    if (pathname?.includes('/folders/special/all')) {return SpecialFolders.All}
     if (pathname?.includes('/folders/special/unclassified'))
-      return SpecialFolders.Unclassified
-    if (pathname?.includes('/folders/special/find')) return SpecialFolders.Find
+      {return SpecialFolders.Unclassified}
+    if (pathname?.includes('/folders/special/find')) {return SpecialFolders.Find}
     if (pathname?.includes('/folders/special/hidden'))
-      return SpecialFolders.Hidden
+      {return SpecialFolders.Hidden}
     // User folder from query param
     const user = searchParams?.get('folderName')
     return (user as FolderType) || SpecialFolders.All
@@ -137,7 +137,7 @@ export function PopupManager() {
         <WorldDetailPopup
           open={!!showWorldDetails}
           onOpenChange={(open) => {
-            if (!open) setPopup('showWorldDetails', null)
+            if (!open) {setPopup('showWorldDetails', null)}
           }}
           worldId={showWorldDetails.id}
           currentFolder={currentFolder}

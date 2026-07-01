@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, ReactNode } from 'react'
+import { createContext, useContext, ReactNode } from 'react'
 import { usePatreonStore } from '@/stores/patreon-store'
 import { useEffect } from 'react'
 
@@ -20,7 +20,7 @@ export function PatreonProvider({ children }: PatreonProviderProps) {
 
   useEffect(() => {
     fetchSupporters()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <PatreonContext.Provider value={{ supporters, isLoading }}>

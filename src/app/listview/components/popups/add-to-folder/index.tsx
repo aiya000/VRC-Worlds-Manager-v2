@@ -1,4 +1,3 @@
-import { useState, useRef, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -10,17 +9,12 @@ import {
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Check, Info, Loader2, Minus, AlertCircle } from 'lucide-react'
-import { commands, WorldDisplayData } from '@/lib/commands'
+import { WorldDisplayData } from '@/lib/commands'
 import { useLocalization } from '@/hooks/use-localization'
 import { Alert, AlertDescription } from '../../../../../components/ui/alert'
 import { Input } from '../../../../../components/ui/input'
 import { Checkbox } from '../../../../../components/ui/checkbox'
-import { FolderRemovalPreference } from '@/lib/commands'
-import { useFolders } from '@/app/listview/hook/use-folders'
 
-import { usePathname } from 'next/navigation'
-import { useSelectedWorldsStore } from '../../../hook/use-selected-worlds'
-import { useWorlds } from '../../../hook/use-worlds'
 import { useAddToFolderPopup } from './hook'
 import { FolderType } from '@/types/folders'
 
@@ -90,7 +84,7 @@ export function AddToFolderDialog({
             <ScrollArea className={isFindPage ? 'h-[240px]' : 'h-[300px]'}>
               <div ref={listRef} className="space-y-2 px-2 pb-2">
                 {folders.map((folder) => {
-                  const isNew = folder.name === createdFolder
+                  const _isNew = folder.name === createdFolder
                   const state = getFolderState(folder.name)
                   const isAll = state === 'all'
                   const isSome = state === 'some'
