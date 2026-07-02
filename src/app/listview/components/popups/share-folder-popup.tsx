@@ -85,7 +85,7 @@ export function ShareFolderPopup({
         }
       } catch (e) {
         console.error(`Failed to fetch folder info: ${e}`)
-        setErrorMessage(t('share-folder:error-message', e))
+        setErrorMessage(t('share-folder:error-message', String(e)))
       } finally {
         setInfoLoading(false)
       }

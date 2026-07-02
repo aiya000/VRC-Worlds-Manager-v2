@@ -18,7 +18,7 @@ export function useWorldGrid(
     getSelectedWorlds,
     isSelectionMode,
     toggleWorldSelection,
-    selectAllWorlds: _selectAllWorlds,
+    selectAllWorlds,
     clearFolderSelections,
   } = useSelectedWorldsStore()
 
