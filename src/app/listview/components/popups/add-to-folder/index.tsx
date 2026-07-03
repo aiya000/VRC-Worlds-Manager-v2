@@ -191,9 +191,7 @@ export function AddToFolderDialog({
             <Alert variant="destructive">
               <AlertDescription className="flex">
                 <AlertCircle className="h-4 w-4 mt-0.5 mr-2" />
-                {t('add-to-folder-dialog:remove-confirm', {
-                  folder: currentFolder,
-                })}
+                {t('add-to-folder-dialog:remove-confirm')}
               </AlertDescription>
             </Alert>
 
