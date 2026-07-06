@@ -4,11 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "lint": "eslint --max-warnings 0"
   },
   "devDependencies": {
     "wrangler": "^4.0.0",
     "@cloudflare/workers-types": "^4.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "eslint": "^9",
+    "typescript-eslint": "^8"
   }
 }
