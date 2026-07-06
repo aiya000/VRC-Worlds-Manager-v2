@@ -47,4 +47,15 @@ describe('locales', () => {
       )
     }
   })
+
+  it('uses web-appropriate setup thank-you text', () => {
+    const locales = readLocaleFiles()
+
+    expect(locales['ja-JP.json']?.['setup-page:thank-you']).toBe(
+      'ご利用ありがとうございます！',
+    )
+    expect(locales['en-US.json']?.['setup-page:thank-you']).toBe(
+      'Thank you for using VRChat Worlds Manager Web!',
+    )
+  })
 })
