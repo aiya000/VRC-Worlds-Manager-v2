@@ -1,16 +1,33 @@
-import fs from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
 function readLocaleFiles(): Record<string, Record<string, string>> {
-  const localesDir = path.join(process.cwd(), 'locales')
-  const files = fs.readdirSync(localesDir).filter((f) => f.endsWith('.json'))
+  const localesDir = path.resolve(__dirname, '../../locales')
+  const files = readdirSync(localesDir)
+    .filter((f) => f.endsWith('.json'))
+    .sort((a, b) => a.localeCompare(b))
 
   const locales: Record<string, Record<string, string>> = {}
   for (const file of files) {
-    const content = fs.readFileSync(path.join(localesDir, file), 'utf8')
-    locales[file] = JSON.parse(content)
+    const content = readFileSync(path.join(localesDir, file), 'utf8')
+
+    try {
+      const parsed = JSON.parse(content) as unknown
+      if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        throw new Error('expected a JSON object at the top level')
+      }
+
+      locales[file] = parsed as Record<string, string>
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      throw new Error(`Failed to parse ${file}: ${message}`)
+    }
   }
+
   return locales
 }
 
