@@ -22,9 +22,5 @@ jobs:
       - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2
       - name: Install dependencies
         run: bun install
-      - name: Prettier
-        run: bunx prettier --check .
-      - name: ESLint
-        run: bun run lint
-      - name: TypeCheck
-        run: bun run typecheck
+      - name: Prettier, ESLint, and TypeCheck
+        run: bun run check

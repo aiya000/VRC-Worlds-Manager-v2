@@ -5,7 +5,12 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "lint": "eslint --max-warnings 0"
+    "check": "bun run lint && bun run typecheck",
+    "lint": "bun run lint:eslint && bun run lint:prettier",
+    "lint:eslint": "eslint --max-warnings 0",
+    "lint:prettier": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "wrangler": "^4.0.0",
