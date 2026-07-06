@@ -42,6 +42,7 @@
   "general:memo": "メモ",
   "general:save": "保存",
   "general:error-open-logs": "ログフォルダの展開に失敗しました",
+  "general:error-open-folder": "フォルダを開けませんでした。フォルダが見つからないようです。",
   "general:open-folder": "フォルダを開く",
   "general:cancelled": "キャンセルされました",
   "general:failed": "失敗しました",

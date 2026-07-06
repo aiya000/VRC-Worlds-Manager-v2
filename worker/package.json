@@ -4,11 +4,20 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "check": "bun run lint && bun run typecheck",
+    "lint": "bun run lint:eslint && bun run lint:prettier",
+    "lint:eslint": "eslint --max-warnings 0",
+    "lint:prettier": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write ."
   },
   "devDependencies": {
-    "wrangler": "^4.0.0",
     "@cloudflare/workers-types": "^4.0.0",
-    "typescript": "^5.0.0"
+    "eslint": "^9",
+    "prettier": "^3.9.4",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8",
+    "wrangler": "^4.0.0"
   }
 }
