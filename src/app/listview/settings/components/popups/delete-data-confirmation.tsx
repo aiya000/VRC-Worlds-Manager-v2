@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLocalization } from '@/hooks/use-localization'
 import { AlertCircle, Trash2 } from 'lucide-react'
 import {
@@ -29,15 +29,14 @@ export function DeleteDataConfirmationDialog({
   const holdDuration = 3000 // 3 seconds in milliseconds
   const stepInterval = 50 // Update every 50ms
 
-  const handleConfirm = async () => {
+  const handleConfirm = useCallback(async () => {
     try {
       await onConfirm()
     } catch (error) {
       console.error('Error during data deletion:', error)
     }
-  }
+  }, [onConfirm])
 
-   
   useEffect(() => {
     if (isHolding) {
       intervalRef.current = setInterval(() => {
@@ -46,7 +45,9 @@ export function DeleteDataConfirmationDialog({
           if (newProgress >= 100) {
             // Clear interval when reaching 100%
             console.info('Deleting data...')
-            if (intervalRef.current) {clearInterval(intervalRef.current)}
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current)
+            }
             setIsHolding(false)
             handleConfirm()
             return 100
@@ -60,22 +61,27 @@ export function DeleteDataConfirmationDialog({
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
-      // Only reset progress if we haven't completed
-      if (progress < 100) {setProgress(0)}
     }
 
     return () => {
-      if (intervalRef.current) {clearInterval(intervalRef.current)}
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
     }
-  }, [isHolding])  
+  }, [isHolding, handleConfirm])
 
   useEffect(() => {
     if (!open) {
+      return
+    }
+    return () => {
       setProgress(0)
       setIsHolding(false)
-      if (intervalRef.current) {clearInterval(intervalRef.current)}
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
     }
-  }, [open])  
+  }, [open])
 
   const handleMouseDown = () => {
     setIsHolding(true)
@@ -83,10 +89,12 @@ export function DeleteDataConfirmationDialog({
 
   const handleMouseUp = () => {
     setIsHolding(false)
+    setProgress((prev) => (prev < 100 ? 0 : prev))
   }
 
   const handleMouseLeave = () => {
     setIsHolding(false)
+    setProgress((prev) => (prev < 100 ? 0 : prev))
   }
 
   return (

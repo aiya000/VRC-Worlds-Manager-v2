@@ -48,23 +48,20 @@ export const useUpdateDialog = ({
     }
   }
 
-  const getLocalizedChanges = async () => {
-    const result = await commands.getChangelog()
-
-    if (result.status === 'error') {
-      console.error('Failed to get localized changes:', result.error)
-      setLocalizedChanges([])
+  useEffect(() => {
+    if (dialogOpen !== true) {
       return
     }
-
-    setLocalizedChanges(result.data)
-  }
-
-   
-  useEffect(() => {
-    if (dialogOpen === true) {
-      getLocalizedChanges()
+    const fetchChanges = async () => {
+      const result = await commands.getChangelog()
+      if (result.status === 'error') {
+        console.error('Failed to get localized changes:', result.error)
+        setLocalizedChanges([])
+        return
+      }
+      setLocalizedChanges(result.data)
     }
+    fetchChanges()
   }, [dialogOpen])
 
   useEffect(() => {
@@ -76,7 +73,9 @@ export const useUpdateDialog = ({
     const setupListener = async () => {
       try {
         unlistenCompleteFn = await events.taskStatusChanged.listen((e) => {
-          if (isCancelled) {return}
+          if (isCancelled) {
+            return
+          }
 
           const completedTaskId = e.payload.id
           const status = e.payload.status
@@ -113,7 +112,9 @@ export const useUpdateDialog = ({
         }
 
         unlistenProgressFn = await events.updateProgress.listen((e) => {
-          if (isCancelled) {return}
+          if (isCancelled) {
+            return
+          }
 
           setProgress(e.payload.progress * 100)
         })
@@ -165,7 +166,7 @@ export const useUpdateDialog = ({
       unlistenProgressFn?.()
       unlistenCompleteFn?.()
     }
-  }, [taskId, onCancelButtonClick, t])  
+  }, [taskId, onCancelButtonClick, t])
 
   return {
     progress,

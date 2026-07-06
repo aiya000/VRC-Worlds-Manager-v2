@@ -142,7 +142,9 @@ export default function MultiFilterItemSelector({
   // Save starred items with debounce to reduce file writes
   useEffect(() => {
     // Skip if no id provided or on initial render with empty array
-    if (!id) {return}
+    if (!id) {
+      return
+    }
 
     // Wait 500ms after changes stop before saving
     const saveTimeout = setTimeout(() => {

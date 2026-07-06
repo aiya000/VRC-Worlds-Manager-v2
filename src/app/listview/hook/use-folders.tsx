@@ -7,7 +7,9 @@ import { usePopupStore } from './usePopups/store'
 
 const fetchFolders = async (): Promise<FolderData[]> => {
   const result = await commands.getFolders()
-  if (result.status === 'ok') {return result.data}
+  if (result.status === 'ok') {
+    return result.data
+  }
   throw new Error(result.error)
 }
 

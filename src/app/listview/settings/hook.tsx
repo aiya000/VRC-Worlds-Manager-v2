@@ -199,7 +199,9 @@ export const useSettingsPage = () => {
     foldersFile: File,
   ) => {
     try {
-      console.info(`Migrating data from ${worldsFile.name} and ${foldersFile.name}`)
+      console.info(
+        `Migrating data from ${worldsFile.name} and ${foldersFile.name}`,
+      )
       const result = await commands.migrateOldDataFromFiles(
         worldsFile,
         foldersFile,
@@ -355,7 +357,9 @@ export const useSettingsPage = () => {
         console.info(`Folder removal preference set to: ${value}`)
         setFolderRemovalPreference(value)
       } else {
-        console.error(`Failed to set folder removal preference: ${result.error}`)
+        console.error(
+          `Failed to set folder removal preference: ${result.error}`,
+        )
         toast(t('general:error-title'), {
           description:
             t('settings-page:error-save-preferences') + ': ' + result.error,

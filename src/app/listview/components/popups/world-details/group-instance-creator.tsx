@@ -175,10 +175,14 @@ export function GroupInstanceCreator({
   }
 
   const handleRoleToggle = (roleId: string, checked: boolean) => {
-    if (!roles) {return}
+    if (!roles) {
+      return
+    }
 
     const role = roles.find((r) => r.id === roleId)
-    if (!role) {return}
+    if (!role) {
+      return
+    }
 
     const newSelectedRoles = new Set(stepInfo.selectedRoles)
     const everyoneRole = getEveryoneRole()
@@ -232,7 +236,9 @@ export function GroupInstanceCreator({
   }
 
   const isRoleDisabled = (role: GroupRole) => {
-    if (selectingEveryoneRole) {return false}
+    if (selectingEveryoneRole) {
+      return false
+    }
 
     if (role.permissions.includes('*')) {
       // Owner role should be selectable when no other roles are selected
@@ -265,7 +271,9 @@ export function GroupInstanceCreator({
   }
 
   const isRoleRequired = (role: GroupRole) => {
-    if (selectingEveryoneRole) {return false}
+    if (selectingEveryoneRole) {
+      return false
+    }
 
     if (role.permissions.includes('*')) {
       // Owner is only required when OTHER non-Everyone roles are selected
@@ -303,7 +311,9 @@ export function GroupInstanceCreator({
   }
 
   const handleCreateInstance = () => {
-    if (!stepInfo.instanceType || !stepInfo.groupId) {return}
+    if (!stepInfo.instanceType || !stepInfo.groupId) {
+      return
+    }
 
     const rolesToPass =
       stepInfo.instanceType === 'group' && canGateRoles()
@@ -424,7 +434,6 @@ export function GroupInstanceCreator({
     </Button>
   )
 
-   
   const GroupSelectionPage = () => {
     if (isLoading || !groups) {
       return (
@@ -471,7 +480,6 @@ export function GroupInstanceCreator({
     )
   }
 
-   
   const InstanceTypeSelectionPage = () => {
     if (isLoading || !permission) {
       return (
@@ -536,7 +544,6 @@ export function GroupInstanceCreator({
     )
   }
 
-   
   const RoleSelectionPage = () => {
     if (isLoading || !roles) {
       return (
@@ -607,7 +614,6 @@ export function GroupInstanceCreator({
     )
   }
 
-   
   const ConfigurationPage = () => (
     <div className="space-y-1">
       <NavigationItem
@@ -657,11 +663,12 @@ export function GroupInstanceCreator({
           type="single"
           value={mapRegion.toUI(stepInfo.region)}
           onValueChange={(value) => {
-            if (value)
-              {setStepInfo((prev) => ({
+            if (value) {
+              setStepInfo((prev) => ({
                 ...prev,
                 region: mapRegion.toBackend(value),
-              }))}
+              }))
+            }
           }}
           className="flex gap-2 mt-1"
         >

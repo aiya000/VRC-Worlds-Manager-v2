@@ -149,14 +149,18 @@ export function WorldDetailPopup({
 
   const normalizeCustomTag = useCallback((raw: string): string | null => {
     const trimmed = raw.trim()
-    if (!trimmed) {return null}
+    if (!trimmed) {
+      return null
+    }
 
     const withoutPrefix = trimmed.startsWith('custom:')
       ? trimmed.slice('custom:'.length)
       : trimmed
     const cleaned = withoutPrefix.trim()
 
-    if (!cleaned) {return null}
+    if (!cleaned) {
+      return null
+    }
     return `custom:${cleaned}`
   }, [])
 
@@ -253,7 +257,9 @@ export function WorldDetailPopup({
 
   useEffect(() => {
     const fetchWorldDetails = async () => {
-      if (!open) {return}
+      if (!open) {
+        return
+      }
 
       // Reset all state when opening the dialog with a new world
       setIsLoading(true)
@@ -317,7 +323,9 @@ export function WorldDetailPopup({
                   setIsCountdownActive(true) // Start the countdown only if blacklisted
                 }
               } else {
-                console.error(`Failed to fetch blacklist: ${blacklistResult.error}`)
+                console.error(
+                  `Failed to fetch blacklist: ${blacklistResult.error}`,
+                )
               }
             } catch (blacklistError) {
               console.error(`Failed to fetch blacklist: ${blacklistError}`)
@@ -344,7 +352,9 @@ export function WorldDetailPopup({
       }
     }
     const fetchWorldFolders = async () => {
-      if (!worldId) {return}
+      if (!worldId) {
+        return
+      }
 
       try {
         const result = await commands.getFoldersForWorld(worldId)
@@ -358,7 +368,9 @@ export function WorldDetailPopup({
       }
     }
 
-    if (!open) {return}
+    if (!open) {
+      return
+    }
 
     fetchWorldDetails()
     if (!dontSaveToLocal) {
@@ -366,7 +378,7 @@ export function WorldDetailPopup({
       fetchWorldFolders()
     }
     loadCustomTags()
-  }, [dontSaveToLocal, loadCustomTags, open, worldId])  
+  }, [dontSaveToLocal, loadCustomTags, open, worldId])
 
   useEffect(() => {
     const loadRegionPreference = async () => {
@@ -484,9 +496,12 @@ export function WorldDetailPopup({
     onOpenChange(false) // Close dialog after creating instance
   }
 
-  const handleDeleteWorld = (worldId: string) => {
-    deleteWorld(worldId)
-  }
+  const handleDeleteWorld = useCallback(
+    (id: string) => {
+      deleteWorld(id)
+    },
+    [deleteWorld],
+  )
 
   // Add this effect to handle the countdown and auto-close
   useEffect(() => {
@@ -511,7 +526,8 @@ export function WorldDetailPopup({
     isCountdownActive,
     onOpenChange,
     worldId,
-  ])  
+    handleDeleteWorld,
+  ])
 
   async function toggleWorldFolder(folder: string): Promise<void> {
     try {
@@ -544,9 +560,13 @@ export function WorldDetailPopup({
       await mutateFoldersCache<FolderData[]>(
         'folders',
         (current) => {
-          if (!current) {return current}
+          if (!current) {
+            return current
+          }
           return current.map((f) => {
-            if (f.name !== folder) {return f}
+            if (f.name !== folder) {
+              return f
+            }
             const nextCount = Math.max(0, f.world_count + delta)
             return { ...f, world_count: nextCount }
           })
@@ -835,8 +855,9 @@ export function WorldDetailPopup({
                             type="single"
                             value={selectedInstanceType}
                             onValueChange={(value) => {
-                              if (value)
-                                {setSelectedInstanceType(value as InstanceType)}
+                              if (value) {
+                                setSelectedInstanceType(value as InstanceType)
+                              }
                             }}
                             className="grid grid-cols-2 gap-2"
                           >
@@ -895,8 +916,9 @@ export function WorldDetailPopup({
                             type="single"
                             value={mapRegion.toUI(selectedRegion)}
                             onValueChange={(value) => {
-                              if (value)
-                                {setSelectedRegion(mapRegion.toBackend(value))}
+                              if (value) {
+                                setSelectedRegion(mapRegion.toBackend(value))
+                              }
                             }}
                             className="flex gap-2"
                           >

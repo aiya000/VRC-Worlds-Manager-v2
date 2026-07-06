@@ -147,7 +147,7 @@ export default function FindWorldsPage() {
       // Only update when it's not already 'relevance' to avoid unnecessary state updates
       setSelectedSort((prev) => (prev === 'relevance' ? prev : 'relevance'))
     }
-  }, [searchQuery])  
+  }, [searchQuery])
   const [loadMoreBackoffUntil, setLoadMoreBackoffUntil] = useState<
     number | null
   >(null)
@@ -157,7 +157,7 @@ export default function FindWorldsPage() {
     if (recentlyVisitedWorlds.length === 0 && !isLoading) {
       fetchRecentlyVisitedWorlds()
     }
-  }, [recentlyVisitedWorlds.length, isLoading, fetchRecentlyVisitedWorlds])  
+  }, [recentlyVisitedWorlds.length, isLoading, fetchRecentlyVisitedWorlds])
 
   // Load tags when the search tab is active
   useEffect(() => {
@@ -242,7 +242,9 @@ export default function FindWorldsPage() {
       if (loadMore) {
         const backoffMs = 2500 // 2-3 seconds backoff
         setLoadMoreBackoffUntil(Date.now() + backoffMs)
-        console.info(`Load-more backoff applied for ${backoffMs}ms; nudging scroll up`)
+        console.info(
+          `Load-more backoff applied for ${backoffMs}ms; nudging scroll up`,
+        )
         const scroller = findGridRef.current
         try {
           if (scroller) {

@@ -292,7 +292,9 @@ const WelcomePage: React.FC = () => {
         <MigrationConfirmationPopup
           open={showMigrationConfirm}
           onOpenChange={(open) => {
-            if (!open) {setShowMigrationConfirm(false)}
+            if (!open) {
+              setShowMigrationConfirm(false)
+            }
           }}
           onCancel={handleMigrationCancel}
           onConfirm={handleMigrationConfirm}

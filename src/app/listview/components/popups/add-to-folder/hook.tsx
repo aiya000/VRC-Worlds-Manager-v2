@@ -107,17 +107,25 @@ export const useAddToFolderPopup = ({
         console.error(`[AddToFolder] Failed to load memberships: ${e}`)
       }
     }
-    if (selectedWorlds?.length) {loadMembership()}
+    if (selectedWorlds?.length) {
+      loadMembership()
+    }
     return () => {
       cancelled = true
     }
   }, [selectedWorlds])
 
   const handleNewNameKey = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key !== 'Enter') {return}
+    if (e.key !== 'Enter') {
+      return
+    }
     const name = newFolderName.trim()
-    if (!name) {return}
-    console.info(`[AddToFolder] Creating new folder via Enter key, name="${name}"`)
+    if (!name) {
+      return
+    }
+    console.info(
+      `[AddToFolder] Creating new folder via Enter key, name="${name}"`,
+    )
     setIsLoading(true)
     await createFolder(name)
     setIsLoading(false)
@@ -128,7 +136,9 @@ export const useAddToFolderPopup = ({
 
   // whenever `folders` changes after we created one, scroll it into view
   useEffect(() => {
-    if (!createdFolder) {return}
+    if (!createdFolder) {
+      return
+    }
     console.info(
       `[AddToFolder] New folder created, scrolling into view: ${createdFolder}`,
     )
@@ -141,14 +151,16 @@ export const useAddToFolderPopup = ({
         el.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
     }
-    setCreatedFolder(null) // eslint-disable-line react-hooks/set-state-in-effect
-  }, [folders, createdFolder])  
+    setCreatedFolder(null)
+  }, [folders, createdFolder])
 
   const getInitialState = (folder: string) => {
     const worldsInFolder = selectedWorlds?.filter((world) => {
       const set = membershipByWorld.get(world.worldId)
       // prefer authoritative membership; fallback to world.folders
-      if (set) {return set.has(folder)}
+      if (set) {
+        return set.has(folder)
+      }
       return world?.folders?.includes(folder)
     }).length
 
@@ -334,7 +346,9 @@ export const useAddToFolderPopup = ({
 
   // Save preference based on user action
   const saveFolderRemovalPreference = async (action: 'keep' | 'remove') => {
-    if (!rememberChoice) {return} // Only save if checkbox is checked
+    if (!rememberChoice) {
+      return
+    } // Only save if checkbox is checked
 
     try {
       const preference = action === 'keep' ? 'neverRemove' : 'alwaysRemove'
@@ -566,10 +580,14 @@ export const useAddToFolderPopup = ({
           await mutateFoldersCache<FolderData[]>(
             'folders',
             (current) => {
-              if (!current) {return current}
+              if (!current) {
+                return current
+              }
               return current.map((f) => {
                 const delta = folderDelta.get(f.name) ?? 0
-                if (delta === 0) {return f}
+                if (delta === 0) {
+                  return f
+                }
                 const nextCount = Math.max(0, f.world_count + delta)
                 return { ...f, world_count: nextCount }
               })

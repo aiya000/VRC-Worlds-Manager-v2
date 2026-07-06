@@ -53,7 +53,7 @@ export default function AboutSection() {
     }
 
     fetchPatreonData()
-  }, [])  
+  }, [])
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">

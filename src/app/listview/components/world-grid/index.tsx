@@ -115,7 +115,9 @@ export function WorldGrid({
               <div
                 id={world.worldId}
                 onClick={() => {
-                  if (disableCardClick) {return}
+                  if (disableCardClick) {
+                    return
+                  }
                   if (isFindPage) {
                     // Only set dontSaveToLocal on worlds not already in collection
                     handleOpenWorldDetails(
@@ -273,7 +275,9 @@ export function WorldGrid({
           <AlertDialog
             open={dialogConfig.isOpen}
             onOpenChange={(open) => {
-              if (!open) {handleDialogClose()}
+              if (!open) {
+                handleDialogClose()
+              }
             }}
           >
             <AlertDialogContent onEscapeKeyDown={handleDialogClose}>
