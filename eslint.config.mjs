@@ -27,8 +27,12 @@ export default tseslint.config(
           ignoreRestSiblings: true,
         },
       ],
+      '@typescript-eslint/no-unused-expressions': 'warn',
       curly: ['error', 'all'],
       eqeqeq: ['error', 'always'],
     },
+  },
+  {
+    ignores: ['.next/**', 'out/**', 'build/**', 'next-env.d.ts'],
   },
 )
