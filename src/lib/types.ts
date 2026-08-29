@@ -21,6 +21,14 @@ export type FolderData = { name: string; world_count: number }
 
 export type FolderRemovalPreference = 'ask' | 'alwaysRemove' | 'neverRemove'
 
+export type WorldCardFieldVisibility = {
+  name: boolean
+  authorName: boolean
+  visits: boolean
+  lastUpdated: boolean
+  favorites: boolean
+}
+
 export type GroupInstanceCreateAllowedType = {
   normal: boolean
   plus: boolean

@@ -1,4 +1,9 @@
-import { CardSize, commands, WorldDisplayData } from '@/lib/commands'
+import {
+  CardSize,
+  commands,
+  WorldCardFieldVisibility,
+  WorldDisplayData,
+} from '@/lib/commands'
 import { usePopupStore } from '../../hook/usePopups/store'
 import { toast } from 'sonner'
 import { useLocalization } from '@/hooks/use-localization'
@@ -25,6 +30,14 @@ export function useWorldGrid(
   const { refresh } = useWorlds(currentFolder)
 
   const [cardSize, setCardSize] = useState<CardSize>('Normal')
+  const [fieldVisibility, setFieldVisibility] =
+    useState<WorldCardFieldVisibility>({
+      name: true,
+      authorName: true,
+      visits: true,
+      lastUpdated: true,
+      favorites: true,
+    })
 
   const loadCardSize = async () => {
     try {
@@ -40,8 +53,20 @@ export function useWorldGrid(
     }
   }
 
+  const loadFieldVisibility = async () => {
+    try {
+      const result = await commands.getWorldCardFieldVisibility()
+      if (result.status === 'ok') {
+        setFieldVisibility(result.data)
+      }
+    } catch (e) {
+      console.error(`Failed to load world card field visibility: ${e}`)
+    }
+  }
+
   useEffect(() => {
     loadCardSize()
+    loadFieldVisibility()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectedWorlds = Array.from(getSelectedWorlds(currentFolder))
@@ -79,7 +104,9 @@ export function useWorldGrid(
   // respond to membership changes triggered by dialogs
   const membershipVersion = usePopupStore((s) => s.membershipVersion)
   useEffect(() => {
-    if (!isFindPage) {return} // Only needed for find page
+    if (!isFindPage) {
+      return
+    } // Only needed for find page
 
     const checkWorldsExistence = async () => {
       try {
@@ -94,7 +121,9 @@ export function useWorldGrid(
 
         const hiddenWorldsResult = await commands.getHiddenWorlds()
         if (hiddenWorldsResult.status !== 'ok') {
-          console.error(`Error fetching hidden worlds: ${hiddenWorldsResult.error}`)
+          console.error(
+            `Error fetching hidden worlds: ${hiddenWorldsResult.error}`,
+          )
           throw new Error(hiddenWorldsResult.error)
         }
         const hiddenWorlds = hiddenWorldsResult.data
@@ -339,6 +368,7 @@ export function useWorldGrid(
 
   return {
     cardSize,
+    fieldVisibility,
     selectedWorlds,
     selectAllWorlds,
     toggleWorld,

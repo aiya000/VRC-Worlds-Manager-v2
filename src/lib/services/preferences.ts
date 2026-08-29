@@ -4,7 +4,16 @@ import type {
   FilterItemSelectorStarredType,
   FolderRemovalPreference,
   InstanceRegion,
+  WorldCardFieldVisibility,
 } from '@/lib/types'
+
+const defaultWorldCardFieldVisibility: WorldCardFieldVisibility = {
+  name: true,
+  authorName: true,
+  visits: true,
+  lastUpdated: true,
+  favorites: true,
+}
 
 export class PreferencesService extends Context.Tag('PreferencesService')<
   PreferencesService,
@@ -32,6 +41,10 @@ export class PreferencesService extends Context.Tag('PreferencesService')<
     readonly setSortPreferences: (
       sortField: string,
       sortDirection: string,
+    ) => Effect.Effect<void>
+    readonly getWorldCardFieldVisibility: () => Effect.Effect<WorldCardFieldVisibility>
+    readonly setWorldCardFieldVisibility: (
+      visibility: WorldCardFieldVisibility,
     ) => Effect.Effect<void>
   }
 >() {}
@@ -83,4 +96,13 @@ export const PreferencesServiceLive = Layer.succeed(PreferencesService, {
     ),
   setSortPreferences: (sortField, sortDirection) =>
     Effect.sync(() => setItem('sortPreferences', [sortField, sortDirection])),
+  getWorldCardFieldVisibility: () =>
+    Effect.succeed(
+      getItem<WorldCardFieldVisibility>(
+        'worldCardFieldVisibility',
+        defaultWorldCardFieldVisibility,
+      ),
+    ),
+  setWorldCardFieldVisibility: (visibility) =>
+    Effect.sync(() => setItem('worldCardFieldVisibility', visibility)),
 })
