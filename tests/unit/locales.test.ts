@@ -17,7 +17,11 @@ function readLocaleFiles(): Record<string, Record<string, string>> {
 
     try {
       const parsed = JSON.parse(content) as unknown
-      if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      if (
+        parsed === null ||
+        typeof parsed !== 'object' ||
+        Array.isArray(parsed)
+      ) {
         throw new Error('expected a JSON object at the top level')
       }
 

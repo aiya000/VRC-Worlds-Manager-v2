@@ -35,7 +35,9 @@ export function ListViewClientShell({
   // Handle mouse move during resize
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing) {return}
+      if (!isResizing) {
+        return
+      }
 
       // Clamp the width to min/max boundaries to prevent sticking
       const newWidth = Math.max(

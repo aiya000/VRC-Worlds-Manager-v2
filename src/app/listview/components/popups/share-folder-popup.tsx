@@ -40,11 +40,10 @@ export function ShareFolderPopup({
   const [shareLoading, setShareLoading] = useState(false)
   const [shareId, setShareId] = useState<string | null>(null)
 
-   
   useEffect(() => {
     if (!open) {
       // Reset state when dialog closes
-      setShareId(null) // eslint-disable-line react-hooks/set-state-in-effect
+      setShareId(null)
       setErrorMessage(null)
       setShareLoading(false)
       setInfoLoading(false)
@@ -92,7 +91,7 @@ export function ShareFolderPopup({
     }
 
     fetchFolderInfo()
-  }, [open, folderName])
+  }, [open, folderName]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleShare = async () => {
     setErrorMessage(null)
@@ -165,7 +164,9 @@ export function ShareFolderPopup({
   }
 
   const handleTweetShare = async () => {
-    if (!tweetIntentUrl) {return}
+    if (!tweetIntentUrl) {
+      return
+    }
     try {
       window.open(tweetIntentUrl, '_blank')
       toast.success(t('share-folder:toast-twitter-opened', folderName))

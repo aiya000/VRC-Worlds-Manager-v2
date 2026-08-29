@@ -11,16 +11,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AlertCircle, Loader2 } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import {
-  commands,
-  WorldDetails,
-} from '@/lib/commands'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { commands, WorldDetails } from '@/lib/commands'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { WorldCardPreview } from '@/components/world-card'
 import { useLocalization } from '@/hooks/use-localization'
 import { useWorlds } from '../../hook/use-worlds'
@@ -156,7 +148,9 @@ export function AddWorldPopup({ onClose, currentFolder }: AddWorldPopupProps) {
     <Dialog
       open
       onOpenChange={(open) => {
-        if (!open) {handleCancel()}
+        if (!open) {
+          handleCancel()
+        }
       }}
     >
       <DialogContent className="sm:max-w-lg">

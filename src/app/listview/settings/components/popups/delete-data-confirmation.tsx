@@ -37,7 +37,6 @@ export function DeleteDataConfirmationDialog({
     }
   }
 
-   
   useEffect(() => {
     if (isHolding) {
       intervalRef.current = setInterval(() => {
@@ -46,7 +45,9 @@ export function DeleteDataConfirmationDialog({
           if (newProgress >= 100) {
             // Clear interval when reaching 100%
             console.info('Deleting data...')
-            if (intervalRef.current) {clearInterval(intervalRef.current)}
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current)
+            }
             setIsHolding(false)
             handleConfirm()
             return 100
@@ -61,21 +62,28 @@ export function DeleteDataConfirmationDialog({
         intervalRef.current = null
       }
       // Only reset progress if we haven't completed
-      if (progress < 100) {setProgress(0)}
+      if (progress < 100) {
+        setProgress(0)
+      }
     }
 
     return () => {
-      if (intervalRef.current) {clearInterval(intervalRef.current)}
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
     }
-  }, [isHolding])  
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHolding])
 
   useEffect(() => {
     if (!open) {
       setProgress(0)
       setIsHolding(false)
-      if (intervalRef.current) {clearInterval(intervalRef.current)}
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
     }
-  }, [open])  
+  }, [open])
 
   const handleMouseDown = () => {
     setIsHolding(true)

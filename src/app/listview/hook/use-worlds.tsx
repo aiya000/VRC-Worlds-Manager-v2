@@ -31,23 +31,31 @@ async function fetchWorldsImpl(
 ): Promise<WorldDisplayData[]> {
   if (isUserFolder(folder)) {
     const res = await commands.getWorlds(folder as string)
-    if (res.status === 'ok') {return res.data}
+    if (res.status === 'ok') {
+      return res.data
+    }
     throw new Error(res.error)
   }
   switch (folder) {
     case SpecialFolders.All: {
       const res = await commands.getAllWorlds()
-      if (res.status === 'ok') {return res.data}
+      if (res.status === 'ok') {
+        return res.data
+      }
       throw new Error(res.error)
     }
     case SpecialFolders.Unclassified: {
       const res = await commands.getUnclassifiedWorlds()
-      if (res.status === 'ok') {return res.data}
+      if (res.status === 'ok') {
+        return res.data
+      }
       throw new Error(res.error)
     }
     case SpecialFolders.Hidden: {
       const res = await commands.getHiddenWorlds()
-      if (res.status === 'ok') {return res.data}
+      if (res.status === 'ok') {
+        return res.data
+      }
       throw new Error(res.error)
     }
     case SpecialFolders.Find:
@@ -87,10 +95,14 @@ export const useWorldsStore = create<WorldsStoreState>((set, get) => ({
             [key]: { worlds: data, isLoading: false, error: undefined },
           },
         }))
-        console.info(`[useWorldsStore] Loaded ${data.length} worlds for key=${key}`)
+        console.info(
+          `[useWorldsStore] Loaded ${data.length} worlds for key=${key}`,
+        )
       } catch (e) {
         const msg = String(e)
-        console.error(`[useWorldsStore] Failed to load worlds for key=${key}: ${msg}`)
+        console.error(
+          `[useWorldsStore] Failed to load worlds for key=${key}: ${msg}`,
+        )
         set((s) => ({
           byKey: {
             ...s.byKey,
@@ -117,7 +129,9 @@ export const useWorldsStore = create<WorldsStoreState>((set, get) => ({
   async addWorldToFolder(folder, worldId) {
     const key = folderKey(folder)
     const res = await commands.getWorld(worldId, null)
-    if (res.status === 'error') {throw new Error(res.error)}
+    if (res.status === 'error') {
+      throw new Error(res.error)
+    }
 
     // Only call addWorldToFolder command for user folders
     if (isUserFolder(folder)) {
@@ -136,12 +150,16 @@ export const useWorldsStore = create<WorldsStoreState>((set, get) => ({
   },
   async getAllWorlds() {
     const res = await commands.getAllWorlds()
-    if (res.status === 'ok') {return res.data}
+    if (res.status === 'ok') {
+      return res.data
+    }
     throw new Error(res.error)
   },
   async getFavoriteWorlds() {
     const res = await commands.getFavoriteWorlds()
-    if (res.status === 'ok') {return res.data}
+    if (res.status === 'ok') {
+      return res.data
+    }
     throw new Error(res.error)
   },
 }))
