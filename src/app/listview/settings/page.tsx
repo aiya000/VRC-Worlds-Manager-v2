@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { RestoreBackupDialog } from '@/app/listview/settings/components/popups/restore-backup-dialog'
 import { MigrationPopup } from '@/app/listview/settings/components/popups/migration-popup'
 import { DeleteDataConfirmationDialog } from '@/app/listview/settings/components/popups/delete-data-confirmation'
+import { PurgeVrchatFavoritesDialog } from '@/app/listview/settings/components/popups/purge-vrchat-favorites-dialog'
 import { ExportPopup } from './components/popups/export'
 import { useSettingsPage } from './hook'
 
@@ -42,6 +43,8 @@ export default function SettingsPage() {
     setShowRestoreDialog,
     showExportDialog,
     setShowExportDialog,
+    showPurgeFavoritesDialog,
+    setShowPurgeFavoritesDialog,
     handleExportConfirm,
     handleBackup,
     handleRestoreConfirm,
@@ -282,6 +285,27 @@ export default function SettingsPage() {
               </span>
             </Button>
           </Card>
+
+          <Card className="flex flex-row items-center justify-between p-4 rounded-lg border border-destructive bg-destructive/5">
+            <div className="flex flex-col space-y-1.5">
+              <Label className="text-base font-medium">
+                {t('settings-page:purge-favorites-title')}
+              </Label>
+              <div className="text-sm text-muted-foreground">
+                {t('settings-page:purge-favorites-description')}
+              </div>
+            </div>
+            <Button
+              variant="destructive"
+              onClick={() => setShowPurgeFavoritesDialog(true)}
+              className="gap-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="text-sm">
+                {t('settings-page:purge-favorites-button')}
+              </span>
+            </Button>
+          </Card>
         </TabsContent>
 
         <TabsContent value="others" className="space-y-4">
@@ -355,6 +379,11 @@ export default function SettingsPage() {
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
         onConfirm={handleDeleteConfirm}
+      />
+      <PurgeVrchatFavoritesDialog
+        open={showPurgeFavoritesDialog}
+        onOpenChange={setShowPurgeFavoritesDialog}
+        onRequestBackup={handleBackup}
       />
     </div>
   )

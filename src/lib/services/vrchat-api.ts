@@ -61,6 +61,9 @@ export class VRChatApiService extends Context.Tag('VRChatApiService')<
     ) => Effect.Effect<void, Error>
     readonly logout: () => Effect.Effect<void, Error>
     readonly getFavoriteWorlds: () => Effect.Effect<void, Error>
+    readonly purgeAllFavoriteWorlds: (
+      onProgress?: (done: number, total: number) => void,
+    ) => Effect.Effect<{ deleted: number; failed: number }, Error>
     readonly getWorld: (worldId: string) => Effect.Effect<WorldDetails, Error>
     readonly checkWorldInfo: (
       worldId: string,
@@ -152,6 +155,47 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
         await apiFetch('/favorites?type=world&n=100')
       },
       catch: (e) => new Error(`Failed to get favorites: ${e}`),
+    }),
+
+  // Deletes every "world" favorite on the real, authenticated VRChat account.
+  // This is irreversible on VRChat's side; callers must gate this behind an
+  // explicit user confirmation (see purge-vrchat-favorites-dialog.tsx).
+  purgeAllFavoriteWorlds: (onProgress) =>
+    Effect.tryPromise({
+      try: async () => {
+        const PAGE_SIZE = 100
+        const favoriteIds: string[] = []
+        let offset = 0
+        for (;;) {
+          const res = await apiFetch(
+            `/favorites?type=world&n=${PAGE_SIZE}&offset=${offset}`,
+          )
+          const page = (await res.json()) as Array<{ id: string }>
+          favoriteIds.push(...page.map((f) => f.id))
+          if (page.length < PAGE_SIZE) {
+            break
+          }
+          offset += PAGE_SIZE
+        }
+
+        let deleted = 0
+        let failed = 0
+        const total = favoriteIds.length
+        onProgress?.(0, total)
+        for (const favoriteId of favoriteIds) {
+          try {
+            await apiFetch(`/favorites/${favoriteId}`, { method: 'DELETE' })
+            deleted += 1
+          } catch (e) {
+            console.error(`Failed to delete favorite ${favoriteId}: ${e}`)
+            failed += 1
+          }
+          onProgress?.(deleted + failed, total)
+        }
+
+        return { deleted, failed }
+      },
+      catch: (e) => new Error(`Failed to purge favorites: ${e}`),
     }),
 
   getWorld: (worldId) =>

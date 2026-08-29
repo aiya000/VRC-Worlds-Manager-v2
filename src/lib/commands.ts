@@ -35,7 +35,6 @@ import type {
   TaskStatusChanged,
 } from '@/lib/types'
 
- 
 function run<A>(
   effect: Effect.Effect<A, unknown, unknown>,
 ): Promise<Result<A, string>> {
@@ -57,7 +56,6 @@ function run<A>(
   )
 }
 
- 
 function runVoid(
   effect: Effect.Effect<void, unknown, unknown>,
 ): Promise<Result<null, string>> {
@@ -573,6 +571,17 @@ export const commands = {
       Effect.gen(function* () {
         const svc = yield* VRChatApiService
         yield* svc.getFavoriteWorlds()
+      }),
+    )
+  },
+
+  async purgeAllVrchatFavorites(
+    onProgress?: (done: number, total: number) => void,
+  ): Promise<Result<{ deleted: number; failed: number }, string>> {
+    return run(
+      Effect.gen(function* () {
+        const svc = yield* VRChatApiService
+        return yield* svc.purgeAllFavoriteWorlds(onProgress)
       }),
     )
   },
