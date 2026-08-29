@@ -1,5 +1,10 @@
 import { useLocalization } from '@/hooks/use-localization'
-import { CardSize, commands, FolderRemovalPreference } from '@/lib/commands'
+import {
+  CardSize,
+  commands,
+  FolderRemovalPreference,
+  WorldCardFieldVisibility,
+} from '@/lib/commands'
 import { useContext, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { ExportType } from './components/popups/export'
@@ -28,6 +33,14 @@ export const useSettingsPage = () => {
   const [language, setLanguage] = useState<string>('en-US')
   const [folderRemovalPreference, setFolderRemovalPreference] =
     useState<FolderRemovalPreference | null>(null)
+  const [fieldVisibility, setFieldVisibility] =
+    useState<WorldCardFieldVisibility>({
+      name: true,
+      authorName: true,
+      visits: true,
+      lastUpdated: true,
+      favorites: true,
+    })
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showMigrateDialog, setShowMigrateDialog] = useState(false)
@@ -96,6 +109,8 @@ export const useSettingsPage = () => {
         const cardSizeResult = await commands.getCardSize()
         const folderRemovalPreferenceResult =
           await commands.getFolderRemovalPreference()
+        const fieldVisibilityResult =
+          await commands.getWorldCardFieldVisibility()
         const theme =
           themeResult.status === 'ok'
             ? normalizeThemeValue(themeResult.data)
@@ -109,16 +124,28 @@ export const useSettingsPage = () => {
           folderRemovalPreferenceResult.status === 'ok'
             ? folderRemovalPreferenceResult.data
             : 'ask'
+        const fieldVisibility =
+          fieldVisibilityResult.status === 'ok'
+            ? fieldVisibilityResult.data
+            : {
+                name: true,
+                authorName: true,
+                visits: true,
+                lastUpdated: true,
+                favorites: true,
+              }
         setTheme(theme)
         setLanguage(language)
         setCardSize(cardSize)
         setFolderRemovalPreference(folderRemovalPreference)
+        setFieldVisibility(fieldVisibility)
         // put a toast if commands fail
         if (
           themeResult.status === 'error' ||
           languageResult.status === 'error' ||
           cardSizeResult.status === 'error' ||
-          folderRemovalPreferenceResult.status === 'error'
+          folderRemovalPreferenceResult.status === 'error' ||
+          fieldVisibilityResult.status === 'error'
         ) {
           toast(t('general:error-title'), {
             description:
@@ -129,6 +156,9 @@ export const useSettingsPage = () => {
               (cardSizeResult.status === 'error' ? cardSizeResult.error : '') +
               (folderRemovalPreferenceResult.status === 'error'
                 ? folderRemovalPreferenceResult.error
+                : '') +
+              (fieldVisibilityResult.status === 'error'
+                ? fieldVisibilityResult.error
                 : ''),
           })
         }
@@ -199,7 +229,9 @@ export const useSettingsPage = () => {
     foldersFile: File,
   ) => {
     try {
-      console.info(`Migrating data from ${worldsFile.name} and ${foldersFile.name}`)
+      console.info(
+        `Migrating data from ${worldsFile.name} and ${foldersFile.name}`,
+      )
       const result = await commands.migrateOldDataFromFiles(
         worldsFile,
         foldersFile,
@@ -345,6 +377,32 @@ export const useSettingsPage = () => {
     }
   }
 
+  const handleFieldVisibilityChange = async (
+    value: WorldCardFieldVisibility,
+  ) => {
+    try {
+      console.info(
+        `Setting world card field visibility to: ${JSON.stringify(value)}`,
+      )
+      const result = await commands.setWorldCardFieldVisibility(value)
+      if (result.status === 'ok') {
+        setFieldVisibility(value)
+        console.info('World card field visibility saved')
+      } else {
+        console.error(`Failed to set field visibility: ${result.error}`)
+        toast(t('general:error-title'), {
+          description:
+            t('settings-page:error-save-preferences') + ': ' + result.error,
+        })
+      }
+    } catch (e) {
+      console.error(`Failed to save field visibility: ${e}`)
+      toast(t('general:error-title'), {
+        description: t('settings-page:error-save-preferences'),
+      })
+    }
+  }
+
   const handleFolderRemovalPreferenceChange = async (
     value: FolderRemovalPreference,
   ) => {
@@ -355,7 +413,9 @@ export const useSettingsPage = () => {
         console.info(`Folder removal preference set to: ${value}`)
         setFolderRemovalPreference(value)
       } else {
-        console.error(`Failed to set folder removal preference: ${result.error}`)
+        console.error(
+          `Failed to set folder removal preference: ${result.error}`,
+        )
         toast(t('general:error-title'), {
           description:
             t('settings-page:error-save-preferences') + ': ' + result.error,
@@ -377,6 +437,7 @@ export const useSettingsPage = () => {
     cardSize,
     language,
     folderRemovalPreference,
+    fieldVisibility,
     showDeleteConfirm,
     setShowDeleteConfirm,
     showMigrateDialog,
@@ -394,6 +455,7 @@ export const useSettingsPage = () => {
     handleThemeChange,
     handleLanguageChange,
     handleCardSizeChange,
+    handleFieldVisibilityChange,
     handleFolderRemovalPreferenceChange,
     openHiddenFolder,
     t,

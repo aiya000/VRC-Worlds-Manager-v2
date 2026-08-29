@@ -1,16 +1,29 @@
 import { Heart } from 'lucide-react'
-import { CardSize, WorldDisplayData } from '@/lib/commands'
+import {
+  CardSize,
+  WorldCardFieldVisibility,
+  WorldDisplayData,
+} from '@/lib/commands'
 import { useLocalization } from '@/hooks/use-localization'
 import { usePatreonContext } from '@/contexts/patreon-context'
 import { PlatformIndicator } from './platform-indicator'
 
+const defaultFieldVisibility: WorldCardFieldVisibility = {
+  name: true,
+  authorName: true,
+  visits: true,
+  lastUpdated: true,
+  favorites: true,
+}
+
 interface WorldCardPreviewProps {
   size: CardSize
   world: WorldDisplayData
+  fieldVisibility?: WorldCardFieldVisibility
 }
 
 export function WorldCardPreview(props: WorldCardPreviewProps) {
-  const { size, world } = props
+  const { size, world, fieldVisibility = defaultFieldVisibility } = props
   const { t } = useLocalization()
   const { supporters } = usePatreonContext()
   const isSupporter = supporters.has(world.authorName)
@@ -43,64 +56,92 @@ export function WorldCardPreview(props: WorldCardPreviewProps) {
 
       {size === 'Compact' && (
         <div className="p-2">
-          <h3 className="font-medium truncate">{world.name}</h3>
+          {fieldVisibility.name && (
+            <h3 className="font-medium truncate">{world.name}</h3>
+          )}
         </div>
       )}
 
       {size === 'Normal' && (
         <div className="p-2 space-y-1">
-          <div className="flex items-center justify-between">
-            <h3 className="font-medium truncate">{world.name}</h3>
-          </div>
-          <div className="flex items-center justify-between">
-            <span
-              className={`text-sm truncate ${isSupporter ? 'text-pink-500 dark:text-pink-400' : 'text-muted-foreground'}`}
-            >
-              {world.authorName}
-            </span>
-            <div className="flex items-center gap-1">
-              <Heart className="w-3.5 h-3.5" />
-              <span className="text-sm truncate">{world.favorites}</span>
+          {fieldVisibility.name && (
+            <div className="flex items-center justify-between">
+              <h3 className="font-medium truncate">{world.name}</h3>
             </div>
-          </div>
+          )}
+          {(fieldVisibility.authorName || fieldVisibility.favorites) && (
+            <div className="flex items-center justify-between">
+              {fieldVisibility.authorName && (
+                <span
+                  className={`text-sm truncate ${isSupporter ? 'text-pink-500 dark:text-pink-400' : 'text-muted-foreground'}`}
+                >
+                  {world.authorName}
+                </span>
+              )}
+              {fieldVisibility.favorites && (
+                <div className="flex items-center gap-1">
+                  <Heart className="w-3.5 h-3.5" />
+                  <span className="text-sm truncate">{world.favorites}</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
       {size === 'Expanded' && (
         <div className="p-2 space-y-1">
-          <div className="flex items-center justify-between">
-            <h3 className="font-medium truncate">{world.name}</h3>
-          </div>
-          <div className="flex items-center text-sm justify-between">
-            <span
-              className={`truncate ${isSupporter ? 'text-pink-500 dark:text-pink-400' : 'text-muted-foreground'}`}
-            >
-              {world.authorName}
-            </span>
-            <span className="truncate text-muted-foreground">
-              {t('world-card:visits', world.visits)}
-            </span>
-          </div>
-          <div className="flex justify-between whitespace-nowrap">
-            <span className="text-sm text-muted-foreground truncate">
-              {t('world-card:updated', world.lastUpdated)}
-            </span>
-            <div className="flex items-center gap-1">
-              <Heart className="w-3.5 h-3.5" />
-              <span className="text-sm truncate">{world.favorites}</span>
+          {fieldVisibility.name && (
+            <div className="flex items-center justify-between">
+              <h3 className="font-medium truncate">{world.name}</h3>
             </div>
-          </div>
+          )}
+          {(fieldVisibility.authorName || fieldVisibility.visits) && (
+            <div className="flex items-center text-sm justify-between">
+              {fieldVisibility.authorName && (
+                <span
+                  className={`truncate ${isSupporter ? 'text-pink-500 dark:text-pink-400' : 'text-muted-foreground'}`}
+                >
+                  {world.authorName}
+                </span>
+              )}
+              {fieldVisibility.visits && (
+                <span className="truncate text-muted-foreground">
+                  {t('world-card:visits', world.visits)}
+                </span>
+              )}
+            </div>
+          )}
+          {(fieldVisibility.lastUpdated || fieldVisibility.favorites) && (
+            <div className="flex justify-between whitespace-nowrap">
+              {fieldVisibility.lastUpdated && (
+                <span className="text-sm text-muted-foreground truncate">
+                  {t('world-card:updated', world.lastUpdated)}
+                </span>
+              )}
+              {fieldVisibility.favorites && (
+                <div className="flex items-center gap-1">
+                  <Heart className="w-3.5 h-3.5" />
+                  <span className="text-sm truncate">{world.favorites}</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
       {size === 'Original' && (
         <div className="p-2">
-          <h3 className="font-medium truncate">{world.name}</h3>
-          <p
-            className={`text-sm truncate ${isSupporter ? 'text-pink-500 dark:text-pink-400' : 'text-muted-foreground'}`}
-          >
-            {t('world-card:by-author', world.authorName)}
-          </p>
+          {fieldVisibility.name && (
+            <h3 className="font-medium truncate">{world.name}</h3>
+          )}
+          {fieldVisibility.authorName && (
+            <p
+              className={`text-sm truncate ${isSupporter ? 'text-pink-500 dark:text-pink-400' : 'text-muted-foreground'}`}
+            >
+              {t('world-card:by-author', world.authorName)}
+            </p>
+          )}
         </div>
       )}
     </div>

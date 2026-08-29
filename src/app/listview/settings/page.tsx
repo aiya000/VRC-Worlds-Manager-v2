@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { WorldCardPreview } from '@/components/world-card'
+import { WorldCardFieldToggles } from '@/components/world-card-field-toggles'
 
 import { FolderRemovalPreference } from '@/lib/commands'
 import {
@@ -34,6 +35,7 @@ export default function SettingsPage() {
     cardSize,
     language,
     folderRemovalPreference,
+    fieldVisibility,
     showDeleteConfirm,
     setShowDeleteConfirm,
     showMigrateDialog,
@@ -51,6 +53,7 @@ export default function SettingsPage() {
     handleThemeChange,
     handleLanguageChange,
     handleCardSizeChange,
+    handleFieldVisibilityChange,
     handleFolderRemovalPreferenceChange,
     openHiddenFolder,
     t,
@@ -155,6 +158,7 @@ export default function SettingsPage() {
             </div>
             <WorldCardPreview
               size={cardSize || 'Normal'}
+              fieldVisibility={fieldVisibility}
               world={{
                 worldId: '1',
                 name: t('settings-page:preview-world'),
@@ -170,6 +174,23 @@ export default function SettingsPage() {
                 capacity: 16,
               }}
             />
+          </Card>
+
+          <Card className="flex flex-col items-start justify-between space-y-3 p-4 rounded-lg border">
+            <div className="flex flex-col space-y-1.5">
+              <Label className="text-base font-medium">
+                {t('settings-page:world-card-fields')}
+              </Label>
+              <div className="text-sm text-muted-foreground">
+                {t('settings-page:world-card-fields-description')}
+              </div>
+            </div>
+            <div className="w-full">
+              <WorldCardFieldToggles
+                value={fieldVisibility}
+                onChange={handleFieldVisibilityChange}
+              />
+            </div>
           </Card>
         </TabsContent>
 

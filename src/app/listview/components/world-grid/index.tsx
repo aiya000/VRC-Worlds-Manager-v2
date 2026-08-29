@@ -46,6 +46,7 @@ export function WorldGrid({
 
   const {
     cardSize,
+    fieldVisibility,
     selectedWorlds,
     selectAllWorlds: _selectAllWorlds,
     toggleWorld,
@@ -115,7 +116,9 @@ export function WorldGrid({
               <div
                 id={world.worldId}
                 onClick={() => {
-                  if (disableCardClick) {return}
+                  if (disableCardClick) {
+                    return
+                  }
                   if (isFindPage) {
                     // Only set dontSaveToLocal on worlds not already in collection
                     handleOpenWorldDetails(
@@ -132,7 +135,11 @@ export function WorldGrid({
                 {isSelected && (
                   <div className="absolute inset-0 rounded-lg border-2 border-primary pointer-events-none z-10" />
                 )}
-                <WorldCardPreview size={cardSize} world={world} />
+                <WorldCardPreview
+                  size={cardSize}
+                  world={world}
+                  fieldVisibility={fieldVisibility}
+                />
                 <div className="absolute bottom-[70px] left-2 z-10">
                   {isFindPage && existingWorldIds.has(world.worldId) && (
                     <Badge className="bg-green-100 text-green-700 border-green-300 hover:bg-green-100 hover:border-green-300 cursor-default">
@@ -273,7 +280,9 @@ export function WorldGrid({
           <AlertDialog
             open={dialogConfig.isOpen}
             onOpenChange={(open) => {
-              if (!open) {handleDialogClose()}
+              if (!open) {
+                handleDialogClose()
+              }
             }}
           >
             <AlertDialogContent onEscapeKeyDown={handleDialogClose}>

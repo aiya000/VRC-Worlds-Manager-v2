@@ -13,10 +13,11 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { WorldCardPreview } from '@/components/world-card'
+import { WorldCardFieldToggles } from '@/components/world-card-field-toggles'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Loader2, Globe } from 'lucide-react'
-import { commands, CardSize } from '@/lib/commands'
+import { commands, CardSize, WorldCardFieldVisibility } from '@/lib/commands'
 import { SetupLayout } from '@/app/setup/components/setup-layout'
 import { useLocalization } from '@/hooks/use-localization'
 import { LocalizationContext } from '@/components/localization-context'
@@ -38,6 +39,14 @@ const WelcomePage: React.FC = () => {
   const { setLanguage } = useContext(LocalizationContext)
   const [selectedSize, setSelectedSize] = useState<CardSize>('Normal')
   const [page, setPage] = useState(1)
+  const [fieldVisibility, setFieldVisibility] =
+    useState<WorldCardFieldVisibility>({
+      name: true,
+      authorName: true,
+      visits: true,
+      lastUpdated: true,
+      favorites: true,
+    })
   const [preferences, setPreferences] = useState({
     theme: 'system',
     language: 'en-US',
@@ -130,12 +139,17 @@ const WelcomePage: React.FC = () => {
       return
     }
     if (page === 6) {
-      const [result_theme, result_language, result_card_size] =
-        await Promise.all([
-          commands.setTheme(preferences.theme),
-          commands.setLanguage(preferences.language),
-          commands.setCardSize(preferences.card_size),
-        ])
+      const [
+        result_theme,
+        result_language,
+        result_card_size,
+        result_field_visibility,
+      ] = await Promise.all([
+        commands.setTheme(preferences.theme),
+        commands.setLanguage(preferences.language),
+        commands.setCardSize(preferences.card_size),
+        commands.setWorldCardFieldVisibility(fieldVisibility),
+      ])
 
       const errorResult =
         result_theme.status === 'error'
@@ -144,7 +158,9 @@ const WelcomePage: React.FC = () => {
             ? result_language
             : result_card_size.status === 'error'
               ? result_card_size
-              : null
+              : result_field_visibility.status === 'error'
+                ? result_field_visibility
+                : null
 
       if (errorResult) {
         toast(t('general:error-title'), {
@@ -292,7 +308,9 @@ const WelcomePage: React.FC = () => {
         <MigrationConfirmationPopup
           open={showMigrationConfirm}
           onOpenChange={(open) => {
-            if (!open) {setShowMigrationConfirm(false)}
+            if (!open) {
+              setShowMigrationConfirm(false)
+            }
           }}
           onCancel={handleMigrationCancel}
           onConfirm={handleMigrationConfirm}
@@ -594,11 +612,22 @@ const WelcomePage: React.FC = () => {
                       </SelectItem>
                     </SelectContent>
                   </Select>
+                  <div className="flex flex-col space-y-1 pt-4">
+                    <Label>{t('settings-page:world-card-fields')}</Label>
+                    <div className="text-sm text-gray-500">
+                      {t('settings-page:world-card-fields-description')}
+                    </div>
+                  </div>
+                  <WorldCardFieldToggles
+                    value={fieldVisibility}
+                    onChange={setFieldVisibility}
+                  />
                 </div>
                 <div className="max-w-[300px] w-full">
                   <div className="flex justify-center">
                     <WorldCardPreview
                       size={selectedSize}
+                      fieldVisibility={fieldVisibility}
                       world={{
                         worldId: '1',
                         name: t('settings-page:preview-world'),

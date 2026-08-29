@@ -30,12 +30,12 @@ import type {
   TaskStatus,
   UserGroup,
   WorldBlacklist,
+  WorldCardFieldVisibility,
   WorldDetails,
   WorldDisplayData,
   TaskStatusChanged,
 } from '@/lib/types'
 
- 
 function run<A>(
   effect: Effect.Effect<A, unknown, unknown>,
 ): Promise<Result<A, string>> {
@@ -57,7 +57,6 @@ function run<A>(
   )
 }
 
- 
 function runVoid(
   effect: Effect.Effect<void, unknown, unknown>,
 ): Promise<Result<null, string>> {
@@ -520,6 +519,28 @@ export const commands = {
       Effect.gen(function* () {
         const svc = yield* PreferencesService
         yield* svc.setSortPreferences(sortField, sortDirection)
+      }),
+    )
+  },
+
+  async getWorldCardFieldVisibility(): Promise<
+    Result<WorldCardFieldVisibility, string>
+  > {
+    return run(
+      Effect.gen(function* () {
+        const svc = yield* PreferencesService
+        return yield* svc.getWorldCardFieldVisibility()
+      }),
+    )
+  },
+
+  async setWorldCardFieldVisibility(
+    visibility: WorldCardFieldVisibility,
+  ): Promise<Result<null, string>> {
+    return runVoid(
+      Effect.gen(function* () {
+        const svc = yield* PreferencesService
+        yield* svc.setWorldCardFieldVisibility(visibility)
       }),
     )
   },
@@ -1014,6 +1035,7 @@ export type {
   UpdateProgress,
   UserGroup,
   WorldBlacklist,
+  WorldCardFieldVisibility,
   WorldDetails,
   WorldDisplayData,
 } from '@/lib/types'
