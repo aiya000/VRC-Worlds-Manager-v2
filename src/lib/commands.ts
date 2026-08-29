@@ -598,6 +598,17 @@ export const commands = {
     )
   },
 
+  async purgeAllVrchatFavorites(
+    onProgress?: (done: number, total: number) => void,
+  ): Promise<Result<{ deleted: number; failed: number }, string>> {
+    return run(
+      Effect.gen(function* () {
+        const svc = yield* VRChatApiService
+        return yield* svc.purgeAllFavoriteWorlds(onProgress)
+      }),
+    )
+  },
+
   async getWorld(
     worldId: string,
     dontSaveToLocal: boolean | null,

@@ -46,6 +46,8 @@ export const useSettingsPage = () => {
   const [showMigrateDialog, setShowMigrateDialog] = useState(false)
   const [showRestoreDialog, setShowRestoreDialog] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showPurgeFavoritesDialog, setShowPurgeFavoritesDialog] =
+    useState(false)
 
   const router = useRouter()
 
@@ -446,6 +448,8 @@ export const useSettingsPage = () => {
     setShowRestoreDialog,
     showExportDialog,
     setShowExportDialog,
+    showPurgeFavoritesDialog,
+    setShowPurgeFavoritesDialog,
     handleExportConfirm,
     handleBackup,
     handleRestoreConfirm,

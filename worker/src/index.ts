@@ -34,6 +34,7 @@ const ALLOWED_ROUTES: AllowedRoute[] = [
   },
   { method: 'PUT', pattern: /^\/logout$/ },
   { method: 'GET', pattern: /^\/favorites$/ },
+  { method: 'DELETE', pattern: /^\/favorites\/[^/]+$/ },
   { method: 'GET', pattern: /^\/worlds$/ },
   { method: 'GET', pattern: /^\/worlds\/[^/]+$/ },
   { method: 'POST', pattern: /^\/instances$/ },
