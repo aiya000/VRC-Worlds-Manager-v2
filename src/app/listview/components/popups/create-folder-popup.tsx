@@ -33,7 +33,9 @@ export function CreateFolderDialog({
 
   // Separate handlers for import vs create
   const handleImport = async () => {
-    if (!importUUID || !importFolder) {return}
+    if (!importUUID || !importFolder) {
+      return
+    }
     setIsLoading(true)
     try {
       await importFolder(importUUID)
@@ -47,7 +49,9 @@ export function CreateFolderDialog({
   }
 
   const handleCreate = async () => {
-    if (!folderName) {return}
+    if (!folderName) {
+      return
+    }
     setIsLoading(true)
     try {
       await createFolder(folderName)

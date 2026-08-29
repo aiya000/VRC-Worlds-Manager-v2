@@ -80,7 +80,9 @@ export function ExportPopup({
   }, [open])
 
   useEffect(() => {
-    if (!open) {return}
+    if (!open) {
+      return
+    }
     commands
       .getSortPreferences()
       .then((result) => {

@@ -268,9 +268,15 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
         return finalList.slice().sort((a, b) => {
           const av = getSortValue(a, sortField)
           const bv = getSortValue(b, sortField)
-          if (av === null && bv === null) {return 0}
-          if (av === null) {return 1}
-          if (bv === null) {return -1}
+          if (av === null && bv === null) {
+            return 0
+          }
+          if (av === null) {
+            return 1
+          }
+          if (bv === null) {
+            return -1
+          }
           if (typeof av === 'number' && typeof bv === 'number') {
             return (av - bv) * dirFactor
           }
@@ -292,7 +298,9 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
         if (sortRes.status === 'ok') {
           sortedList = sortRes.data
         } else {
-          console.error(`[useWorldFilters] Backend sort failed: ${sortRes.error}`)
+          console.error(
+            `[useWorldFilters] Backend sort failed: ${sortRes.error}`,
+          )
           sortedList = fallbackSort()
         }
       } catch (e) {
@@ -340,7 +348,9 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
                   a.localeCompare(b, undefined, { sensitivity: 'base' }),
                 )
               } else {
-                console.info('[useWorldFilters] Fallback returned empty tag list')
+                console.info(
+                  '[useWorldFilters] Fallback returned empty tag list',
+                )
               }
             } else {
               console.error(
@@ -425,7 +435,10 @@ export function useWorldFilters(worlds: WorldDisplayData[]) {
 }
 
 // Helper to extract value for sorting
-function getSortValue(world: WorldDisplayData, field: SortField): string | number | undefined {
+function getSortValue(
+  world: WorldDisplayData,
+  field: SortField,
+): string | number | undefined {
   switch (field) {
     case 'name':
       return world.name

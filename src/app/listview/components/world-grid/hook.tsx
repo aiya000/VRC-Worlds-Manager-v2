@@ -79,7 +79,9 @@ export function useWorldGrid(
   // respond to membership changes triggered by dialogs
   const membershipVersion = usePopupStore((s) => s.membershipVersion)
   useEffect(() => {
-    if (!isFindPage) {return} // Only needed for find page
+    if (!isFindPage) {
+      return
+    } // Only needed for find page
 
     const checkWorldsExistence = async () => {
       try {
@@ -94,7 +96,9 @@ export function useWorldGrid(
 
         const hiddenWorldsResult = await commands.getHiddenWorlds()
         if (hiddenWorldsResult.status !== 'ok') {
-          console.error(`Error fetching hidden worlds: ${hiddenWorldsResult.error}`)
+          console.error(
+            `Error fetching hidden worlds: ${hiddenWorldsResult.error}`,
+          )
           throw new Error(hiddenWorldsResult.error)
         }
         const hiddenWorlds = hiddenWorldsResult.data

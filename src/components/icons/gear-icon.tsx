@@ -1,4 +1,3 @@
-
 export function GearIcon({ className }: { className?: string }) {
   return (
     <svg

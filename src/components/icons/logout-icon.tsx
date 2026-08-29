@@ -1,4 +1,3 @@
-
 interface LogoutIconProps {
   className?: string
 }

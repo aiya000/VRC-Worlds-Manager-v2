@@ -53,18 +53,18 @@ When dealing with types that can be both falsy and null/undefined, use explicit 
 **Good examples:**
 
 ```ts
-const foo: string | null = something;
+const foo: string | null = something
 if (foo === null) {
   // This allows empty string '' to pass through
-  throw new Error('foo is null');
+  throw new Error('foo is null')
 }
 ```
 
 ```ts
-const bar: number | undefined = something;
+const bar: number | undefined = something
 if (bar === undefined) {
   // This allows 0 to pass through
-  throw new Error('bar is undefined');
+  throw new Error('bar is undefined')
 }
 ```
 

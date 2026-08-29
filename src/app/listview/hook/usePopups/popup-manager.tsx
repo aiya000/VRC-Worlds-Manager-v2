@@ -37,12 +37,18 @@ export function PopupManager() {
 
   const currentFolder: FolderType = (() => {
     // Special folders by path
-    if (pathname?.includes('/folders/special/all')) {return SpecialFolders.All}
-    if (pathname?.includes('/folders/special/unclassified'))
-      {return SpecialFolders.Unclassified}
-    if (pathname?.includes('/folders/special/find')) {return SpecialFolders.Find}
-    if (pathname?.includes('/folders/special/hidden'))
-      {return SpecialFolders.Hidden}
+    if (pathname?.includes('/folders/special/all')) {
+      return SpecialFolders.All
+    }
+    if (pathname?.includes('/folders/special/unclassified')) {
+      return SpecialFolders.Unclassified
+    }
+    if (pathname?.includes('/folders/special/find')) {
+      return SpecialFolders.Find
+    }
+    if (pathname?.includes('/folders/special/hidden')) {
+      return SpecialFolders.Hidden
+    }
     // User folder from query param
     const user = searchParams?.get('folderName')
     return (user as FolderType) || SpecialFolders.All
@@ -108,7 +114,9 @@ export function PopupManager() {
               })
               setPopup('showImportedFolderContainsHidden', null)
             } catch (e) {
-              console.error(`[PopupManager] restore hidden during import failed: ${e}`)
+              console.error(
+                `[PopupManager] restore hidden during import failed: ${e}`,
+              )
               toast(t('general:error-title'), {
                 description: t('listview-page:error-restore-hidden-worlds'),
               })
@@ -137,7 +145,9 @@ export function PopupManager() {
         <WorldDetailPopup
           open={!!showWorldDetails}
           onOpenChange={(open) => {
-            if (!open) {setPopup('showWorldDetails', null)}
+            if (!open) {
+              setPopup('showWorldDetails', null)
+            }
           }}
           worldId={showWorldDetails.id}
           currentFolder={currentFolder}

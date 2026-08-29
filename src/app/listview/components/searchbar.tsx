@@ -332,7 +332,9 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
                   const availW = parentW - reserved - usedW
                   const fitCount = Math.floor(availW / perBadge)
                   const showFirst = fitCount >= 2
-                  if (!showFirst) {return null}
+                  if (!showFirst) {
+                    return null
+                  }
 
                   const visible = folderFilters.slice(0, fitCount)
                   const hidden = folderFilters.length - fitCount
