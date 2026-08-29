@@ -21,17 +21,22 @@ import {
   FolderOpen,
   Save,
   FolderUp,
+  Users,
 } from 'lucide-react'
+import { useState } from 'react'
 import { Card } from '../../../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { RestoreBackupDialog } from '@/app/listview/settings/components/popups/restore-backup-dialog'
 import { MigrationPopup } from '@/app/listview/settings/components/popups/migration-popup'
 import { DeleteDataConfirmationDialog } from '@/app/listview/settings/components/popups/delete-data-confirmation'
 import { PurgeVrchatFavoritesDialog } from '@/app/listview/settings/components/popups/purge-vrchat-favorites-dialog'
+import { ImportFavoritesFromAccountDialog } from '@/app/listview/settings/components/popups/import-favorites-from-account-dialog'
 import { ExportPopup } from './components/popups/export'
 import { useSettingsPage } from './hook'
 
 export default function SettingsPage() {
+  const [showImportFavoritesDialog, setShowImportFavoritesDialog] =
+    useState(false)
   const {
     cardSize,
     language,
@@ -271,6 +276,27 @@ export default function SettingsPage() {
           <Card className="flex flex-row items-center justify-between p-4 rounded-lg border">
             <div className="flex flex-col space-y-1.5">
               <Label className="text-base font-medium">
+                {t('settings-page:import-favorites-title')}
+              </Label>
+              <div className="text-sm text-muted-foreground">
+                {t('settings-page:import-favorites-description')}
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setShowImportFavoritesDialog(true)}
+              className="gap-2"
+            >
+              <Users className="h-4 w-4" />
+              <span className="text-sm">
+                {t('settings-page:import-favorites-button')}
+              </span>
+            </Button>
+          </Card>
+
+          <Card className="flex flex-row items-center justify-between p-4 rounded-lg border">
+            <div className="flex flex-col space-y-1.5">
+              <Label className="text-base font-medium">
                 {t('settings-page:data-migration-title')}
               </Label>
               <div className="text-sm text-muted-foreground">
@@ -405,6 +431,10 @@ export default function SettingsPage() {
         open={showPurgeFavoritesDialog}
         onOpenChange={setShowPurgeFavoritesDialog}
         onRequestBackup={handleBackup}
+      />
+      <ImportFavoritesFromAccountDialog
+        open={showImportFavoritesDialog}
+        onOpenChange={setShowImportFavoritesDialog}
       />
     </div>
   )

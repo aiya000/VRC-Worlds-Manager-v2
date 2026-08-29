@@ -609,6 +609,35 @@ export const commands = {
     )
   },
 
+  async getFavoriteWorldIds(): Promise<Result<string[], string>> {
+    return run(
+      Effect.gen(function* () {
+        const svc = yield* VRChatApiService
+        return yield* svc.getFavoriteWorldIds()
+      }),
+    )
+  },
+
+  async getCurrentUser(): Promise<
+    Result<{ id: string; displayName: string }, string>
+  > {
+    return run(
+      Effect.gen(function* () {
+        const svc = yield* VRChatApiService
+        return yield* svc.getCurrentUser()
+      }),
+    )
+  },
+
+  async putWorld(world: WorldDisplayData): Promise<Result<null, string>> {
+    return runVoid(
+      Effect.gen(function* () {
+        const svc = yield* WorldService
+        yield* svc.putWorld(world)
+      }),
+    )
+  },
+
   async getWorld(
     worldId: string,
     dontSaveToLocal: boolean | null,

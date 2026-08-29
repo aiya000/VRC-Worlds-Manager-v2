@@ -64,6 +64,11 @@ export class VRChatApiService extends Context.Tag('VRChatApiService')<
     readonly purgeAllFavoriteWorlds: (
       onProgress?: (done: number, total: number) => void,
     ) => Effect.Effect<{ deleted: number; failed: number }, Error>
+    readonly getFavoriteWorldIds: () => Effect.Effect<string[], Error>
+    readonly getCurrentUser: () => Effect.Effect<
+      { id: string; displayName: string },
+      Error
+    >
     readonly getWorld: (worldId: string) => Effect.Effect<WorldDetails, Error>
     readonly checkWorldInfo: (
       worldId: string,
@@ -196,6 +201,41 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
         return { deleted, failed }
       },
       catch: (e) => new Error(`Failed to purge favorites: ${e}`),
+    }),
+
+  getFavoriteWorldIds: () =>
+    Effect.tryPromise({
+      try: async () => {
+        const PAGE_SIZE = 100
+        const favoriteIds: string[] = []
+        let offset = 0
+        for (;;) {
+          const res = await apiFetch(
+            `/favorites?type=world&n=${PAGE_SIZE}&offset=${offset}`,
+          )
+          const page = (await res.json()) as Array<{ favoriteId: string }>
+          favoriteIds.push(...page.map((f) => f.favoriteId))
+          if (page.length < PAGE_SIZE) {
+            break
+          }
+          offset += PAGE_SIZE
+        }
+        return favoriteIds
+      },
+      catch: (e) => new Error(`Failed to get favorite world IDs: ${e}`),
+    }),
+
+  getCurrentUser: () =>
+    Effect.tryPromise({
+      try: async () => {
+        const res = await apiFetch('/auth/user')
+        const user = (await res.json()) as {
+          id: string
+          displayName: string
+        }
+        return { id: user.id, displayName: user.displayName }
+      },
+      catch: (e) => new Error(`Failed to get current user: ${e}`),
     }),
 
   getWorld: (worldId) =>
