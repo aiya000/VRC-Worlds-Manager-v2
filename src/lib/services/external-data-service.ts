@@ -6,7 +6,18 @@ import type {
   LocalizedChanges,
 } from '@/lib/types'
 
-const DATA_BASE_URL = 'https://data.raifaworks.com'
+/**
+ * `data.raifaworks.com` is the desktop app author's own server and does not
+ * send `Access-Control-Allow-Origin` for this app's origin, so browser
+ * requests to it are always blocked by CORS. Rather than issuing a doomed
+ * `fetch()` (which surfaces as an alarming cross-origin error in devtools),
+ * these endpoints fail fast with an explanatory error.
+ */
+function notImplementedBecauseOfCors(feature: string): Error {
+  return new Error(
+    `Not implemented because ${feature} requires data.raifaworks.com, which does not allow cross-origin requests from the browser (CORS)`,
+  )
+}
 
 export class ExternalDataService extends Context.Tag('ExternalDataService')<
   ExternalDataService,
@@ -23,40 +34,15 @@ export class ExternalDataService extends Context.Tag('ExternalDataService')<
 
 export const ExternalDataServiceLive = Layer.succeed(ExternalDataService, {
   fetchPatreonData: () =>
-    Effect.tryPromise({
-      try: async () => {
-        const res = await fetch(`${DATA_BASE_URL}/api/supporters`)
-        if (!res.ok) {
-          throw new Error(`Failed to fetch supporters: ${res.status}`)
-        }
-        return (await res.json()) as PatreonData
-      },
-      catch: (e) => new Error(`Failed to fetch Patreon data: ${e}`),
-    }),
+    Effect.fail(notImplementedBecauseOfCors('fetching Patreon supporter data')),
 
   fetchPatreonVrchatNames: () =>
-    Effect.tryPromise({
-      try: async () => {
-        const res = await fetch(`${DATA_BASE_URL}/api/supporters/vrchat`)
-        if (!res.ok) {
-          throw new Error(`Failed to fetch VRChat names: ${res.status}`)
-        }
-        return (await res.json()) as PatreonVRChatNames
-      },
-      catch: (e) => new Error(`Failed to fetch Patreon VRChat names: ${e}`),
-    }),
+    Effect.fail(
+      notImplementedBecauseOfCors('fetching Patreon-linked VRChat names'),
+    ),
 
   fetchBlacklist: () =>
-    Effect.tryPromise({
-      try: async () => {
-        const res = await fetch(`${DATA_BASE_URL}/api/blacklist`)
-        if (!res.ok) {
-          throw new Error(`Failed to fetch blacklist: ${res.status}`)
-        }
-        return (await res.json()) as WorldBlacklist
-      },
-      catch: (e) => new Error(`Failed to fetch blacklist: ${e}`),
-    }),
+    Effect.fail(notImplementedBecauseOfCors('fetching the world blacklist')),
 
   getChangelog: () =>
     Effect.tryPromise({
