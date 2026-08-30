@@ -48,9 +48,42 @@ function isRouteAllowed(method: string, apiPath: string): boolean {
   )
 }
 
+/**
+ * Cloudflare Pages serves every branch/preview deployment of a project under
+ * `<branch>.<project>.pages.dev`, and only the project owner can deploy to
+ * that subdomain — so when `allowedOrigin` is itself a `*.pages.dev` origin,
+ * also allow its preview subdomains. This isn't a wildcard over all of
+ * `pages.dev`: an unrelated project can never obtain a hostname ending in
+ * `.<project>.pages.dev`.
+ */
+export function isOriginAllowed(
+  origin: string,
+  allowedOrigin: string,
+): boolean {
+  if (allowedOrigin === '*') {
+    return true
+  }
+  if (origin === allowedOrigin) {
+    return true
+  }
+
+  try {
+    const allowed = new URL(allowedOrigin)
+    const requested = new URL(origin)
+    return (
+      requested.protocol === allowed.protocol &&
+      allowed.hostname.endsWith('.pages.dev') &&
+      requested.hostname.endsWith(`.${allowed.hostname}`)
+    )
+  } catch {
+    return false
+  }
+}
+
 function corsHeaders(origin: string, allowedOrigin: string): HeadersInit {
-  const effectiveOrigin =
-    origin === allowedOrigin || allowedOrigin === '*' ? origin : allowedOrigin
+  const effectiveOrigin = isOriginAllowed(origin, allowedOrigin)
+    ? origin
+    : allowedOrigin
   return {
     'Access-Control-Allow-Origin': effectiveOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -105,7 +138,7 @@ export default {
     }
 
     // Verify origin
-    if (env.ALLOWED_ORIGIN !== '*' && origin !== env.ALLOWED_ORIGIN) {
+    if (!isOriginAllowed(origin, env.ALLOWED_ORIGIN)) {
       return new Response('Forbidden', { status: 403 })
     }
 

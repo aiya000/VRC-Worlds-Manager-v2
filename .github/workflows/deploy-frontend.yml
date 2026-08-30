@@ -21,6 +21,8 @@ jobs:
         run: bun install
       - name: Build
         run: bun run build
+        env:
+          NEXT_PUBLIC_CF_WORKER_URL: https://vrchat-worlds-manager-web-backend.vrchat-worlds-manager-web.workers.dev
       - name: Deploy
         run: bun run deploy
         env:

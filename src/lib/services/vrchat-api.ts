@@ -7,10 +7,15 @@ import type {
   GroupInstancePermissionInfo,
 } from '@/lib/types'
 
+// `localStorage` override lets a developer point the app at a locally-run
+// `wrangler dev` worker; production/preview deployments fall back to the
+// worker URL baked in at build time via `NEXT_PUBLIC_CF_WORKER_URL`.
 const CF_WORKER_URL =
-  typeof window !== 'undefined'
-    ? (localStorage.getItem('cf_worker_url') ?? '')
-    : ''
+  (typeof window !== 'undefined'
+    ? localStorage.getItem('cf_worker_url')
+    : null) ??
+  process.env.NEXT_PUBLIC_CF_WORKER_URL ??
+  ''
 
 const CF_ACCESS_CLIENT_ID = process.env.NEXT_PUBLIC_CF_ACCESS_CLIENT_ID ?? ''
 const CF_ACCESS_CLIENT_SECRET =
