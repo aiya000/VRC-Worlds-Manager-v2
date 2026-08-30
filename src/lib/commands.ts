@@ -784,10 +784,6 @@ export const commands = {
     )
   },
 
-  async detectOldInstallation(): Promise<Result<[string, string], string>> {
-    return { status: 'error', error: 'Not available in web version' }
-  },
-
   async passPaths(): Promise<Result<string, string>> {
     return { status: 'ok', data: '' }
   },
@@ -819,16 +815,6 @@ export const commands = {
         return yield* svc.getBackupMetadataFromFile(file)
       }),
     )
-  },
-
-  async getMigrationMetadata(
-    _worldsPath: string,
-    _foldersPath: string,
-  ): Promise<Result<PreviousMetadata, string>> {
-    return {
-      status: 'error',
-      error: 'Use getMigrationMetadataFromFiles for web version',
-    }
   },
 
   async getMigrationMetadataFromFiles(
@@ -905,24 +891,14 @@ export const commands = {
     )
   },
 
-  async migrateOldData(
-    _worldsPath: string,
-    _foldersPath: string,
-  ): Promise<Result<null, string>> {
-    return {
-      status: 'error',
-      error: 'Use migrateOldDataFromFiles for web version',
-    }
-  },
-
-  async migrateOldDataFromFiles(
+  async migrateDataFromFiles(
     worldsFile: File,
     foldersFile: File,
   ): Promise<Result<null, string>> {
     return runVoid(
       Effect.gen(function* () {
         const svc = yield* MigrationService
-        yield* svc.migrateOldData(worldsFile, foldersFile)
+        yield* svc.migrateData(worldsFile, foldersFile)
       }),
     )
   },

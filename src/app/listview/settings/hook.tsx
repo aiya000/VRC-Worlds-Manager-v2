@@ -234,7 +234,7 @@ export const useSettingsPage = () => {
       console.info(
         `Migrating data from ${worldsFile.name} and ${foldersFile.name}`,
       )
-      const result = await commands.migrateOldDataFromFiles(
+      const result = await commands.migrateDataFromFiles(
         worldsFile,
         foldersFile,
       )

@@ -1,23 +1,239 @@
 import { Context, Effect, Layer } from 'effect'
-import type { PreviousMetadata, WorldDisplayData } from '@/lib/types'
-import { db } from './db'
+import type { Platform, PreviousMetadata } from '@/lib/types'
+import { db, type FolderRecord, type WorldRecord } from './db'
 
-interface OldWorldData {
-  worldId: string
+/**
+ * Entry of the desktop VRC Worlds Manager v2 `worlds.json`.
+ * The v2 model flattens its API data and its user data into a single object.
+ */
+interface V2World {
+  id: string
   name: string
-  thumbnailUrl: string
+  imageUrl: string
   authorName: string
+  capacity: number
+  tags: string[]
+  updatedAt: string
+  visits: number | null
   favorites: number
-  lastUpdated: string
-  visits: number
-  dateAdded?: string
   platform: string[]
-  tags?: string[]
-  capacity?: number
+  dateAdded: string
+  memo: string
+  hidden: boolean
+  customTags: string[]
 }
 
-interface OldFolderData {
-  [folderName: string]: string[]
+/** Entry of the desktop VRC Worlds Manager v2 `folders.json`. */
+interface V2Folder {
+  name: string
+  worlds: string[]
+}
+
+export interface V2MigrationData {
+  worlds: WorldRecord[]
+  folders: string[]
+  memos: Array<{ worldId: string; memo: string }>
+  hiddenWorldIds: string[]
+  customTags: Array<{ worldId: string; tags: string[] }>
+}
+
+const platformAliases: Record<string, Platform> = {
+  standalonewindows: 'standalonewindows',
+  pc: 'standalonewindows',
+  android: 'android',
+  quest: 'android',
+  ios: 'ios',
+  unknownplatform: 'unknownplatform',
+}
+
+function parseJsonArray(text: string, fileLabel: string): unknown[] {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(text)
+  } catch (e) {
+    throw new Error(`${fileLabel} is not valid JSON: ${e}`)
+  }
+  if (!Array.isArray(parsed)) {
+    throw new Error(
+      `${fileLabel} is not a VRC Worlds Manager v2 data file: expected a JSON array`,
+    )
+  }
+  return parsed
+}
+
+function asRecord(value: unknown, fileLabel: string, index: number) {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${fileLabel}: entry #${index + 1} is not an object`)
+  }
+  return value as Record<string, unknown>
+}
+
+function requireString(
+  entry: Record<string, unknown>,
+  key: string,
+  fileLabel: string,
+  index: number,
+): string {
+  const value = entry[key]
+  if (typeof value !== 'string') {
+    throw new Error(
+      `${fileLabel}: entry #${index + 1} is missing the "${key}" string field. ` +
+        `Make sure the file comes from VRC Worlds Manager v2.`,
+    )
+  }
+  return value
+}
+
+function optionalString(entry: Record<string, unknown>, key: string): string {
+  const value = entry[key]
+  return typeof value === 'string' ? value : ''
+}
+
+function optionalNumber(
+  entry: Record<string, unknown>,
+  key: string,
+  fallback: number,
+): number {
+  const value = entry[key]
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+}
+
+function optionalStringArray(
+  entry: Record<string, unknown>,
+  key: string,
+): string[] {
+  const value = entry[key]
+  if (!Array.isArray(value)) {
+    return []
+  }
+  return value.filter((item): item is string => typeof item === 'string')
+}
+
+function normalizePlatforms(rawPlatforms: string[]): Platform[] {
+  const normalized: Platform[] = []
+  for (const raw of rawPlatforms) {
+    const platform = platformAliases[raw.toLowerCase()] ?? 'unknownplatform'
+    if (!normalized.includes(platform)) {
+      normalized.push(platform)
+    }
+  }
+  return normalized
+}
+
+function mergeTags(tags: string[], customTags: string[]): string[] {
+  const merged = [...tags]
+  for (const tag of customTags) {
+    if (!merged.includes(tag)) {
+      merged.push(tag)
+    }
+  }
+  return merged
+}
+
+function parseV2Folders(foldersText: string): V2Folder[] {
+  const fileLabel = 'The folders file'
+  return parseJsonArray(foldersText, fileLabel).map((value, index) => {
+    const entry = asRecord(value, fileLabel, index)
+    const worlds = entry['worlds']
+    if (!Array.isArray(worlds)) {
+      throw new Error(
+        `${fileLabel}: entry #${index + 1} is missing the "worlds" array field. ` +
+          `Make sure the file comes from VRC Worlds Manager v2.`,
+      )
+    }
+    return {
+      name: requireString(entry, 'name', fileLabel, index),
+      worlds: worlds.filter((id): id is string => typeof id === 'string'),
+    }
+  })
+}
+
+function parseV2Worlds(worldsText: string): V2World[] {
+  const fileLabel = 'The worlds file'
+  return parseJsonArray(worldsText, fileLabel).map((value, index) => {
+    const entry = asRecord(value, fileLabel, index)
+    return {
+      id: requireString(entry, 'id', fileLabel, index),
+      name: requireString(entry, 'name', fileLabel, index),
+      imageUrl: optionalString(entry, 'imageUrl'),
+      authorName: optionalString(entry, 'authorName'),
+      capacity: optionalNumber(entry, 'capacity', 0),
+      tags: optionalStringArray(entry, 'tags'),
+      updatedAt: optionalString(entry, 'updatedAt'),
+      visits: optionalNumber(entry, 'visits', 0),
+      favorites: optionalNumber(entry, 'favorites', 0),
+      platform: optionalStringArray(entry, 'platform'),
+      dateAdded: optionalString(entry, 'dateAdded'),
+      memo: optionalString(entry, 'memo'),
+      hidden: entry['hidden'] === true,
+      customTags: optionalStringArray(entry, 'customTags'),
+    }
+  })
+}
+
+/**
+ * Converts the desktop v2 `worlds.json` / `folders.json` pair into the records
+ * this app stores. Kept pure so it can be exercised without IndexedDB.
+ */
+export function parseV2MigrationData(
+  worldsText: string,
+  foldersText: string,
+): V2MigrationData {
+  const v2Folders = parseV2Folders(foldersText)
+  const v2Worlds = parseV2Worlds(worldsText)
+
+  const worldIdToFolderNames = new Map<string, string[]>()
+  for (const folder of v2Folders) {
+    for (const worldId of folder.worlds) {
+      const folderNames = worldIdToFolderNames.get(worldId) ?? []
+      if (!folderNames.includes(folder.name)) {
+        folderNames.push(folder.name)
+      }
+      worldIdToFolderNames.set(worldId, folderNames)
+    }
+  }
+
+  const worlds: WorldRecord[] = []
+  const memos: Array<{ worldId: string; memo: string }> = []
+  const hiddenWorldIds: string[] = []
+  const customTags: Array<{ worldId: string; tags: string[] }> = []
+
+  for (const world of v2Worlds) {
+    worlds.push({
+      worldId: world.id,
+      name: world.name,
+      thumbnailUrl: world.imageUrl,
+      authorName: world.authorName,
+      favorites: world.favorites,
+      // v2 stores an RFC 3339 timestamp, the app displays a plain date.
+      lastUpdated: world.updatedAt.slice(0, 10),
+      visits: world.visits ?? 0,
+      dateAdded:
+        world.dateAdded === '' ? new Date().toISOString() : world.dateAdded,
+      platform: normalizePlatforms(world.platform),
+      folders: worldIdToFolderNames.get(world.id) ?? [],
+      tags: mergeTags(world.tags, world.customTags),
+      capacity: world.capacity,
+    })
+
+    if (world.memo !== '') {
+      memos.push({ worldId: world.id, memo: world.memo })
+    }
+    if (world.hidden) {
+      hiddenWorldIds.push(world.id)
+    }
+    if (world.customTags.length > 0) {
+      customTags.push({ worldId: world.id, tags: world.customTags })
+    }
+  }
+
+  return {
+    worlds,
+    folders: v2Folders.map((folder) => folder.name),
+    memos,
+    hiddenWorldIds,
+    customTags,
+  }
 }
 
 export class MigrationService extends Context.Tag('MigrationService')<
@@ -27,7 +243,7 @@ export class MigrationService extends Context.Tag('MigrationService')<
       worldsFile: File,
       foldersFile: File,
     ) => Effect.Effect<PreviousMetadata, Error>
-    readonly migrateOldData: (
+    readonly migrateData: (
       worldsFile: File,
       foldersFile: File,
     ) => Effect.Effect<void, Error>
@@ -38,81 +254,57 @@ export const MigrationServiceLive = Layer.succeed(MigrationService, {
   getMigrationMetadata: (worldsFile, foldersFile) =>
     Effect.tryPromise({
       try: async () => {
-        const worldsText = await worldsFile.text()
-        const foldersText = await foldersFile.text()
-        const worlds = JSON.parse(worldsText) as OldWorldData[]
-        const folders = JSON.parse(foldersText) as OldFolderData
+        const data = parseV2MigrationData(
+          await worldsFile.text(),
+          await foldersFile.text(),
+        )
         return {
-          number_of_worlds: worlds.length,
-          number_of_folders: Object.keys(folders).length,
+          number_of_worlds: data.worlds.length,
+          number_of_folders: data.folders.length,
         }
       },
       catch: (e) => new Error(`Failed to read migration files: ${e}`),
     }),
 
-  migrateOldData: (worldsFile, foldersFile) =>
+  migrateData: (worldsFile, foldersFile) =>
     Effect.tryPromise({
       try: async () => {
-        const worldsText = await worldsFile.text()
-        const foldersText = await foldersFile.text()
-        const oldWorlds = JSON.parse(worldsText) as OldWorldData[]
-        const oldFolders = JSON.parse(foldersText) as OldFolderData
+        const data = parseV2MigrationData(
+          await worldsFile.text(),
+          await foldersFile.text(),
+        )
 
-        const folderToWorlds = new Map<string, string[]>()
-        for (const [folderName, worldIds] of Object.entries(oldFolders)) {
-          folderToWorlds.set(folderName, worldIds)
-        }
+        await db.transaction(
+          'rw',
+          [db.worlds, db.folders, db.hiddenWorlds, db.memos, db.customTags],
+          async () => {
+            const existingFolders = await db.folders.toArray()
+            const existingOrders = new Map(
+              existingFolders.map((folder) => [folder.name, folder.order]),
+            )
+            let nextOrder = existingFolders.reduce(
+              (max, folder) => Math.max(max, folder.order + 1),
+              0,
+            )
 
-        const worldFolderMap = new Map<string, string[]>()
-        for (const [folderName, worldIds] of folderToWorlds) {
-          for (const worldId of worldIds) {
-            const existing = worldFolderMap.get(worldId) ?? []
-            existing.push(folderName)
-            worldFolderMap.set(worldId, existing)
-          }
-        }
-
-        await db.transaction('rw', [db.worlds, db.folders], async () => {
-          let folderOrder = 0
-          for (const folderName of Object.keys(oldFolders)) {
-            await db.folders.put({
-              name: folderName,
-              order: folderOrder++,
+            const folderRecords: FolderRecord[] = data.folders.map((name) => {
+              const existingOrder = existingOrders.get(name)
+              return {
+                name,
+                order:
+                  existingOrder === undefined ? nextOrder++ : existingOrder,
+              }
             })
-          }
 
-          for (const world of oldWorlds) {
-            const displayData: WorldDisplayData = {
-              worldId: world.worldId,
-              name: world.name,
-              thumbnailUrl: world.thumbnailUrl,
-              authorName: world.authorName,
-              favorites: world.favorites,
-              lastUpdated: world.lastUpdated,
-              visits: world.visits,
-              dateAdded: world.dateAdded ?? new Date().toISOString(),
-              platform: world.platform as WorldDisplayData['platform'],
-              folders: worldFolderMap.get(world.worldId) ?? [],
-              tags: world.tags ?? [],
-              capacity: world.capacity ?? 0,
-            }
-
-            await db.worlds.put({
-              worldId: displayData.worldId,
-              name: displayData.name,
-              thumbnailUrl: displayData.thumbnailUrl,
-              authorName: displayData.authorName,
-              favorites: displayData.favorites,
-              lastUpdated: displayData.lastUpdated,
-              visits: displayData.visits,
-              dateAdded: displayData.dateAdded,
-              platform: displayData.platform,
-              folders: displayData.folders,
-              tags: displayData.tags,
-              capacity: displayData.capacity,
-            })
-          }
-        })
+            await db.folders.bulkPut(folderRecords)
+            await db.worlds.bulkPut(data.worlds)
+            await db.memos.bulkPut(data.memos)
+            await db.customTags.bulkPut(data.customTags)
+            await db.hiddenWorlds.bulkPut(
+              data.hiddenWorldIds.map((worldId) => ({ worldId })),
+            )
+          },
+        )
       },
       catch: (e) => new Error(`Failed to migrate data: ${e}`),
     }),

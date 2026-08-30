@@ -83,7 +83,7 @@ const WelcomePage: React.FC = () => {
     if (!migrationFiles[0] || !migrationFiles[1]) {
       return false
     }
-    const result = await commands.migrateOldDataFromFiles(
+    const result = await commands.migrateDataFromFiles(
       migrationFiles[0],
       migrationFiles[1],
     )
