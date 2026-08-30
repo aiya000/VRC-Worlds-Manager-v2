@@ -121,13 +121,13 @@ const WelcomePage: React.FC = () => {
       }
     }
     if (page === 3) {
-      if (
-        !pathValidation[0] ||
-        !pathValidation[1] ||
-        migrationMetaError !== null
-      ) {
+      const canMigrate =
+        pathValidation[0] && pathValidation[1] && migrationMetaError === null
+
+      if (!canMigrate) {
+        // No files selected (or the selected files are invalid): skip migration.
         setAlreadyMigrated(false)
-        setPage(3)
+        setPage(page + 1)
         return
       }
 
