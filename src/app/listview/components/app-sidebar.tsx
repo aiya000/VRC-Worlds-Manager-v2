@@ -15,7 +15,7 @@ import { useLocalization } from '@/hooks/use-localization'
 
 import { Separator } from '@/components/ui/separator'
 
-import { Sidebar, SidebarGroup } from '@/components/ui/sidebar'
+import { Sidebar, SidebarGroup, useSidebar } from '@/components/ui/sidebar'
 
 import {
   ContextMenu,
@@ -63,6 +63,19 @@ export function AppSidebar() {
   const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const router = useRouter()
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  // On a phone the sidebar is a drawer covering the page, so it has to get out
+  // of the way once it has been used to go somewhere.
+  const navigate = (path: string) => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+    if (pathname === path) {
+      return
+    }
+    router.push(path)
+  }
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
@@ -215,10 +228,7 @@ export function AppSidebar() {
               ${pathname === '/listview/folders/special/all' ? sidebarStyles.activeLink : 'hover:bg-accent/50 hover:text-accent-foreground'}
             `}
               onClick={() => {
-                if (pathname === '/listview/folders/special/all') {
-                  return
-                }
-                router.push('/listview/folders/special/all')
+                navigate('/listview/folders/special/all')
               }}
             >
               <SaturnIcon className="h-[18px] w-[18px]" />
@@ -236,10 +246,7 @@ export function AppSidebar() {
               ${pathname === '/listview/folders/special/find' ? sidebarStyles.activeLink : 'hover:bg-accent/50 hover:text-accent-foreground'}
             `}
               onClick={() => {
-                if (pathname === '/listview/folders/special/find') {
-                  return
-                }
-                router.push('/listview/folders/special/find')
+                navigate('/listview/folders/special/find')
               }}
             >
               <History className="h-5 w-5" />
@@ -259,10 +266,7 @@ export function AppSidebar() {
               }
             `}
               onClick={() => {
-                if (pathname === '/listview/folders/special/unclassified') {
-                  return
-                }
-                router.push('/listview/folders/special/unclassified')
+                navigate('/listview/folders/special/unclassified')
               }}
             >
               <FileQuestion className="h-5 w-5" />
@@ -310,13 +314,7 @@ export function AppSidebar() {
                                 }
                               `}
                                 onClick={() => {
-                                  if (
-                                    pathname ===
-                                    `/listview/folders/userFolder?folderName=${folder.name}`
-                                  ) {
-                                    return
-                                  }
-                                  router.push(
+                                  navigate(
                                     `/listview/folders/userFolder?folderName=${folder.name}`,
                                   )
                                 }}
@@ -450,10 +448,7 @@ export function AppSidebar() {
               }
             `}
               onClick={() => {
-                if (pathname === `/listview/about`) {
-                  return
-                }
-                router.push('/listview/about')
+                navigate('/listview/about')
               }}
             >
               <Info className="h-5 w-5" />
@@ -469,10 +464,7 @@ export function AppSidebar() {
               }
             `}
               onClick={() => {
-                if (pathname === `/listview/settings`) {
-                  return
-                }
-                router.push('/listview/settings')
+                navigate('/listview/settings')
               }}
             >
               <div className="h-5 w-5 flex items-center justify-center">
