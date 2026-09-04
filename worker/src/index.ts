@@ -49,6 +49,68 @@ function isRouteAllowed(method: string, apiPath: string): boolean {
 }
 
 /**
+ * The frontend (`*.pages.dev`) and this Worker (`*.workers.dev`) sit on
+ * different registrable domains, so a `Set-Cookie` relayed from VRChat is a
+ * cross-site cookie the browser will not send back on later requests. Hand the
+ * session over as headers instead, and rebuild the `Cookie` header here.
+ */
+const AUTH_TOKEN_HEADER = 'X-VRC-Auth'
+const TWO_FACTOR_TOKEN_HEADER = 'X-VRC-Two-Factor-Auth'
+const AUTH_COOKIE_NAME = 'auth'
+const TWO_FACTOR_COOKIE_NAME = 'twoFactorAuth'
+
+function readSetCookies(headers: Headers): string[] {
+  const withGetSetCookie = headers as Headers & {
+    getSetCookie?: () => string[]
+  }
+  if (typeof withGetSetCookie.getSetCookie === 'function') {
+    return withGetSetCookie.getSetCookie()
+  }
+  const raw = headers.get('Set-Cookie')
+  return raw === null ? [] : [raw]
+}
+
+/**
+ * An empty value means VRChat is expiring the cookie rather than issuing one,
+ * so it is reported as absent: the frontend drops its tokens on logout.
+ */
+export function parseSetCookieValue(
+  setCookies: string[],
+  name: string,
+): string | null {
+  for (const setCookie of setCookies) {
+    const [pair] = setCookie.split(';')
+    const separatorIndex = pair.indexOf('=')
+    if (separatorIndex === -1) {
+      continue
+    }
+    if (pair.slice(0, separatorIndex).trim() !== name) {
+      continue
+    }
+    const value = pair.slice(separatorIndex + 1).trim()
+    if (value === '') {
+      continue
+    }
+    return value
+  }
+  return null
+}
+
+export function buildVRChatCookieHeader(
+  authToken: string | null,
+  twoFactorToken: string | null,
+): string | null {
+  const cookies: string[] = []
+  if (authToken !== null && authToken !== '') {
+    cookies.push(`${AUTH_COOKIE_NAME}=${authToken}`)
+  }
+  if (twoFactorToken !== null && twoFactorToken !== '') {
+    cookies.push(`${TWO_FACTOR_COOKIE_NAME}=${twoFactorToken}`)
+  }
+  return cookies.length === 0 ? null : cookies.join('; ')
+}
+
+/**
  * Cloudflare Pages serves every branch/preview deployment of a project under
  * `<branch>.<project>.pages.dev`, and only the project owner can deploy to
  * that subdomain — so when `allowedOrigin` is itself a `*.pages.dev` origin,
@@ -87,10 +149,9 @@ function corsHeaders(origin: string, allowedOrigin: string): HeadersInit {
   return {
     'Access-Control-Allow-Origin': effectiveOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers':
-      'Content-Type, Authorization, Cookie, X-Requested-With, CF-Access-Client-Id, CF-Access-Client-Secret',
+    'Access-Control-Allow-Headers': `Content-Type, Authorization, Cookie, X-Requested-With, CF-Access-Client-Id, CF-Access-Client-Secret, ${AUTH_TOKEN_HEADER}, ${TWO_FACTOR_TOKEN_HEADER}`,
     'Access-Control-Allow-Credentials': 'true',
-    'Access-Control-Expose-Headers': 'X-Quota-Remaining, Set-Cookie',
+    'Access-Control-Expose-Headers': `X-Quota-Remaining, ${AUTH_TOKEN_HEADER}, ${TWO_FACTOR_TOKEN_HEADER}`,
   }
 }
 
@@ -206,6 +267,18 @@ export default {
     proxyHeaders.delete('CF-Access-Client-Id')
     proxyHeaders.delete('CF-Access-Client-Secret')
 
+    const cookieHeader = buildVRChatCookieHeader(
+      request.headers.get(AUTH_TOKEN_HEADER),
+      request.headers.get(TWO_FACTOR_TOKEN_HEADER),
+    )
+    proxyHeaders.delete(AUTH_TOKEN_HEADER)
+    proxyHeaders.delete(TWO_FACTOR_TOKEN_HEADER)
+    if (cookieHeader === null) {
+      proxyHeaders.delete('Cookie')
+    } else {
+      proxyHeaders.set('Cookie', cookieHeader)
+    }
+
     const proxyRequest = new Request(targetUrl, {
       method: request.method,
       headers: proxyHeaders,
@@ -226,6 +299,22 @@ export default {
         responseHeaders.set(key, value)
       }
       responseHeaders.set('X-Quota-Remaining', String(quotaRemaining))
+
+      const setCookies = readSetCookies(response.headers)
+      const issuedAuth = parseSetCookieValue(setCookies, AUTH_COOKIE_NAME)
+      if (issuedAuth !== null) {
+        responseHeaders.set(AUTH_TOKEN_HEADER, issuedAuth)
+      }
+      const issuedTwoFactor = parseSetCookieValue(
+        setCookies,
+        TWO_FACTOR_COOKIE_NAME,
+      )
+      if (issuedTwoFactor !== null) {
+        responseHeaders.set(TWO_FACTOR_TOKEN_HEADER, issuedTwoFactor)
+      }
+      // The browser could not store these anyway (cross-site), and leaving
+      // them in only invites confusion when debugging the session.
+      responseHeaders.delete('Set-Cookie')
 
       return new Response(response.body, {
         status: response.status,

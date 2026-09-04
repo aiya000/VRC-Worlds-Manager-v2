@@ -1,4 +1,5 @@
 import { Context, Effect, Layer } from 'effect'
+import { db } from './db'
 import type {
   WorldDetails,
   WorldDisplayData,
@@ -21,6 +22,110 @@ const CF_ACCESS_CLIENT_ID = process.env.NEXT_PUBLIC_CF_ACCESS_CLIENT_ID ?? ''
 const CF_ACCESS_CLIENT_SECRET =
   process.env.NEXT_PUBLIC_CF_ACCESS_CLIENT_SECRET ?? ''
 
+// The frontend and the Worker are served from different registrable domains
+// (`*.pages.dev` vs `*.workers.dev`), so the session cookies VRChat issues are
+// cross-site for the browser and never sent back. The Worker therefore hands
+// them over as plain headers, and we replay them on every subsequent request.
+const AUTH_TOKEN_HEADER = 'X-VRC-Auth'
+const TWO_FACTOR_TOKEN_HEADER = 'X-VRC-Two-Factor-Auth'
+const AUTH_TOKEN_KEY = 'auth_cookie'
+const TWO_FACTOR_TOKEN_KEY = 'two_factor_auth_cookie'
+
+const tokenCache = new Map<string, string>()
+
+async function loadToken(key: string): Promise<string | null> {
+  const cached = tokenCache.get(key)
+  if (cached !== undefined) {
+    return cached
+  }
+  try {
+    const record = await db.authState.get(key)
+    if (record === undefined) {
+      return null
+    }
+    tokenCache.set(key, record.value)
+    return record.value
+  } catch {
+    // IndexedDB is unavailable while prerendering and in unit tests; the
+    // in-memory cache alone still carries the session for this page load.
+    return null
+  }
+}
+
+async function saveToken(key: string, value: string): Promise<void> {
+  tokenCache.set(key, value)
+  try {
+    await db.authState.put({ key, value })
+  } catch {
+    // See loadToken(): persistence is best-effort.
+  }
+}
+
+async function clearTokens(): Promise<void> {
+  tokenCache.clear()
+  try {
+    await db.authState.clear()
+  } catch {
+    // See loadToken(): persistence is best-effort.
+  }
+}
+
+async function storeIssuedTokens(res: Response): Promise<void> {
+  const issuedAuth = res.headers.get(AUTH_TOKEN_HEADER)
+  if (issuedAuth !== null && issuedAuth !== '') {
+    await saveToken(AUTH_TOKEN_KEY, issuedAuth)
+  }
+  const issuedTwoFactor = res.headers.get(TWO_FACTOR_TOKEN_HEADER)
+  if (issuedTwoFactor !== null && issuedTwoFactor !== '') {
+    await saveToken(TWO_FACTOR_TOKEN_KEY, issuedTwoFactor)
+  }
+}
+
+export const TWO_FACTOR_REQUIRED_ERROR = '2fa-required'
+export const EMAIL_TWO_FACTOR_REQUIRED_ERROR = 'email-2fa-required'
+
+/**
+ * VRChat answers a login against a 2FA-protected account with HTTP 200 and a
+ * `requiresTwoFactorAuth` body rather than an error status, so the body -- not
+ * the status -- decides whether the login actually completed.
+ */
+export function twoFactorRequirementOf(body: unknown): string | null {
+  if (typeof body !== 'object' || body === null) {
+    return null
+  }
+  const methods = (body as { requiresTwoFactorAuth?: unknown })
+    .requiresTwoFactorAuth
+  if (!Array.isArray(methods)) {
+    return null
+  }
+  const normalized = methods
+    .filter((method): method is string => typeof method === 'string')
+    .map((method) => method.toLowerCase())
+  if (normalized.length === 0) {
+    return null
+  }
+  return normalized.includes('emailotp')
+    ? EMAIL_TWO_FACTOR_REQUIRED_ERROR
+    : TWO_FACTOR_REQUIRED_ERROR
+}
+
+// Callers hand over VRChat's own spelling (`emailOtp`), which does not match
+// the lowercase endpoint segment, so compare case-insensitively.
+export function twoFactorVerifyPath(twoFactorType: string): string {
+  switch (twoFactorType.toLowerCase()) {
+    case 'totp':
+      return '/auth/twofactorauth/totp/verify'
+    case 'emailotp':
+      return '/auth/twofactorauth/emailotp/verify'
+    default:
+      return '/auth/twofactorauth/otp/verify'
+  }
+}
+
+// Carries the UI-facing error code that the login screens match on, so the
+// generic `Login failed: ...` wrapping must not swallow it.
+class TwoFactorRequiredError extends Error {}
+
 function apiUrl(path: string): string {
   return `${CF_WORKER_URL}/api/1${path}`
 }
@@ -40,11 +145,21 @@ async function apiFetch(
     headers['CF-Access-Client-Secret'] = CF_ACCESS_CLIENT_SECRET
   }
 
+  const authToken = await loadToken(AUTH_TOKEN_KEY)
+  if (authToken !== null && authToken !== '') {
+    headers[AUTH_TOKEN_HEADER] = authToken
+  }
+  const twoFactorToken = await loadToken(TWO_FACTOR_TOKEN_KEY)
+  if (twoFactorToken !== null && twoFactorToken !== '') {
+    headers[TWO_FACTOR_TOKEN_HEADER] = twoFactorToken
+  }
+
   const res = await fetch(apiUrl(path), {
     ...options,
     credentials: 'include',
     headers,
   })
+  await storeIssuedTokens(res)
   if (!res.ok) {
     const text = await res.text()
     throw new Error(`API error ${res.status}: ${text}`)
@@ -117,7 +232,12 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
   tryLogin: () =>
     Effect.tryPromise({
       try: async () => {
-        await apiFetch('/auth/user')
+        const res = await apiFetch('/auth/user')
+        // A session still awaiting its second factor also answers 200 here,
+        // and every other endpoint rejects it as `Missing Credentials`.
+        if (twoFactorRequirementOf(await res.json()) !== null) {
+          throw new Error('Two-factor authentication is not verified')
+        }
       },
       catch: (e) => new Error(`Login check failed: ${e}`),
     }),
@@ -125,28 +245,34 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
   loginWithCredentials: (username, password) =>
     Effect.tryPromise({
       try: async () => {
-        await apiFetch('/auth/user', {
+        await clearTokens()
+        const res = await apiFetch('/auth/user', {
           headers: {
             Authorization: `Basic ${btoa(`${username}:${password}`)}`,
           },
         })
+        const requirement = twoFactorRequirementOf(await res.json())
+        if (requirement !== null) {
+          throw new TwoFactorRequiredError(requirement)
+        }
       },
-      catch: (e) => new Error(`Login failed: ${e}`),
+      catch: (e) =>
+        e instanceof TwoFactorRequiredError
+          ? e
+          : new Error(`Login failed: ${e}`),
     }),
 
   loginWith2fa: (code, twoFactorType) =>
     Effect.tryPromise({
       try: async () => {
-        const endpoint =
-          twoFactorType === 'totp'
-            ? '/auth/twofactorauth/totp/verify'
-            : twoFactorType === 'emailotp'
-              ? '/auth/twofactorauth/emailotp/verify'
-              : '/auth/twofactorauth/otp/verify'
-        await apiFetch(endpoint, {
+        const res = await apiFetch(twoFactorVerifyPath(twoFactorType), {
           method: 'POST',
           body: JSON.stringify({ code }),
         })
+        const body = (await res.json()) as { verified?: boolean }
+        if (body.verified === false) {
+          throw new Error('The code was rejected by VRChat')
+        }
       },
       catch: (e) => new Error(`2FA failed: ${e}`),
     }),
@@ -154,7 +280,11 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
   logout: () =>
     Effect.tryPromise({
       try: async () => {
-        await apiFetch('/logout', { method: 'PUT' })
+        try {
+          await apiFetch('/logout', { method: 'PUT' })
+        } finally {
+          await clearTokens()
+        }
       },
       catch: (e) => new Error(`Logout failed: ${e}`),
     }),
