@@ -665,8 +665,25 @@ export const commands = {
   ): Promise<Result<WorldDetails, string>> {
     return run(
       Effect.gen(function* () {
-        const svc = yield* WorldService
-        return yield* svc.getWorld(worldId, dontSaveToLocal)
+        const api = yield* VRChatApiService
+        const worlds = yield* WorldService
+
+        // Nothing but this ever fills the local world-details table, so asking
+        // VRChat first is what makes a world openable at all; the cached copy
+        // is the fallback for being offline, or for a world VRChat will no
+        // longer serve because it stopped being public.
+        return yield* api.getWorld(worldId).pipe(
+          Effect.tap((world) =>
+            dontSaveToLocal === true
+              ? Effect.void
+              : worlds.putWorldDetails(world),
+          ),
+          Effect.catchAll((remoteError) =>
+            worlds
+              .getWorld(worldId, dontSaveToLocal)
+              .pipe(Effect.catchAll(() => Effect.fail(remoteError))),
+          ),
+        )
       }),
     )
   },

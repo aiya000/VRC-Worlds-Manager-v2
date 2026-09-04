@@ -30,6 +30,9 @@ export class WorldService extends Context.Tag('WorldService')<
       dontSaveToLocal: boolean | null,
     ) => Effect.Effect<WorldDetails, Error>
     readonly putWorld: (world: WorldDisplayData) => Effect.Effect<void, Error>
+    readonly putWorldDetails: (
+      world: WorldDetails,
+    ) => Effect.Effect<void, Error>
     readonly sortWorldsDisplay: (
       worlds: WorldDisplayData[],
       sortField: string,
@@ -197,6 +200,29 @@ export const WorldServiceLive = Layer.succeed(WorldService, {
         })
       },
       catch: (e) => new Error(`Failed to put world: ${e}`),
+    }),
+
+  putWorldDetails: (world) =>
+    Effect.tryPromise({
+      try: async () => {
+        await db.worldDetails.put({
+          worldId: world.worldId,
+          name: world.name,
+          thumbnailUrl: world.thumbnailUrl,
+          authorName: world.authorName,
+          authorId: world.authorId,
+          favorites: world.favorites,
+          lastUpdated: world.lastUpdated,
+          visits: world.visits,
+          platform: world.platform,
+          description: world.description,
+          tags: world.tags,
+          capacity: world.capacity,
+          recommendedCapacity: world.recommendedCapacity,
+          publicationDate: world.publicationDate,
+        })
+      },
+      catch: (e) => new Error(`Failed to put world details: ${e}`),
     }),
 
   sortWorldsDisplay: (worlds, sortField, sortDirection) =>
