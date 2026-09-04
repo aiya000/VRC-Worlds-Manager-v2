@@ -1,58 +1,74 @@
-# VRChat Worlds Manager Web
+# VRChat Worlds Manager Web (VRCWW)
 
-[![Tests](https://github.com/aiya000/VRC-Worlds-Manager-v2/actions/workflows/test.yml/badge.svg)](https://github.com/aiya000/VRC-Worlds-Manager-v2/actions/workflows/test.yml)
+[![Tests](https://github.com/aiya000/VRC-Worlds-Manager-Web/actions/workflows/test.yml/badge.svg)](https://github.com/aiya000/VRC-Worlds-Manager-Web/actions/workflows/test.yml)
+[![Web App](https://img.shields.io/badge/Web%20App-vrchat--worlds--manager--web.pages.dev-blue?logo=cloudflarepages)](https://vrchat-worlds-manager-web.pages.dev)
+[![Bun](https://img.shields.io/badge/Bun-%23000000.svg?logo=bun&logoColor=white)](https://bun.sh)
 
 [日本語はこちら / 日本語のREADMEはREADME_JP.mdを参照してください。](./README_JP.md)
 
-VRChat Worlds Manager Web is a web application (PWA) that helps VRChat users organize and store their favorite worlds. Based on the original [VRC Worlds Manager v2](https://github.com/Raifa21/VRC-Worlds-Manager-v2) desktop application.
+**VRChat Worlds Manager Web (VRCWW)** is a Progressive Web App (PWA) that helps VRChat users organize, store, and explore their favorite worlds. It is based on the original [VRC Worlds Manager v2](https://github.com/Raifa21/VRC-Worlds-Manager-v2) desktop application, rewritten to run entirely in modern web browsers, mobile devices, and VR overlays.
+
+🌐 **Live Web App**: [https://vrchat-worlds-manager-web.pages.dev](https://vrchat-worlds-manager-web.pages.dev)
 
 ---
 
 ## Features
 
-- Add Favourite Worlds
-  - Automatically fetch worlds marked as Favourites on VRChat using the API and save them in the app.
-  - Once saved, the worlds will remain in the app even if removed from your VRChat Favourites.
-  - You can also add worlds directly using their URL links.
+- **Web & PWA Ready (VR-First / Responsive Layout)**
+  - Runs in any modern web browser on PC, smartphones, and VR overlays (XSOverlay, SteamVR browser, Quest browser, etc.).
+  - Responsive layout with a collapsible sidebar and touch/laser-friendly controls.
+  - Can be installed to your home screen or desktop as a Progressive Web App (PWA).
 
-- Organize Worlds into Folders
-  - Organize saved worlds into folders.
-  - A single world can be assigned to multiple folders.
+- **Add & Preserve Favourite Worlds**
+  - Automatically fetch worlds marked as Favourites in VRChat via the API and store them in the app.
+  - Saved worlds remain preserved even if removed from your VRChat Favourites list or if your slots are full.
+  - Add worlds directly using URL links.
 
-- View World Details
-  - Check the details of a world from within the app.
-  - You can also attach notes to each world.
+- **Organize Worlds into Folders & Customize Views**
+  - Organize saved worlds into folders (a single world can belong to multiple folders).
+  - Customize world card display with per-field visibility toggles.
+  - Attach personal notes and memos to each world.
 
-- Search Function
-  - Search through saved worlds in the app.
-  - Supports searching by world creator, tags, and folders.
+- **Multi-Account Support & Management Tools**
+  - Import favourite worlds from another VRChat account into your folders.
+  - Purge all VRChat favorites from an account in one click.
 
-- Discover Worlds
-  - Retrieve a list of recently visited worlds.
-  - Search for worlds using tags, text, exclusion tags, and more.
+- **Search & Discover**
+  - Fast local search by world name, author, tags, and folders.
+  - View recently visited worlds.
+  - Search public VRChat worlds using tags, text queries, and exclusion filters.
 
-- Create Instances
-  - Generate instances directly from the app. Group instances can also be created.
-  - When an instance is created, an invite will be sent, just like on the official VRChat website.
+- **Create Instances**
+  - Launch instances directly from the app (including group instances). An invite will be sent to your VRChat client.
 
-- Share Folders
-  - Share folders and generate a UUID valid for 30 days.
-  - Folders can also be viewed on the web.
+- **Share Folders**
+  - Share folders via public links (generating a UUID valid for 30 days).
+  - Shared folders can be viewed directly on the web.
+
+- **Client-Side Privacy**
+  - World data and credentials are stored locally in your browser's IndexedDB (Dexie.js).
+  - Secure Cloudflare Worker CORS proxy handles communication with the VRChat API.
 
 ---
 
 ## Tech Stack
 
-- **Frontend**: Next.js 16 + React 19 + Tailwind CSS 4
+- **Frontend**: Next.js 16 + React 19 + Tailwind CSS 4 + Shadcn/UI
 - **Service Layer**: Effect-TS
 - **Data Storage**: IndexedDB (Dexie.js) + localStorage
-- **API Proxy**: Cloudflare Worker (CORS proxy)
+- **API Proxy**: Cloudflare Worker (CORS proxy with 2FA, session header relay, and rate limiting)
 - **Package Manager**: Bun
-- **Deployment**: Static Generation (PWA)
+- **Deployment**: Cloudflare Pages (Static Export) & Cloudflare Workers
 
 ---
 
 ## Getting Started
+
+### Prerequisites
+
+- [Bun](https://bun.sh/) (v1.2+)
+
+### Development
 
 ```bash
 # Install dependencies
@@ -61,8 +77,14 @@ bun install
 # Start development server
 bun run dev
 
-# Type check
-bun run typecheck
+# Code quality checks (Prettier, ESLint, TypeCheck)
+bun run check
+
+# Run unit & integration tests
+bun run test
+
+# Run E2E tests (Playwright)
+bun run test:e2e
 
 # Build for production
 bun run build
