@@ -27,9 +27,14 @@ export function ListViewClientShell({
           style={{ '--sidebar-width': '17rem' } as CSSProperties}
         >
           <AppSidebar />
-          <main className="flex-1 min-w-0 h-svh overflow-y-auto no-webview-scroll-bar">
+          {/* A div, not a `main`: the root layout already provides that
+              landmark, and `main` may not be nested inside another one. */}
+          <div
+            data-testid="list-view-content"
+            className="flex-1 min-w-0 h-svh overflow-y-auto no-webview-scroll-bar"
+          >
             {children}
-          </main>
+          </div>
           <PopupManager />
         </SidebarProvider>
       </PatreonProvider>
