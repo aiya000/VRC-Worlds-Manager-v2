@@ -1,7 +1,5 @@
-import React from 'react';
-
 interface LogoutIconProps {
-  className?: string;
+  className?: string
 }
 
 export function LogoutIcon({ className }: LogoutIconProps) {
@@ -49,5 +47,5 @@ export function LogoutIcon({ className }: LogoutIconProps) {
       />
       <polygon points="32 74 0 60 0 0 32 14 32 74" fill="currentColor" />
     </svg>
-  );
+  )
 }

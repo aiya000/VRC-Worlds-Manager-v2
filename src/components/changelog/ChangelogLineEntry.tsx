@@ -3,18 +3,18 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
-import { FC, ReactNode } from 'react';
+} from '@/components/ui/tooltip'
+import { cn } from '@/lib/utils'
+import { FC, ReactNode } from 'react'
 
 type Props = {
-  icon: ReactNode;
-  title: string;
-  text: string;
-  className?: string;
-  titleClassName?: string;
-  textClassName?: string;
-};
+  icon: ReactNode
+  title: string
+  text: string
+  className?: string
+  titleClassName?: string
+  textClassName?: string
+}
 
 export const ChangelogLineEntry: FC<Props> = ({
   icon,
@@ -48,5 +48,5 @@ export const ChangelogLineEntry: FC<Props> = ({
         </Tooltip>
       </TooltipProvider>
     </div>
-  );
-};
+  )
+}

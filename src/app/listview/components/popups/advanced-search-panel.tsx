@@ -1,26 +1,26 @@
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
-import SingleFilterItemSelector from '@/components/single-filter-item-selector';
-import MultiFilterItemSelector from '@/components/multi-filter-item-selector';
-import { useLocalization } from '@/hooks/use-localization';
-import { Input } from '@/components/ui/input';
-import { useFolders } from '@/app/listview/hook/use-folders';
-import { useWorldFiltersStore } from '@/app/listview/hook/use-filters';
+} from '@/components/ui/dialog'
+import SingleFilterItemSelector from '@/components/single-filter-item-selector'
+import MultiFilterItemSelector from '@/components/multi-filter-item-selector'
+import { useLocalization } from '@/hooks/use-localization'
+import { Input } from '@/components/ui/input'
+import { useFolders } from '@/app/listview/hook/use-folders'
+import { useWorldFiltersStore } from '@/app/listview/hook/use-filters'
 
 interface AdvancedSearchPanelProps {
-  onClose: () => void;
+  onClose: () => void
 }
 
 export function AdvancedSearchPanel({ onClose }: AdvancedSearchPanelProps) {
-  const { t } = useLocalization();
-  const { folders } = useFolders();
+  const { t } = useLocalization()
+  const { folders } = useFolders()
   const {
     authorFilter,
     tagFilters,
@@ -33,11 +33,11 @@ export function AdvancedSearchPanel({ onClose }: AdvancedSearchPanelProps) {
     clearFilters,
     availableAuthors,
     availableTags,
-  } = useWorldFiltersStore();
+  } = useWorldFiltersStore()
 
   const handleClearAll = () => {
-    clearFilters();
-  };
+    clearFilters()
+  }
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -103,5 +103,5 @@ export function AdvancedSearchPanel({ onClose }: AdvancedSearchPanelProps) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

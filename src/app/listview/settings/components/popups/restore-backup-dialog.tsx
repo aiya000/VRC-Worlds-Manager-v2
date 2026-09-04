@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
-import { useLocalization } from '@/hooks/use-localization';
-import { commands } from '@/lib/bindings';
-import { info, error } from '@tauri-apps/plugin-log';
-import { FolderOpen } from 'lucide-react';
-import { Calendar, Info, AlertTriangle, Loader2, Folder } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { open as openDialog } from '@tauri-apps/plugin-dialog';
-import { SaturnIcon } from '../../../../../components/icons/saturn-icon';
+import { useState } from 'react'
+import { useLocalization } from '@/hooks/use-localization'
+import { commands } from '@/lib/commands'
+import { FolderOpen } from 'lucide-react'
+import { Calendar, Info, AlertTriangle, Loader2, Folder } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { SaturnIcon } from '../../../../../components/icons/saturn-icon'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,18 +14,18 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../../../../components/ui/alert-dialog';
+} from '../../../../../components/ui/alert-dialog'
 
 interface BackupMetadata {
-  date: string;
-  number_of_worlds: number;
-  number_of_folders: number;
+  date: string
+  number_of_worlds: number
+  number_of_folders: number
 }
 
 interface RestoreBackupDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: (path: string) => Promise<void>;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onConfirm: (file: File) => Promise<void>
 }
 
 export function RestoreBackupDialog({
@@ -35,74 +33,73 @@ export function RestoreBackupDialog({
   onOpenChange,
   onConfirm,
 }: RestoreBackupDialogProps) {
-  const { t } = useLocalization();
-  const [selectedPath, setSelectedPath] = useState<string | null>(null);
-  const [metadata, setMetadata] = useState<BackupMetadata | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { t } = useLocalization()
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [metadata, setMetadata] = useState<BackupMetadata | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleDateConversion = (dateString: string) => {
-    //dateString in the form: 2025-04-25_04-22-51
-    const dateParts = dateString.split('_');
-    const date = dateParts[0];
-    return date;
-  };
+    const dateParts = dateString.split('_')
+    const date = dateParts[0]
+    return date
+  }
 
-  const handleSelectBackup = async () => {
-    try {
-      const selectedDir = await openDialog({
-        directory: true,
-        multiple: false,
-        title: t('settings-page:select-restore-directory'),
-      });
-
-      if (selectedDir === null) {
-        info('Backup selection cancelled');
-        return;
+  const handleSelectBackup = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) {
+        console.info('Backup selection cancelled')
+        return
       }
 
-      setIsLoading(true);
-      setErrorMessage(null);
-      const backupPath = selectedDir as string;
+      setIsLoading(true)
+      setErrorMessage(null)
 
-      // Try to load backup metadata
-      const result = await commands.getBackupMetadata(backupPath);
+      try {
+        const result = await commands.getBackupMetadataFromFile(file)
 
-      if (result.status === 'error') {
-        setErrorMessage(result.error);
-        setSelectedPath(null);
-        setMetadata(null);
-        setIsLoading(false);
-        return;
+        if (result.status === 'error') {
+          setErrorMessage(result.error)
+          setSelectedFile(null)
+          setMetadata(null)
+          setIsLoading(false)
+          return
+        }
+
+        setSelectedFile(file)
+        const meta: BackupMetadata = {
+          date: handleDateConversion(result.data.date),
+          number_of_worlds: result.data.number_of_worlds,
+          number_of_folders: result.data.number_of_folders,
+        }
+        setMetadata(meta)
+        setIsLoading(false)
+      } catch (e) {
+        console.error(`Failed to select backup: ${e}`)
+        setErrorMessage(t('settings-page:error-read-backup'))
+        setIsLoading(false)
       }
-
-      setSelectedPath(backupPath);
-
-      const metadata: BackupMetadata = {
-        date: handleDateConversion(result.data.date),
-        number_of_worlds: result.data.number_of_worlds,
-        number_of_folders: result.data.number_of_folders,
-      };
-      setMetadata(metadata);
-      setIsLoading(false);
-    } catch (e) {
-      error(`Failed to select backup: ${e}`);
-      setErrorMessage(t('settings-page:error-read-backup'));
-      setIsLoading(false);
     }
-  };
+    input.click()
+  }
 
   const handleConfirm = async () => {
-    if (!selectedPath) return;
+    if (!selectedFile) {
+      return
+    }
     try {
-      await onConfirm(selectedPath);
-      setSelectedPath(null);
-      setMetadata(null);
-      onOpenChange(false);
-    } catch (e) {
+      await onConfirm(selectedFile)
+      setSelectedFile(null)
+      setMetadata(null)
+      onOpenChange(false)
+    } catch (_e) {
       // Error handling is done in the parent component
     }
-  };
+  }
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -145,7 +142,7 @@ export function RestoreBackupDialog({
             </div>
           )}
 
-          {metadata && selectedPath && (
+          {metadata && selectedFile && (
             <>
               <div className="bg-muted rounded-md p-4 space-y-3">
                 <div className="flex items-center gap-2">
@@ -178,7 +175,9 @@ export function RestoreBackupDialog({
                     <span className="text-sm font-medium">
                       {t('settings-page:backup-location')}:
                     </span>
-                    <span className="text-sm break-words">{selectedPath}</span>
+                    <span className="text-sm break-words">
+                      {selectedFile.name}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -203,7 +202,7 @@ export function RestoreBackupDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>{t('general:cancel')}</AlertDialogCancel>
           <AlertDialogAction
-            disabled={!selectedPath || isLoading}
+            disabled={!selectedFile || isLoading}
             onClick={handleConfirm}
             className="bg-primary"
           >
@@ -212,5 +211,5 @@ export function RestoreBackupDialog({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  );
+  )
 }

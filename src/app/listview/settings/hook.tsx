@@ -1,42 +1,63 @@
-import { useLocalization } from '@/hooks/use-localization';
+import { useLocalization } from '@/hooks/use-localization'
 import {
   CardSize,
   commands,
   FolderRemovalPreference,
-  UpdateChannel,
-} from '@/lib/bindings';
-import { error, info } from '@tauri-apps/plugin-log';
-import { useContext, useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import { open } from '@tauri-apps/plugin-dialog';
-import { ExportType } from './components/popups/export';
-import { useRouter } from 'next/navigation';
-import { LocalizationContext } from '../../../components/localization-context';
-import { useFolders } from '../hook/use-folders';
-import { useTheme } from 'next-themes';
-import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
+  WorldCardFieldVisibility,
+} from '@/lib/commands'
+import { useContext, useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import { ExportType } from './components/popups/export'
+import { useRouter } from 'next/navigation'
+import { LocalizationContext } from '../../../components/localization-context'
+import { useFolders } from '../hook/use-folders'
+import { useTheme } from 'next-themes'
+
+const normalizeThemeValue = (theme: string): 'light' | 'dark' | 'system' => {
+  const unwrappedTheme =
+    theme.startsWith('"') && theme.endsWith('"') ? theme.slice(1, -1) : theme
+
+  if (
+    unwrappedTheme === 'light' ||
+    unwrappedTheme === 'dark' ||
+    unwrappedTheme === 'system'
+  ) {
+    return unwrappedTheme
+  }
+
+  return 'system'
+}
 
 export const useSettingsPage = () => {
-  const [cardSize, setCardSize] = useState<CardSize>('Normal');
-  const [language, setLanguage] = useState<string>('en-US');
+  const [cardSize, setCardSize] = useState<CardSize>('Normal')
+  const [language, setLanguage] = useState<string>('en-US')
   const [folderRemovalPreference, setFolderRemovalPreference] =
-    useState<FolderRemovalPreference | null>(null);
-  const [updateChannel, setUpdateChannel] = useState<UpdateChannel | null>(
-    null,
-  );
+    useState<FolderRemovalPreference | null>(null)
+  const [fieldVisibility, setFieldVisibility] =
+    useState<WorldCardFieldVisibility>({
+      name: true,
+      authorName: true,
+      visits: true,
+      lastUpdated: true,
+      favorites: true,
+    })
 
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showMigrateDialog, setShowMigrateDialog] = useState(false);
-  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
-  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showMigrateDialog, setShowMigrateDialog] = useState(false)
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showPurgeFavoritesDialog, setShowPurgeFavoritesDialog] =
+    useState(false)
 
-  const router = useRouter();
+  const router = useRouter()
 
-  const { setLanguage: changeLanguage } = useContext(LocalizationContext);
+  const { setLanguage: changeLanguage } = useContext(LocalizationContext)
 
-  const { refresh: onDataChange } = useFolders();
+  const { refresh: onDataChange } = useFolders()
 
-  const { setTheme } = useTheme();
+  const { setTheme } = useTheme()
+
+  const { t } = useLocalization()
 
   // Add missing export confirm handler
   const handleExportConfirm = async (
@@ -46,77 +67,87 @@ export const useSettingsPage = () => {
     sortDirection: string,
   ) => {
     try {
-      let result;
+      let result
       switch (exportType) {
         case ExportType.PLS:
-          info('Exporting to Portal Library System...');
+          console.info('Exporting to Portal Library System...')
           result = await commands.exportToPortalLibrarySystem(
             folders,
             sortField,
             sortDirection,
-          );
-          break;
+          )
+          break
         default:
-          error(`Unknown export type: ${exportType}`);
+          console.error(`Unknown export type: ${exportType}`)
           toast(t('general:error-title'), {
             description: t('settings-page:error-unknown-export-type'),
-          });
-          return;
+          })
+          return
       }
       if (result.status === 'error') {
-        error(`Export failed: ${result.error}`);
+        console.error(`Export failed: ${result.error}`)
         toast(t('general:error-title'), {
           description: t('settings-page:error-export-data'),
-        });
-        return;
+        })
+        return
       }
-      info('Export completed successfully');
+      console.info('Export completed successfully')
       toast(t('settings-page:export-success-title'), {
         description: t('settings-page:export-success-description'),
-      });
+      })
     } catch (e) {
-      error(`Export error: ${e}`);
+      console.error(`Export error: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-export-data'),
-      });
+      })
     }
-  };
+  }
 
   useEffect(() => {
     const loadPreferences = async () => {
       try {
-        const themeResult = await commands.getTheme();
-        const languageResult = await commands.getLanguage();
-        const cardSizeResult = await commands.getCardSize();
-        const updateChannelResult = await commands.getUpdateChannel();
+        const themeResult = await commands.getTheme()
+        const languageResult = await commands.getLanguage()
+        const cardSizeResult = await commands.getCardSize()
         const folderRemovalPreferenceResult =
-          await commands.getFolderRemovalPreference();
-        const theme = themeResult.status === 'ok' ? themeResult.data : 'system';
+          await commands.getFolderRemovalPreference()
+        const fieldVisibilityResult =
+          await commands.getWorldCardFieldVisibility()
+        const theme =
+          themeResult.status === 'ok'
+            ? normalizeThemeValue(themeResult.data)
+            : 'system'
         const language =
-          languageResult.status === 'ok' ? languageResult.data : 'en-US';
+          languageResult.status === 'ok' ? languageResult.data : 'en-US'
         const cardSize =
-          cardSizeResult.status === 'ok' ? cardSizeResult.data : 'Normal';
-        const updateChannel =
-          updateChannelResult.status === 'ok'
-            ? updateChannelResult.data
-            : 'stable';
+          cardSizeResult.status === 'ok' ? cardSizeResult.data : 'Normal'
 
         const folderRemovalPreference =
           folderRemovalPreferenceResult.status === 'ok'
             ? folderRemovalPreferenceResult.data
-            : 'ask';
-        setTheme(theme);
-        setLanguage(language);
-        setCardSize(cardSize);
-        setFolderRemovalPreference(folderRemovalPreference);
-        setUpdateChannel(updateChannel);
+            : 'ask'
+        const fieldVisibility =
+          fieldVisibilityResult.status === 'ok'
+            ? fieldVisibilityResult.data
+            : {
+                name: true,
+                authorName: true,
+                visits: true,
+                lastUpdated: true,
+                favorites: true,
+              }
+        setTheme(theme)
+        setLanguage(language)
+        setCardSize(cardSize)
+        setFolderRemovalPreference(folderRemovalPreference)
+        setFieldVisibility(fieldVisibility)
         // put a toast if commands fail
         if (
           themeResult.status === 'error' ||
           languageResult.status === 'error' ||
           cardSizeResult.status === 'error' ||
-          updateChannelResult.status === 'error' ||
-          folderRemovalPreferenceResult.status === 'error'
+          folderRemovalPreferenceResult.status === 'error' ||
+          fieldVisibilityResult.status === 'error'
         ) {
           toast(t('general:error-title'), {
             description:
@@ -125,314 +156,290 @@ export const useSettingsPage = () => {
               (themeResult.status === 'error' ? themeResult.error : '') +
               (languageResult.status === 'error' ? languageResult.error : '') +
               (cardSizeResult.status === 'error' ? cardSizeResult.error : '') +
-              (updateChannelResult.status === 'error'
-                ? updateChannelResult.error
-                : '') +
               (folderRemovalPreferenceResult.status === 'error'
                 ? folderRemovalPreferenceResult.error
+                : '') +
+              (fieldVisibilityResult.status === 'error'
+                ? fieldVisibilityResult.error
                 : ''),
-          });
+          })
         }
       } catch (e) {
-        error(`Failed to load preferences: ${e}`);
+        console.error(`Failed to load preferences: ${e}`)
         toast(t('general:error-title'), {
           description: t('settings-page:error-load-preferences'),
-        });
+        })
       }
-    };
+    }
 
-    loadPreferences();
-  }, [setTheme]);
-
-  const { t } = useLocalization();
+    loadPreferences()
+  }, [setTheme]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBackup = async () => {
     try {
-      info('Creating backup...');
-
-      // Ask user to select a directory for backup
-      const selectedDir = await open({
-        directory: true,
-        multiple: false,
-        title: t('settings-page:select-backup-directory'),
-      });
-
-      // If user cancelled the selection
-      if (selectedDir === null) {
-        info('Backup cancelled: No directory selected');
-        return;
-      }
-
-      const backupPath = selectedDir as string;
-      info(`Selected backup directory: ${backupPath}`);
-
-      const result = await commands.createBackup(backupPath);
+      console.info('Creating backup...')
+      const result = await commands.createBackup()
 
       if (result.status === 'error') {
-        error(`Backup creation failed: ${result.error}`);
+        console.error(`Backup creation failed: ${result.error}`)
         toast(t('general:error-title'), {
           description: t('settings-page:error-create-backup'),
-        });
-        return;
+        })
+        return
       }
 
-      info(`Backup created successfully at: ${backupPath}`);
+      console.info('Backup created successfully')
       toast(t('settings-page:backup-success-title'), {
         description: t('settings-page:backup-success-description'),
-      });
+      })
     } catch (e) {
-      error(`Backup error: ${e}`);
+      console.error(`Backup error: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-create-backup'),
-      });
+      })
     }
-  };
+  }
 
-  const handleRestoreConfirm = async (path: string) => {
+  const handleRestoreConfirm = async (file: File) => {
     try {
-      info(`Restoring from backup: ${path}`);
-      const result = await commands.restoreFromBackup(path);
+      console.info(`Restoring from backup: ${file.name}`)
+      const result = await commands.restoreFromBackupFile(file)
 
       if (result.status === 'error') {
-        error(`Restore failed: ${result.error}`);
+        console.error(`Restore failed: ${result.error}`)
         toast(t('general:error-title'), {
           description: t('settings-page:error-restore-backup'),
-        });
-        return;
+        })
+        return
       }
 
-      info('Restore completed successfully');
+      console.info('Restore completed successfully')
       toast(t('settings-page:restore-success-title'), {
         description: t('settings-page:restore-success-description'),
-      });
-      onDataChange();
+      })
+      onDataChange()
     } catch (e) {
-      error(`Restore error: ${e}`);
+      console.error(`Restore error: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-restore-backup'),
-      });
+      })
     }
-  };
+  }
 
   const handleMigrationConfirm = async (
-    worldsPath: string,
-    foldersPath: string,
+    worldsFile: File,
+    foldersFile: File,
   ) => {
     try {
-      info(`Migrating data from ${worldsPath} and ${foldersPath}`);
-      const result = await commands.migrateOldData(worldsPath, foldersPath);
+      console.info(
+        `Migrating data from ${worldsFile.name} and ${foldersFile.name}`,
+      )
+      const result = await commands.migrateDataFromFiles(
+        worldsFile,
+        foldersFile,
+      )
 
       if (result.status === 'error') {
-        error(`Migration failed: ${result.error}`);
+        console.error(`Migration failed: ${result.error}`)
         toast(t('general:error-title'), {
           description: t('settings-page:error-migrate-data'),
-        });
-        return;
+        })
+        return
       }
 
-      info('Migration completed successfully');
+      console.info('Migration completed successfully')
       toast(t('settings-page:migration-success-title'), {
         description: t('settings-page:migration-success-description'),
-      });
-      onDataChange();
+      })
+      onDataChange()
     } catch (e) {
-      error(`Migration error: ${e}`);
+      console.error(`Migration error: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-migrate-data'),
-      });
+      })
     }
-  };
+  }
 
   const handleDeleteConfirm = async () => {
     try {
-      info('Deleting all data...');
-      const result = await commands.deleteData();
+      console.info('Deleting all data...')
+      const result = await commands.deleteData()
       if (result.status === 'error') {
-        error(`Data deletion failed: ${result.error}`);
+        console.error(`Data deletion failed: ${result.error}`)
         toast(t('general:error-title'), {
           description: t('settings-page:error-delete-data'),
-        });
-        return;
+        })
+        return
       }
-      info('Data deleted successfully');
+      console.info('Data deleted successfully')
       toast(t('settings-page:delete-success-title'), {
         description: t('settings-page:delete-success-description'),
-      });
+      })
 
-      setShowDeleteConfirm(false);
-      onDataChange();
+      setShowDeleteConfirm(false)
+      onDataChange()
     } catch (e) {
-      error(`Data deletion error: ${e}`);
+      console.error(`Data deletion error: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-delete-data'),
-      });
+      })
     }
-  };
+  }
 
   const handleLogout = async () => {
     try {
-      info('Logging out...');
-      const result = await commands.logout();
+      console.info('Logging out...')
+      const result = await commands.logout()
 
       if (result.status === 'error') {
-        error(`Logout failed: ${result.error}`);
+        console.error(`Logout failed: ${result.error}`)
         toast(t('general:error-title'), {
           description: t('settings-page:error-logout'),
-        });
-        return;
+        })
+        return
       }
 
-      info('Logged out successfully');
-      router.push('/login');
+      console.info('Logged out successfully')
+      router.push('/login')
     } catch (e) {
-      error(`Logout error: ${e}`);
+      console.error(`Logout error: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-logout'),
-      });
+      })
     }
-  };
-
-  const handleOpenLogs = async () => {
-    try {
-      const result = await commands.openLogsDirectory();
-
-      if (result.status === 'ok') {
-        info('Opened logs directory');
-      } else {
-        error(`Failed to open logs directory: ${result.error}`);
-      }
-    } catch (e) {
-      error(`Failed to open logs directory: ${e}`);
-      toast(t('general:error-title'), {
-        description: t('general:error-open-logs'),
-      });
-    }
-  };
+  }
 
   const handleThemeChange = async (value: string) => {
     try {
-      info(`Setting theme to: ${value}`);
-      const result = await commands.setTheme(value);
+      const normalizedTheme = normalizeThemeValue(value)
+      console.info(`Setting theme to: ${normalizedTheme}`)
+      const result = await commands.setTheme(normalizedTheme)
 
       if (result.status === 'ok') {
-        setTheme(value);
-        info(`Theme set to: ${value}`);
+        setTheme(normalizedTheme)
+        console.info(`Theme set to: ${normalizedTheme}`)
       } else {
-        error(`Failed to set theme: ${result.error}`);
+        console.error(`Failed to set theme: ${result.error}`)
         toast(t('general:error-title'), {
           description:
             t('settings-page:error-save-preferences') + ': ' + result.error,
-        });
+        })
       }
     } catch (e) {
-      error(`Failed to save theme: ${e}`);
+      console.error(`Failed to save theme: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-save-preferences'),
-      });
+      })
     }
-  };
+  }
 
   const handleLanguageChange = async (value: string) => {
     try {
-      info(`Setting language to: ${value}`);
-      const result = await commands.setLanguage(value);
+      console.info(`Setting language to: ${value}`)
+      const result = await commands.setLanguage(value)
       if (result.status === 'ok') {
-        changeLanguage(value);
-        setLanguage(value);
-        info(`Language set to: ${value}`);
+        changeLanguage(value)
+        setLanguage(value)
+        console.info(`Language set to: ${value}`)
       } else {
-        error(`Failed to set language: ${result.error}`);
+        console.error(`Failed to set language: ${result.error}`)
         toast(t('general:error-title'), {
           description:
             t('settings-page:error-save-preferences') + ': ' + result.error,
-        });
+        })
       }
     } catch (e) {
-      error(`Failed to save language: ${e}`);
+      console.error(`Failed to save language: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-save-preferences'),
-      });
+      })
     }
-  };
+  }
 
   const handleCardSizeChange = async (value: CardSize) => {
     try {
-      info(`Setting card size to: ${value}`);
-      const result = await commands.setCardSize(value);
+      console.info(`Setting card size to: ${value}`)
+      const result = await commands.setCardSize(value)
       if (result.status === 'ok') {
-        setCardSize(value);
-        info(`Card size set to: ${value}`);
+        setCardSize(value)
+        console.info(`Card size set to: ${value}`)
       } else {
-        error(`Failed to set card size: ${result.error}`);
+        console.error(`Failed to set card size: ${result.error}`)
         toast(t('general:error-title'), {
           description:
             t('settings-page:error-save-preferences') + ': ' + result.error,
-        });
-        return;
+        })
+        return
       }
     } catch (e) {
-      error(`Failed to save card size: ${e}`);
+      console.error(`Failed to save card size: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-save-preferences'),
-      });
+      })
     }
-  };
+  }
+
+  const handleFieldVisibilityChange = async (
+    value: WorldCardFieldVisibility,
+  ) => {
+    try {
+      console.info(
+        `Setting world card field visibility to: ${JSON.stringify(value)}`,
+      )
+      const result = await commands.setWorldCardFieldVisibility(value)
+      if (result.status === 'ok') {
+        setFieldVisibility(value)
+        console.info('World card field visibility saved')
+      } else {
+        console.error(`Failed to set field visibility: ${result.error}`)
+        toast(t('general:error-title'), {
+          description:
+            t('settings-page:error-save-preferences') + ': ' + result.error,
+        })
+      }
+    } catch (e) {
+      console.error(`Failed to save field visibility: ${e}`)
+      toast(t('general:error-title'), {
+        description: t('settings-page:error-save-preferences'),
+      })
+    }
+  }
 
   const handleFolderRemovalPreferenceChange = async (
     value: FolderRemovalPreference,
   ) => {
     try {
-      info(`Setting folder removal preference to: ${value}`);
-      const result = await commands.setFolderRemovalPreference(value);
+      console.info(`Setting folder removal preference to: ${value}`)
+      const result = await commands.setFolderRemovalPreference(value)
       if (result.status === 'ok') {
-        info(`Folder removal preference set to: ${value}`);
-        setFolderRemovalPreference(value);
+        console.info(`Folder removal preference set to: ${value}`)
+        setFolderRemovalPreference(value)
       } else {
-        error(`Failed to set folder removal preference: ${result.error}`);
+        console.error(
+          `Failed to set folder removal preference: ${result.error}`,
+        )
         toast(t('general:error-title'), {
           description:
             t('settings-page:error-save-preferences') + ': ' + result.error,
-        });
+        })
       }
     } catch (e) {
-      error(`Failed to save folder removal preference: ${e}`);
+      console.error(`Failed to save folder removal preference: ${e}`)
       toast(t('general:error-title'), {
         description: t('settings-page:error-save-preferences'),
-      });
+      })
     }
-  };
-
-  const handleUpdateChannelChange = async (value: UpdateChannel) => {
-    try {
-      info(`Setting update channel to: ${value}`);
-      const result = await commands.setUpdateChannel(value);
-      if (result.status === 'ok') {
-        setUpdateChannel(value);
-        info(`Update channel set to: ${value}`);
-      } else {
-        error(`Failed to set update channel: ${result.error}`);
-        toast(t('general:error-title'), {
-          description:
-            t('settings-page:error-save-preferences') + ': ' + result.error,
-        });
-      }
-    } catch (e) {
-      error(`Failed to save update channel: ${e}`);
-      toast(t('general:error-title'), {
-        description: t('settings-page:error-save-preferences'),
-      });
-    }
-  };
+  }
 
   const openHiddenFolder = () => {
-    router.push('/listview/folders/hidden');
-  };
+    router.push('/listview/folders/hidden')
+  }
 
   return {
     cardSize,
     language,
     folderRemovalPreference,
-    updateChannel,
+    fieldVisibility,
     showDeleteConfirm,
     setShowDeleteConfirm,
     showMigrateDialog,
@@ -441,19 +448,20 @@ export const useSettingsPage = () => {
     setShowRestoreDialog,
     showExportDialog,
     setShowExportDialog,
+    showPurgeFavoritesDialog,
+    setShowPurgeFavoritesDialog,
     handleExportConfirm,
     handleBackup,
     handleRestoreConfirm,
     handleMigrationConfirm,
     handleDeleteConfirm,
     handleLogout,
-    handleOpenLogs,
     handleThemeChange,
     handleLanguageChange,
     handleCardSizeChange,
+    handleFieldVisibilityChange,
     handleFolderRemovalPreferenceChange,
-    handleUpdateChannelChange,
     openHiddenFolder,
     t,
-  };
-};
+  }
+}

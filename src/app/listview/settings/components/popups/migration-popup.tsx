@@ -1,20 +1,17 @@
-import React, { useState } from 'react';
-import { useLocalization } from '@/hooks/use-localization';
-import { commands } from '@/lib/bindings';
-import { info, error } from '@tauri-apps/plugin-log';
+import { useState } from 'react'
+import { useLocalization } from '@/hooks/use-localization'
+import { commands } from '@/lib/commands'
 import {
   FolderOpen,
-  ArrowRightLeft,
   Loader2,
   Info,
   AlertTriangle,
   FileJson,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { open as openDialog } from '@tauri-apps/plugin-dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { SaturnIcon } from '@/components/icons/saturn-icon';
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { SaturnIcon } from '@/components/icons/saturn-icon'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,17 +21,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from '@/components/ui/alert-dialog'
 
 interface MigrationData {
-  number_of_worlds: number;
-  number_of_folders: number;
+  number_of_worlds: number
+  number_of_folders: number
 }
 
 interface MigrationPopupProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: (worlds_path: string, folders_path: string) => Promise<void>;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onConfirm: (worldsFile: File, foldersFile: File) => Promise<void>
 }
 
 export function MigrationPopup({
@@ -42,109 +39,90 @@ export function MigrationPopup({
   onOpenChange,
   onConfirm,
 }: MigrationPopupProps) {
-  const { t } = useLocalization();
-  const [migrationPaths, setMigrationPaths] = useState<[string, string]>([
-    '',
-    '',
-  ]);
-  const [pathValidation, setPathValidation] = useState<[boolean, boolean]>([
-    false,
-    false,
-  ]);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [migrationData, setMigrationData] = useState<MigrationData | null>(
-    null,
-  );
+  const { t } = useLocalization()
+  const [migrationFiles, setMigrationFiles] = useState<
+    [File | null, File | null]
+  >([null, null])
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [migrationData, setMigrationData] = useState<MigrationData | null>(null)
 
-  const handleFilePick = async (index: number) => {
-    try {
-      const selected = await openDialog({
-        directory: false,
-        multiple: false,
-        title:
-          index === 0
-            ? t('settings-page:select-worlds-file')
-            : t('settings-page:select-folders-file'),
-        filters: [{ name: 'JSON', extensions: ['json'] }],
-      });
-
-      if (selected === null) {
-        info('File selection cancelled');
-        return;
+  const handleFilePick = (index: number) => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) {
+        console.info('File selection cancelled')
+        return
       }
 
-      const newPaths: [string, string] = [...migrationPaths];
-      newPaths[index] = selected as string;
-      setMigrationPaths(newPaths);
+      try {
+        const newFiles: [File | null, File | null] = [...migrationFiles]
+        newFiles[index] = file
+        setMigrationFiles(newFiles)
 
-      // Update validation
-      const newValidation: [boolean, boolean] = [...pathValidation];
-      newValidation[index] = true;
-      setPathValidation(newValidation);
-
-      // If both files are selected, try to get metadata
-      if (newPaths[0] && newPaths[1]) {
-        await validateAndLoadMetadata(newPaths[0], newPaths[1]);
+        if (newFiles[0] && newFiles[1]) {
+          await validateAndLoadMetadata(newFiles[0], newFiles[1])
+        }
+      } catch (e) {
+        console.error(`Failed to select file: ${e}`)
+        setErrorMessage(t('settings-page:error-select-file'))
       }
-    } catch (e) {
-      error(`Failed to select file: ${e}`);
-      setErrorMessage(t('settings-page:error-select-file'));
     }
-  };
+    input.click()
+  }
 
   const validateAndLoadMetadata = async (
-    worldsPath: string,
-    foldersPath: string,
+    worldsFile: File,
+    foldersFile: File,
   ) => {
-    setIsLoading(true);
-    setErrorMessage(null);
+    setIsLoading(true)
+    setErrorMessage(null)
 
     try {
-      // Check if we can read the data from these files
-      const result = await commands.getMigrationMetadata(
-        worldsPath,
-        foldersPath,
-      );
+      const result = await commands.getMigrationMetadataFromFiles(
+        worldsFile,
+        foldersFile,
+      )
 
       if (result.status === 'error') {
-        setErrorMessage(result.error);
-        setMigrationData(null);
-        setIsLoading(false);
-        return;
+        setErrorMessage(result.error)
+        setMigrationData(null)
+        setIsLoading(false)
+        return
       }
       const data: MigrationData = {
         number_of_worlds: result.data.number_of_worlds,
         number_of_folders: result.data.number_of_folders,
-      };
-      setMigrationData(data);
-      setIsLoading(false);
+      }
+      setMigrationData(data)
+      setIsLoading(false)
     } catch (e) {
-      error(`Failed to read migration data: ${e}`);
-      setErrorMessage(t('settings-page:error-read-migration-files'));
-      setMigrationData(null);
+      console.error(`Failed to read migration data: ${e}`)
+      setErrorMessage(t('settings-page:error-read-migration-files'))
+      setMigrationData(null)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleConfirm = async () => {
-    if (!migrationPaths[0] || !migrationPaths[1]) return;
+    if (!migrationFiles[0] || !migrationFiles[1]) {
+      return
+    }
 
     try {
-      // Pass both paths to the parent component
-      await onConfirm(migrationPaths[0], migrationPaths[1]); // worlds_path, folders_path
+      await onConfirm(migrationFiles[0], migrationFiles[1])
 
-      // Clean up and close dialog on success
-      setMigrationPaths(['', '']);
-      setPathValidation([false, false]);
-      setMigrationData(null);
-      onOpenChange(false);
+      setMigrationFiles([null, null])
+      setMigrationData(null)
+      onOpenChange(false)
     } catch (e) {
-      // Parent component should handle errors
-      error(`Migration confirmation error: ${e}`);
+      console.error(`Migration confirmation error: ${e}`)
     }
-  };
+  }
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -165,7 +143,7 @@ export function MigrationPopup({
               <Label>{t('general:worlds-data')}</Label>
               <div className="flex space-x-2">
                 <Input
-                  value={migrationPaths[0]}
+                  value={migrationFiles[0]?.name ?? ''}
                   readOnly
                   placeholder={t(
                     'settings-page:select-worlds-file-placeholder',
@@ -188,7 +166,7 @@ export function MigrationPopup({
               <Label>{t('general:folders-data')}</Label>
               <div className="flex space-x-2">
                 <Input
-                  value={migrationPaths[1]}
+                  value={migrationFiles[1]?.name ?? ''}
                   readOnly
                   placeholder={t(
                     'settings-page:select-folders-file-placeholder',
@@ -266,8 +244,8 @@ export function MigrationPopup({
           </AlertDialogCancel>
           <AlertDialogAction
             disabled={
-              !pathValidation[0] ||
-              !pathValidation[1] ||
+              !migrationFiles[0] ||
+              !migrationFiles[1] ||
               isLoading ||
               !migrationData
             }
@@ -279,5 +257,5 @@ export function MigrationPopup({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  );
+  )
 }

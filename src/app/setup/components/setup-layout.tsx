@@ -1,28 +1,27 @@
-import React from 'react';
-import { useLocalization } from '@/hooks/use-localization';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import React from 'react'
+import { useLocalization } from '@/hooks/use-localization'
+import { Progress } from '@/components/ui/progress'
+import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { info } from '@tauri-apps/plugin-log';
+} from '@/components/ui/card'
 
 interface SetupLayoutProps {
-  title: string;
-  currentPage: number;
-  children: React.ReactNode;
-  onBack: () => void;
-  onNext: () => void;
-  isFirstPage?: boolean;
-  isLastPage?: boolean;
-  isMigrationPage?: boolean;
-  isLoading?: boolean;
-  isValid?: boolean;
+  title: string
+  currentPage: number
+  children: React.ReactNode
+  onBack: () => void
+  onNext: () => void
+  isFirstPage?: boolean
+  isLastPage?: boolean
+  isMigrationPage?: boolean
+  isLoading?: boolean
+  isValid?: boolean
 }
 
 export function SetupLayout({
@@ -37,10 +36,14 @@ export function SetupLayout({
   isValid = false,
   isLoading = false,
 }: SetupLayoutProps) {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
+  const totalPages = 6
   return (
     <div className="container max-w-2xl mx-auto p-4">
-      <Progress value={currentPage * 25 - 25} className="mb-8" />
+      <Progress
+        value={((currentPage - 1) / (totalPages - 1)) * 100}
+        className="mb-8"
+      />
       <Card className="h-[480px]">
         <CardHeader>
           <CardTitle>{title}</CardTitle>
@@ -88,5 +91,5 @@ export function SetupLayout({
         </CardFooter>
       </Card>
     </div>
-  );
+  )
 }

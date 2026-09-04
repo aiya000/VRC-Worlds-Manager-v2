@@ -1,50 +1,29 @@
-'use client';
+'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useLocalization } from '@/hooks/use-localization';
-import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
-import { UserProfile } from '@/app/listview/about/components/user-profile';
-import { ExternalLink, Heart } from 'lucide-react';
-import { SiGithub, SiDiscord } from '@icons-pack/react-simple-icons';
-import { toast } from 'sonner';
-import { commands } from '@/lib/bindings';
-import { info, error } from '@tauri-apps/plugin-log';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { SidebarTrigger } from '@/components/ui/sidebar'
+import { useLocalization } from '@/hooks/use-localization'
+import { Button } from '@/components/ui/button'
+import { useEffect, useState } from 'react'
+import { UserProfile } from '@/app/listview/about/components/user-profile'
+import { Heart } from 'lucide-react'
+import { SiGithub, SiDiscord } from '@icons-pack/react-simple-icons'
+import { toast } from 'sonner'
+import { commands } from '@/lib/commands'
 
 export default function AboutSection() {
-  const { t } = useLocalization();
-  const [orderedSupporters, setOrderedSupporters] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchPatreonData() {
-      try {
-        const result = await commands.fetchPatreonData();
-        if (result.status === 'ok') {
-          setOrderedSupporters(sortSupporters(result.data));
-        } else {
-          throw new Error(result.error);
-        }
-      } catch (e) {
-        error(`Failed to fetch Patreon data: ${e}`);
-        toast('Error', {
-          description: 'Failed to load supporter data.',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchPatreonData();
-  }, [toast]);
+  const { t } = useLocalization()
+  const [orderedSupporters, setOrderedSupporters] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? 'unknown'
 
   // Helper function to sort supporters
-  const sortSupporters = (data: any) => {
-    const platinumNames = (data.platinumSupporter || []).sort();
-    const goldNames = (data.goldSupporter || []).sort();
-    const silverNames = (data.silverSupporter || []).sort();
-    const bronzeNames = (data.bronzeSupporter || []).sort();
-    const basicNames = (data.basicSupporter || []).sort();
+  const sortSupporters = (data: Record<string, string[]>) => {
+    const platinumNames = (data.platinumSupporter || []).sort()
+    const goldNames = (data.goldSupporter || []).sort()
+    const silverNames = (data.silverSupporter || []).sort()
+    const bronzeNames = (data.bronzeSupporter || []).sort()
+    const basicNames = (data.basicSupporter || []).sort()
 
     return [
       ...platinumNames,
@@ -52,25 +31,69 @@ export default function AboutSection() {
       ...silverNames,
       ...bronzeNames,
       ...basicNames,
-    ];
-  };
+    ]
+  }
+
+  useEffect(() => {
+    async function fetchPatreonData() {
+      try {
+        const result = await commands.fetchPatreonData()
+        if (result.status === 'ok') {
+          setOrderedSupporters(sortSupporters(result.data))
+        } else {
+          throw new Error(result.error)
+        }
+      } catch (e) {
+        console.error(`Failed to fetch Patreon data: ${e}`)
+        toast('Error', {
+          description: 'Failed to load supporter data.',
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchPatreonData()
+  }, [])
 
   return (
-    <div className="min-h-screen flex flex-col overflow-x-hidden">
-      <div className="flex-1 container mx-auto p-6">
-        {/* Development Team and Special Thanks Section */}
-        <div className="flex flex-row mb-2">
-          {/* Development Team Section */}
-          <div>
-            <CardHeader>
-              <CardTitle>{t('about-section:development-team')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-8">
+    <div className="min-h-svh flex flex-col overflow-x-hidden">
+      <div className="flex-1 container mx-auto p-6 space-y-6">
+        <SidebarTrigger className="h-10 w-10 shrink-0" />
+        {/* Web Version Header with aiya000 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('about-section:web-version-title')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              {t('about-section:web-version-description')}
+            </p>
+            <UserProfile
+              name="aiya000"
+              iconUrl="/icons/aiya000.jpg"
+              xUsername="public_ai000ya"
+              githubUsername="aiya000"
+            />
+          </CardContent>
+        </Card>
+
+        {/* Original (VRC Worlds Manager v2) Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('about-section:original-title')}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Development Team */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">
+                {t('about-section:development-team')}
+              </h3>
+              <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-4">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-4">
                     {t('about-section:developers')}
-                  </h3>
+                  </h4>
                   <div className="space-x-4 flex flex-row">
                     <UserProfile
                       name="Raifa"
@@ -87,9 +110,9 @@ export default function AboutSection() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-4">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-4">
                     {t('about-section:media-design')}
-                  </h3>
+                  </h4>
                   <div className="space-x-4 flex flex-row">
                     <UserProfile
                       name="じゃんくま"
@@ -99,14 +122,13 @@ export default function AboutSection() {
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </div>
-          {/* Special Thanks Section */}
-          <div>
-            <CardHeader>
-              <CardTitle>{t('about-section:special-thanks')}</CardTitle>
-            </CardHeader>
-            <CardContent>
+            </div>
+
+            {/* Special Thanks */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">
+                {t('about-section:special-thanks')}
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="flex items-start gap-3">
                   <div>
@@ -157,12 +179,12 @@ export default function AboutSection() {
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </div>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Supporters Section */}
-        <div>
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Heart className="h-5 w-5 text-pink-500" />
@@ -203,14 +225,14 @@ export default function AboutSection() {
               )}
             </div>
           </CardContent>
-        </div>
+        </Card>
       </div>
 
       {/* Footer */}
       <div className="w-full border-t bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
           <div className="text-sm text-muted-foreground">
-            VRC Worlds Manager v2 1.3.1
+            VRChat Worlds Manager Web {appVersion}
           </div>
 
           <div className="flex gap-4">
@@ -238,7 +260,24 @@ export default function AboutSection() {
             </Button>
           </div>
         </div>
+        <div className="container mx-auto px-4 pb-3">
+          <p className="text-xs text-muted-foreground">
+            {t('about-section:fork-attribution:foretext')}
+            <a
+              href="https://github.com/Raifa21/VRC-Worlds-Manager-v2"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground/80 underline-offset-2 hover:underline hover:text-foreground"
+            >
+              {t('about-section:fork-attribution:link-text')}
+            </a>
+            {t('about-section:fork-attribution:posttext')}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {t('about-section:fork-attribution:thanks')}
+          </p>
+        </div>
       </div>
     </div>
-  );
+  )
 }

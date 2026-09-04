@@ -33,6 +33,7 @@ If you lack permission to self-assign, leave a comment to indicate your intent.
 ### Pull Requests
 
 When creating a Pull Request, please follow these guidelines:
+
 1. Ensure there is a related Issue or Security Advisory (create one if necessary).
 2. Keep changes minimal to facilitate review.
 3. (If possible) Use a prefix for branch names (e.g., `feat/`, `fix/`, `perf/`, `docs/`).
@@ -45,6 +46,7 @@ After creating a PR, you can request translation contributions from others.
 
 If you discover a vulnerability or security-related bug, report it through [GitHub Security Advisories](https://github.com/Raifa21/VRC-Worlds-Manager-v2/security/advisories/new).  
 If you plan to commit a fix yourself, follow these guidelines based on the severity:
+
 - If revealing a PoC (Proof of Concept) before the fix is released is risky:
   - Create the fix in a [Private Fork](https://docs.github.com/en/code-security/security-advisories/working-with-repository-security-advisories/collaborating-in-a-temporary-private-fork-to-resolve-a-repository-security-vulnerability) and share it with contributors.
 - If revealing a PoC before the fix is acceptable for minor vulnerabilities:
@@ -61,42 +63,33 @@ See the [LICENSE](LICENSE) file for details.
 
 Install the following dependencies:
 
-- [Rust](https://www.rust-lang.org/tools/install)
-- [Next.js](https://nextjs.org/docs/app/getting-started/installation)
-- [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
+- [Bun](https://bun.sh/)
 
 We recommend using [VSCode](https://code.visualstudio.com/), but you can use any editor you prefer.
 
-### Installing Frontend Packages
+### Installing Packages
 
-Run the following command to install Node.js packages:
+Run the following command to install packages:
 
 ```
-npm i
+bun install
 ```
-
-Rust dependencies will be installed automatically when running Tauri.
 
 ### Running in Dev Mode
 
-Run `npm run tauri dev` to start the application.
+Run `bun run dev` to start the application.
 
 Frontend code changes will trigger automatic updates.  
 If updates do not appear, try refreshing with `Ctrl-R`.
-
-Backend code changes will trigger an automatic restart.
-
-> [!NOTE]
-> Modifying backend code triggers a dev build on every save, which can slow development.  
-> It is recommended to restart only when necessary.
 
 ### Useful Commands
 
 Sometimes after merging a PR on GitHub, the remote branch is deleted, but the local branch still remains.
 To avoid clutter, you can clean up your local branches that:
- - Were already merged and deleted on GitHub
- - 	Were previously pushed, but are now gone on origin
- - Are not your private local-only branches
+
+- Were already merged and deleted on GitHub
+-     Were previously pushed, but are now gone on origin
+- Are not your private local-only branches
 
 ```
 git fetch --prune
@@ -106,10 +99,9 @@ git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -n 1 git branch -d
 ## Code Formatting
 
 Use the following commands to format the code:
-```
-npx prettier --write "src/**/*.{ts,tsx}"
 
-(cd src-tauri && cargo fmt)  
+```
+bun run format
 ```
 
 ---

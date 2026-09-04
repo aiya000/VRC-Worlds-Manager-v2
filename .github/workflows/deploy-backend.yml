@@ -1,0 +1,33 @@
+name: Deploy Backend
+on:
+  push:
+    branches:
+      - main
+      - feature/web
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare Workers
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+    defaults:
+      run:
+        working-directory: worker
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2
+      - name: Install dependencies
+        run: bun install
+      - name: Create wrangler.toml
+        run: |
+          cp wrangler.sample.toml wrangler.toml
+          sed -i "s/INPUT_HERE_KV_NAMESPACE_ID/${{ secrets.CLOUDFLARE_KV_NAMESPACE_ID }}/" wrangler.toml
+      - name: Deploy
+        run: bun run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_BACKEND }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

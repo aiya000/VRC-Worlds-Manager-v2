@@ -1,31 +1,34 @@
 # Project Overview
 
-This is a desktop application built with **Next.js** (frontend) and **Tauri** (backend in Rust).  
-We follow **Test-Driven Development (TDD)**, keeping changes small and iterative.  
+This is a web application (PWA) built with **Next.js** (Static Generation) and **Effect-TS** for the service layer.
+We follow **Test-Driven Development (TDD)**, keeping changes small and iterative.
 The focus is on correctness, maintainability, and clarity.
 
 ## Folder Structure
 
 - `/src`: Next.js frontend source code
-- `/src-tauri`: Tauri backend (Rust)
+- `/src/lib/services`: Effect-TS service layer (IndexedDB, localStorage, API calls)
+- `/worker`: Cloudflare Worker (CORS proxy for VRChat API)
 - `/public`: Static assets
-- `/docs`: Documentation and specs
+- `/locales`: Localization files (en-US, ja-JP)
 
 ## Libraries and Frameworks
 
-- Next.js + React (frontend)
-- Tailwind CSS for styling
+- Next.js 16 + React 19 (frontend)
+- Tailwind CSS 4 for styling
 - Shadcn/UI for UI components
-- Tauri (Rust backend)
-- @tauri-apps/plugin-log for logging
+- Effect-TS for service layer and error handling
+- Dexie.js for IndexedDB
+- `@/lib/services/logger` for logging
 
 ## Coding Standards
 
 - TypeScript strict mode
 - Functional components + hooks
 - Arrow functions for callbacks
-- **All logs must use `@tauri-apps/plugin-log` instead of `console.log`.**
+- **All logs must use `@/lib/services/logger` instead of `console.log`.**
 - Git commits follow conventional commits
+- Package manager: **Bun** (never npm/yarn/pnpm)
 
 ## Development Workflow
 
@@ -35,18 +38,11 @@ The focus is on correctness, maintainability, and clarity.
 - Strive for **pair programming** style thinking: explain decisions as if to a peer.
 - Keep refactors incremental and supported by tests.
 
-## Tauri Guidelines
-
-- Use Tauri commands for backend logic (no direct Node APIs).
-- Access filesystem and OS APIs only through Tauri secure APIs.
-- Store configuration in `AppConfigDir` or `AppDataDir`.
-- Keep Rust backend minimal; domain/business logic should stay in the frontend.
-
 ## Testing & QA
 
-- Storybook (with Vite builder) for component previews
-- Lost Pixel for visual regression testing (preferred)
 - Vitest + Testing Library for unit/integration tests
+- `bun run typecheck` for type checking
+- `bun run build` for build verification
 
 ## UI Guidelines
 

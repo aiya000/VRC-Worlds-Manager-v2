@@ -1,19 +1,19 @@
-'use client';
+'use client'
 
-import React from 'react';
-import { useTheme } from 'next-themes';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { useTheme } from 'next-themes'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { WorldCardPreview } from '@/components/world-card';
+} from '@/components/ui/select'
+import { WorldCardPreview } from '@/components/world-card'
+import { WorldCardFieldToggles } from '@/components/world-card-field-toggles'
 
-import { FolderRemovalPreference, UpdateChannel } from '@/lib/bindings';
+import { FolderRemovalPreference } from '@/lib/commands'
 import {
   LogOut,
   Trash2,
@@ -21,21 +21,28 @@ import {
   FolderOpen,
   Save,
   FolderUp,
-} from 'lucide-react';
-import { Card } from '../../../components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RestoreBackupDialog } from '@/app/listview/settings/components/popups/restore-backup-dialog';
-import { MigrationPopup } from '@/app/listview/settings/components/popups/migration-popup';
-import { DeleteDataConfirmationDialog } from '@/app/listview/settings/components/popups/delete-data-confirmation';
-import { ExportPopup } from './components/popups/export';
-import { useSettingsPage } from './hook';
+  Users,
+} from 'lucide-react'
+import { useState } from 'react'
+import { Card } from '../../../components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { RestoreBackupDialog } from '@/app/listview/settings/components/popups/restore-backup-dialog'
+import { MigrationPopup } from '@/app/listview/settings/components/popups/migration-popup'
+import { DeleteDataConfirmationDialog } from '@/app/listview/settings/components/popups/delete-data-confirmation'
+import { PurgeVrchatFavoritesDialog } from '@/app/listview/settings/components/popups/purge-vrchat-favorites-dialog'
+import { ImportFavoritesFromAccountDialog } from '@/app/listview/settings/components/popups/import-favorites-from-account-dialog'
+import { ExportPopup } from './components/popups/export'
+import { useSettingsPage } from './hook'
+import { SidebarTrigger } from '@/components/ui/sidebar'
 
 export default function SettingsPage() {
+  const [showImportFavoritesDialog, setShowImportFavoritesDialog] =
+    useState(false)
   const {
     cardSize,
     language,
     folderRemovalPreference,
-    updateChannel,
+    fieldVisibility,
     showDeleteConfirm,
     setShowDeleteConfirm,
     showMigrateDialog,
@@ -44,25 +51,29 @@ export default function SettingsPage() {
     setShowRestoreDialog,
     showExportDialog,
     setShowExportDialog,
+    showPurgeFavoritesDialog,
+    setShowPurgeFavoritesDialog,
     handleExportConfirm,
     handleBackup,
     handleRestoreConfirm,
     handleMigrationConfirm,
     handleDeleteConfirm,
     handleLogout,
-    handleOpenLogs,
     handleThemeChange,
     handleLanguageChange,
     handleCardSizeChange,
+    handleFieldVisibilityChange,
     handleFolderRemovalPreferenceChange,
-    handleUpdateChannelChange,
     openHiddenFolder,
     t,
-  } = useSettingsPage();
+  } = useSettingsPage()
 
   return (
     <div className="container max-w-4xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold">{t('general:settings')}</h1>
+      <div className="flex items-center gap-2">
+        <SidebarTrigger className="h-10 w-10 shrink-0" />
+        <h1 className="text-2xl font-bold">{t('general:settings')}</h1>
+      </div>
       <Tabs defaultValue="preferences" className="w-full">
         <div className="sticky top-0 z-10 bg-background pt-2 pb-2">
           <TabsList className="grid grid-cols-3">
@@ -159,6 +170,7 @@ export default function SettingsPage() {
             </div>
             <WorldCardPreview
               size={cardSize || 'Normal'}
+              fieldVisibility={fieldVisibility}
               world={{
                 worldId: '1',
                 name: t('settings-page:preview-world'),
@@ -174,6 +186,23 @@ export default function SettingsPage() {
                 capacity: 16,
               }}
             />
+          </Card>
+
+          <Card className="flex flex-col items-start justify-between space-y-3 p-4 rounded-lg border">
+            <div className="flex flex-col space-y-1.5">
+              <Label className="text-base font-medium">
+                {t('settings-page:world-card-fields')}
+              </Label>
+              <div className="text-sm text-muted-foreground">
+                {t('settings-page:world-card-fields-description')}
+              </div>
+            </div>
+            <div className="w-full">
+              <WorldCardFieldToggles
+                value={fieldVisibility}
+                onChange={handleFieldVisibilityChange}
+              />
+            </div>
           </Card>
         </TabsContent>
 
@@ -251,6 +280,27 @@ export default function SettingsPage() {
           <Card className="flex flex-row items-center justify-between p-4 rounded-lg border">
             <div className="flex flex-col space-y-1.5">
               <Label className="text-base font-medium">
+                {t('settings-page:import-favorites-title')}
+              </Label>
+              <div className="text-sm text-muted-foreground">
+                {t('settings-page:import-favorites-description')}
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setShowImportFavoritesDialog(true)}
+              className="gap-2"
+            >
+              <Users className="h-4 w-4" />
+              <span className="text-sm">
+                {t('settings-page:import-favorites-button')}
+              </span>
+            </Button>
+          </Card>
+
+          <Card className="flex flex-row items-center justify-between p-4 rounded-lg border">
+            <div className="flex flex-col space-y-1.5">
+              <Label className="text-base font-medium">
                 {t('settings-page:data-migration-title')}
               </Label>
               <div className="text-sm text-muted-foreground">
@@ -283,6 +333,27 @@ export default function SettingsPage() {
               <Trash2 className="h-4 w-4" />
               <span className="text-sm">
                 {t('settings-page:delete-all-data')}
+              </span>
+            </Button>
+          </Card>
+
+          <Card className="flex flex-row items-center justify-between p-4 rounded-lg border border-destructive bg-destructive/5">
+            <div className="flex flex-col space-y-1.5">
+              <Label className="text-base font-medium">
+                {t('settings-page:purge-favorites-title')}
+              </Label>
+              <div className="text-sm text-muted-foreground">
+                {t('settings-page:purge-favorites-description')}
+              </div>
+            </div>
+            <Button
+              variant="destructive"
+              onClick={() => setShowPurgeFavoritesDialog(true)}
+              className="gap-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="text-sm">
+                {t('settings-page:purge-favorites-button')}
               </span>
             </Button>
           </Card>
@@ -326,54 +397,6 @@ export default function SettingsPage() {
           <Card className="flex flex-row items-center justify-between p-4 rounded-lg border">
             <div className="flex flex-col space-y-1.5">
               <Label className="text-base font-medium">
-                {t('settings-page:logs-title')}
-              </Label>
-              <div className="text-sm text-muted-foreground">
-                {t('settings-page:logs-description')}
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              onClick={handleOpenLogs}
-              className="gap-2"
-            >
-              <FolderOpen className="h-4 w-4" />
-              <span className="text-sm">{t('general:open-folder')}</span>
-            </Button>
-          </Card>
-
-          <Card className="flex flex-row items-center justify-between p-4 rounded-lg border">
-            <div className="flex flex-col space-y-1.5">
-              <Label className="text-base font-medium">
-                {t('settings-page:update-channel-title')}
-              </Label>
-              <div className="text-sm text-muted-foreground">
-                {t('settings-page:update-channel-description')}
-              </div>
-            </div>
-            <Select
-              value={updateChannel || 'stable'}
-              onValueChange={(value) =>
-                handleUpdateChannelChange(value as UpdateChannel)
-              }
-            >
-              <SelectTrigger className="w-fit px-2">
-                <SelectValue placeholder="Update Channel" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="stable">
-                  {t('settings-page:update-channel-stable')}
-                </SelectItem>
-                <SelectItem value="pre-release">
-                  {t('settings-page:update-channel-prerelease')}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </Card>
-
-          <Card className="flex flex-row items-center justify-between p-4 rounded-lg border">
-            <div className="flex flex-col space-y-1.5">
-              <Label className="text-base font-medium">
                 {t('settings-page:logout-title')}
               </Label>
               <div className="text-sm text-muted-foreground">
@@ -408,6 +431,15 @@ export default function SettingsPage() {
         onOpenChange={setShowDeleteConfirm}
         onConfirm={handleDeleteConfirm}
       />
+      <PurgeVrchatFavoritesDialog
+        open={showPurgeFavoritesDialog}
+        onOpenChange={setShowPurgeFavoritesDialog}
+        onRequestBackup={handleBackup}
+      />
+      <ImportFavoritesFromAccountDialog
+        open={showImportFavoritesDialog}
+        onOpenChange={setShowImportFavoritesDialog}
+      />
     </div>
-  );
+  )
 }

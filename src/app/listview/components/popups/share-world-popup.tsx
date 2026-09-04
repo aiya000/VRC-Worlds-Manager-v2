@@ -1,25 +1,22 @@
-import React from 'react';
-import { useLocalization } from '@/hooks/use-localization';
-import { info, error } from '@tauri-apps/plugin-log';
-import { Copy, Twitter } from 'lucide-react';
-import { open as openUrl } from '@tauri-apps/plugin-shell';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useLocalization } from '@/hooks/use-localization'
+import { Copy, Twitter } from 'lucide-react'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '../../../../components/ui/dialog';
+} from '../../../../components/ui/dialog'
 
 interface ShareWorldPopupProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  worldId: string;
-  worldName: string;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  worldId: string
+  worldName: string
 }
 
 export function ShareWorldPopup({
@@ -28,48 +25,50 @@ export function ShareWorldPopup({
   worldId,
   worldName,
 }: ShareWorldPopupProps) {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
 
-  const worldUrl = `https://vrchat.com/home/world/${worldId}`;
+  const worldUrl = `https://vrchat.com/home/world/${worldId}`
 
-  const shareText = t('share-world:share-text', worldName, worldUrl);
+  const shareText = t('share-world:share-text', worldName, worldUrl)
 
-  const tweetText = t('share-world:twitter-text', worldName, worldUrl);
+  const tweetText = t('share-world:twitter-text', worldName, worldUrl)
 
-  const tweetIntentUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+  const tweetIntentUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}`
 
   // Handler to copy the world URL to clipboard
   const handleCopyUrl = async () => {
     try {
-      await navigator.clipboard.writeText(worldUrl);
-      info('Copied world URL to clipboard');
-      toast.success(t('share-world:toast-url-copied', worldName));
-      onOpenChange(false);
+      await navigator.clipboard.writeText(worldUrl)
+      console.info('Copied world URL to clipboard')
+      toast.success(t('share-world:toast-url-copied', worldName))
+      onOpenChange(false)
     } catch (e) {
-      error(`Clipboard copy failed: ${e}`);
+      console.error(`Clipboard copy failed: ${e}`)
     }
-  };
+  }
 
   const handleCopyText = async () => {
     try {
-      await navigator.clipboard.writeText(shareText);
-      info('Copied share text to clipboard');
-      toast.success(t('share-world:toast-share-text-copied', worldName));
-      onOpenChange(false);
+      await navigator.clipboard.writeText(shareText)
+      console.info('Copied share text to clipboard')
+      toast.success(t('share-world:toast-share-text-copied', worldName))
+      onOpenChange(false)
     } catch (e) {
-      error(`Clipboard copy failed: ${e}`);
+      console.error(`Clipboard copy failed: ${e}`)
     }
-  };
+  }
   const handleTweetShare = async () => {
-    if (!tweetIntentUrl) return;
-    try {
-      await openUrl(tweetIntentUrl);
-      toast.success(t('share-world:toast-twitter-opened', worldName));
-      onOpenChange(false);
-    } catch (e) {
-      error(`Twitter share failed: ${e}`);
+    if (!tweetIntentUrl) {
+      return
     }
-  };
+    try {
+      window.open(tweetIntentUrl, '_blank')
+      toast.success(t('share-world:toast-twitter-opened', worldName))
+      onOpenChange(false)
+    } catch (e) {
+      console.error(`Twitter share failed: ${e}`)
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -124,5 +123,5 @@ export function ShareWorldPopup({
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

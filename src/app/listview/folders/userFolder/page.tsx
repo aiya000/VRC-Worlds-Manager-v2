@@ -1,23 +1,23 @@
-'use client';
+'use client'
 
-import { useLocalization } from '@/hooks/use-localization';
-import { Button } from '@/components/ui/button';
-import { Menu, Plus, Share } from 'lucide-react';
+import { useLocalization } from '@/hooks/use-localization'
+import { Button } from '@/components/ui/button'
+import { Menu, Plus, Share } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useSearchParams } from 'next/navigation';
-import WorldFolderPage from '@/app/listview/components/world-folder-page';
-import { usePopupStore } from '../../hook/usePopups/store';
+} from '@/components/ui/dropdown-menu'
+import { useSearchParams } from 'next/navigation'
+import WorldFolderPage from '@/app/listview/components/world-folder-page'
+import { usePopupStore } from '../../hook/usePopups/store'
 
 export default function UserFolder() {
-  const searchParams = useSearchParams();
-  const folderName = searchParams.get('folderName') || '';
-  const { t } = useLocalization();
-  const setPopup = usePopupStore((state) => state.setPopup);
+  const searchParams = useSearchParams()
+  const folderName = searchParams.get('folderName') || ''
+  const { t } = useLocalization()
+  const setPopup = usePopupStore((state) => state.setPopup)
 
   return (
     <WorldFolderPage
@@ -60,5 +60,5 @@ export default function UserFolder() {
         </div>
       )}
     />
-  );
+  )
 }

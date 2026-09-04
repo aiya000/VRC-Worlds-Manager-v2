@@ -1,13 +1,13 @@
-'use client';
+'use client'
 
-import { useLocalization } from '@/hooks/use-localization';
-import { Button } from '@/components/ui/button';
-import { Plus, RefreshCw } from 'lucide-react';
-import WorldFolderPage from '@/app/listview/components/world-folder-page';
-import { SpecialFolders } from '@/types/folders';
+import { useLocalization } from '@/hooks/use-localization'
+import { Button } from '@/components/ui/button'
+import { Plus, RefreshCw } from 'lucide-react'
+import WorldFolderPage from '@/app/listview/components/world-folder-page'
+import { SpecialFolders } from '@/types/folders'
 
 export default function AllWorldsPage() {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
 
   return (
     <WorldFolderPage
@@ -39,5 +39,5 @@ export default function AllWorldsPage() {
         </>
       )}
     />
-  );
+  )
 }

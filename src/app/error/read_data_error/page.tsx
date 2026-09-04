@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import { Suspense } from 'react';
-import { ErrorContent } from './error-content';
+import { Suspense } from 'react'
+import { ErrorContent } from './error-content'
 
 export default function ReadDataErrorPage() {
   return (
@@ -14,5 +14,5 @@ export default function ReadDataErrorPage() {
     >
       <ErrorContent />
     </Suspense>
-  );
+  )
 }

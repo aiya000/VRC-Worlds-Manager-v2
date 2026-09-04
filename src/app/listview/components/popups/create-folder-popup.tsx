@@ -1,90 +1,92 @@
-import { useState, useRef, useEffect } from 'react';
-import { info, error } from '@tauri-apps/plugin-log';
+import { useState, useRef, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useLocalization } from '@/hooks/use-localization';
-import { Label } from '../../../../components/ui/label';
-import { useFolders } from '@/app/listview/hook/use-folders';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { useLocalization } from '@/hooks/use-localization'
+import { Label } from '../../../../components/ui/label'
+import { useFolders } from '@/app/listview/hook/use-folders'
 
 interface CreateFolderDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
 export function CreateFolderDialog({
   open,
   onOpenChange,
 }: CreateFolderDialogProps) {
-  const { t } = useLocalization();
-  const { createFolder } = useFolders();
-  const [folderName, setFolderName] = useState('');
-  const [importUUID, setImportUUID] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const { t } = useLocalization()
+  const { createFolder } = useFolders()
+  const [folderName, setFolderName] = useState('')
+  const [importUUID, setImportUUID] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   // separate refs for import vs create inputs
-  const importInputRef = useRef<HTMLInputElement>(null);
-  const createInputRef = useRef<HTMLInputElement>(null);
+  const importInputRef = useRef<HTMLInputElement>(null)
+  const createInputRef = useRef<HTMLInputElement>(null)
 
-  const { importFolder } = useFolders();
+  const { importFolder } = useFolders()
 
   // Separate handlers for import vs create
   const handleImport = async () => {
-    if (!importUUID || !importFolder) return;
-    setIsLoading(true);
-    try {
-      await importFolder(importUUID);
-      setImportUUID('');
-      onOpenChange(false);
-    } catch (e) {
-      error(`Failed to import folder: ${e}`);
-    } finally {
-      setIsLoading(false);
+    if (!importUUID || !importFolder) {
+      return
     }
-  };
+    setIsLoading(true)
+    try {
+      await importFolder(importUUID)
+      setImportUUID('')
+      onOpenChange(false)
+    } catch (e) {
+      console.error(`Failed to import folder: ${e}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleCreate = async () => {
-    if (!folderName) return;
-    setIsLoading(true);
-    try {
-      await createFolder(folderName);
-      setFolderName('');
-      onOpenChange(false);
-    } catch (e) {
-      error(`Failed to create folder: ${e}`);
-    } finally {
-      setIsLoading(false);
+    if (!folderName) {
+      return
     }
-  };
+    setIsLoading(true)
+    try {
+      await createFolder(folderName)
+      setFolderName('')
+      onOpenChange(false)
+    } catch (e) {
+      console.error(`Failed to create folder: ${e}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   // F8/IME support and autofocus only on the "Create" input
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'F8' && document.activeElement === createInputRef.current) {
-        const len = createInputRef.current!.value.length;
+        const len = createInputRef.current!.value.length
         setTimeout(() => {
-          createInputRef.current!.focus();
-          createInputRef.current!.setSelectionRange(len, len);
-        }, 0);
+          createInputRef.current!.focus()
+          createInputRef.current!.setSelectionRange(len, len)
+        }, 0)
       }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   // Auto-focus the "Create" input when the dialog opens
   useEffect(() => {
     if (open) {
       setTimeout(() => {
-        createInputRef.current?.focus();
-      }, 100);
+        createInputRef.current?.focus()
+      }, 100)
     }
-  }, [open]);
+  }, [open])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -135,5 +137,5 @@ export function CreateFolderDialog({
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

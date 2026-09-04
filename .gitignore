@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/playwright-report
+/test-results
 
 # next.js
 /.next/
@@ -36,16 +38,17 @@ yarn-error.log*
 # vercel
 .vercel
 
-# keys
-/src-tauri/.config
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 
-# tauri
-/src-tauri/target
-/src-tauri/bundled
-
 # pnpm
 pnpm-lock.yaml
+
+# Claude Code worktrees and artifacts
+/.claude/worktrees/
+/feature/
+/pr-conversation-summary.md
+
+# npm lock file (using bun.lock instead)
+package-lock.json

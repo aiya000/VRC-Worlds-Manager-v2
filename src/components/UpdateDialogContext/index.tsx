@@ -1,27 +1,27 @@
-'use client';
+'use client'
 
-import { createContext, ReactNode } from 'react';
-import { UpdateDialog } from '../update-dialog';
-import { useUpdateDialogContext } from './hook';
-import { useLocalization } from '@/hooks/use-localization';
-import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { createContext, ReactNode } from 'react'
+import { UpdateDialog } from '../update-dialog'
+import { useUpdateDialogContext } from './hook'
+import { useLocalization } from '@/hooks/use-localization'
+import { Button } from '@/components/ui/button'
+import { X } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export type UpdateDialogContextType = {
-  checkForUpdate: () => Promise<void>;
-};
+  checkForUpdate: () => Promise<void>
+}
 
 export const UpdateDialogContext = createContext<UpdateDialogContextType>({
   checkForUpdate: async () => {},
-});
+})
 
 type Props = {
-  children: ReactNode;
-};
+  children: ReactNode
+}
 
 export const UpdateDialogProvider = ({ children }: Props) => {
-  const { t } = useLocalization();
+  const { t } = useLocalization()
   const {
     updateDialogOpen,
     setUpdateDialogOpen,
@@ -31,7 +31,7 @@ export const UpdateDialogProvider = ({ children }: Props) => {
     startUpdateDownloadingAndOpenDialog,
     dismissUpdateNotification,
     isNotificationClosing,
-  } = useUpdateDialogContext();
+  } = useUpdateDialogContext()
 
   return (
     <UpdateDialogContext.Provider value={{ checkForUpdate }}>
@@ -94,5 +94,5 @@ export const UpdateDialogProvider = ({ children }: Props) => {
         taskId={updateDownloadTaskId}
       />
     </UpdateDialogContext.Provider>
-  );
-};
+  )
+}
