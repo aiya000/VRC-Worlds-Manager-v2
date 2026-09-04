@@ -194,6 +194,30 @@ export default config
 - All metadata should be optimized for static export
 - Use `export const dynamic = "force-static"` for route handlers when using `output: "export"`
 
+## UI Target Environments
+
+This app is meant to be used **while in VR**. When a UI decision trades one environment
+off against another, resolve it in this order:
+
+1. **VR overlays** (XSOverlay and the like) — the primary target
+2. **Phones** — the layout should be genuinely pleasant here, not merely usable
+3. **Desktop with a physical mouse** — important, but it yields to the two above
+
+### What that implies
+
+- **Assume a coarse pointer.** A VR controller aims a laser; there is no precise hover and
+  no reliable drag. Anything that requires pixel-accurate aiming is effectively unusable.
+  Hit targets must be large; a 1px drag handle is not a control
+- **Assume a narrow panel.** An overlay window is small, and the user cannot casually resize
+  it. Nothing may claim a fixed share of the width; panels must be collapsible
+- **Assume text is read at a distance.** Prefer generous type and spacing over density
+- **Do not rely on keyboard shortcuts** as the only way to reach a feature — there is usually
+  no keyboard in VR. They are welcome as an addition
+- Hover-only affordances need a tap-or-click equivalent
+
+Phone and VR pull in the same direction almost everywhere, so a change made for one
+usually serves the other.
+
 ## Testing Changes
 
 ### When Resolving Issues
