@@ -304,9 +304,19 @@ Follow Conventional Commits format:
 
 Always write commit messages in English.
 
+## Git Branching & Release Workflow
+
+- **`develop` branch is the primary working branch**:
+  - Direct pushes and feature PRs should target `develop`.
+- **Do NOT routinely merge into `main` or create PRs targeting `main`**:
+  - The `main` branch represents production releases (e.g. deployed to https://vrchat-worlds-manager-web.pages.dev/ ).
+  - **Only merge `develop` into `main` (via PR) when explicitly instructed by the user** (i.e. when a production release is specifically desired).
+
 ## Remember
 
 1. **Always use Bun, never npm/yarn/pnpm**
 2. **Avoid redundant comments - let code be self-explanatory**
 3. **Test with `bun run typecheck` and `bun run build` before committing**
 4. **This is a static site - ensure all changes work with `output: "export"`**
+5. **Develop on `develop`; never merge to `main` without explicit user instruction**
+
