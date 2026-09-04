@@ -1,5 +1,6 @@
 import { Context, Effect, Layer } from 'effect'
 import { db } from './db'
+import { parseVRChatWorld, toWorldDisplayData } from './vrchat-world'
 import type {
   WorldDetails,
   WorldDisplayData,
@@ -180,7 +181,7 @@ export class VRChatApiService extends Context.Tag('VRChatApiService')<
       twoFactorType: string,
     ) => Effect.Effect<void, Error>
     readonly logout: () => Effect.Effect<void, Error>
-    readonly getFavoriteWorlds: () => Effect.Effect<void, Error>
+    readonly getFavoriteWorlds: () => Effect.Effect<WorldDisplayData[], Error>
     readonly purgeAllFavoriteWorlds: (
       onProgress?: (done: number, total: number) => void,
     ) => Effect.Effect<{ deleted: number; failed: number }, Error>
@@ -289,10 +290,33 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
       catch: (e) => new Error(`Logout failed: ${e}`),
     }),
 
+  // `/worlds/favorites` returns the favorited worlds themselves, so one request
+  // per page is enough. Walking `/favorites` and fetching each world instead
+  // would cost one request per favorite and quickly hit the Worker's hourly
+  // per-IP limit for anyone with a few hundred favorites.
   getFavoriteWorlds: () =>
     Effect.tryPromise({
       try: async () => {
-        await apiFetch('/favorites?type=world&n=100')
+        const PAGE_SIZE = 100
+        const worlds: WorldDisplayData[] = []
+        const fetchedAt = new Date().toISOString()
+        let offset = 0
+        for (;;) {
+          const res = await apiFetch(
+            `/worlds/favorites?n=${PAGE_SIZE}&offset=${offset}`,
+          )
+          const page = (await res.json()) as unknown[]
+          for (const raw of page) {
+            worlds.push(
+              toWorldDisplayData(parseVRChatWorld(raw), fetchedAt, []),
+            )
+          }
+          if (page.length < PAGE_SIZE) {
+            break
+          }
+          offset += PAGE_SIZE
+        }
+        return worlds
       },
       catch: (e) => new Error(`Failed to get favorites: ${e}`),
     }),
@@ -377,7 +401,7 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
     Effect.tryPromise({
       try: async () => {
         const res = await apiFetch(`/worlds/${worldId}`)
-        return (await res.json()) as WorldDetails
+        return parseVRChatWorld(await res.json())
       },
       catch: (e) => new Error(`Failed to get world: ${e}`),
     }),
@@ -386,7 +410,7 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
     Effect.tryPromise({
       try: async () => {
         const res = await apiFetch(`/worlds/${worldId}`)
-        return (await res.json()) as WorldDetails
+        return parseVRChatWorld(await res.json())
       },
       catch: (e) => new Error(`Failed to check world: ${e}`),
     }),
@@ -397,7 +421,10 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
         const res = await apiFetch(
           '/worlds?sort=updated&user=me&releaseStatus=public&n=100',
         )
-        return (await res.json()) as WorldDisplayData[]
+        const fetchedAt = new Date().toISOString()
+        return ((await res.json()) as unknown[]).map((raw) =>
+          toWorldDisplayData(parseVRChatWorld(raw), fetchedAt, []),
+        )
       },
       catch: (e) => new Error(`Failed to get recent worlds: ${e}`),
     }),
@@ -420,7 +447,10 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
           params.set('notag', excludeTags.join(','))
         }
         const res = await apiFetch(`/worlds?${params.toString()}`)
-        return (await res.json()) as WorldDisplayData[]
+        const fetchedAt = new Date().toISOString()
+        return ((await res.json()) as unknown[]).map((raw) =>
+          toWorldDisplayData(parseVRChatWorld(raw), fetchedAt, []),
+        )
       },
       catch: (e) => new Error(`Failed to search worlds: ${e}`),
     }),

@@ -592,8 +592,29 @@ export const commands = {
   async getFavoriteWorlds(): Promise<Result<null, string>> {
     return runVoid(
       Effect.gen(function* () {
-        const svc = yield* VRChatApiService
-        yield* svc.getFavoriteWorlds()
+        const api = yield* VRChatApiService
+        const worlds = yield* WorldService
+        const favorites = yield* api.getFavoriteWorlds()
+
+        // Refreshing must not look like a re-add: a world already known
+        // locally keeps the folders it was filed into and the date it first
+        // appeared, and only its VRChat-owned fields are updated.
+        const stored = yield* worlds.getAllWorlds()
+        const storedByWorldId = new Map(
+          stored.map((world) => [world.worldId, world]),
+        )
+        for (const favorite of favorites) {
+          const existing = storedByWorldId.get(favorite.worldId)
+          yield* worlds.putWorld(
+            existing === undefined
+              ? favorite
+              : {
+                  ...favorite,
+                  dateAdded: existing.dateAdded,
+                  folders: existing.folders,
+                },
+          )
+        }
       }),
     )
   },
