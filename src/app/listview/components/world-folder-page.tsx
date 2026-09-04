@@ -1,7 +1,6 @@
 import React from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { SidebarTrigger } from '@/components/ui/sidebar'
 import { SearchBar } from './searchbar'
 import { WorldGrid } from './world-grid'
 import { WorldGridSkeleton } from './world-grid/skeleton'
@@ -61,7 +60,6 @@ export function WorldFolderPage(props: WorldFolderPageProps) {
       <div ref={gridScrollRef} className="flex-1 flex flex-col overflow-auto">
         <div className="p-4 flex flex-wrap items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
-            <SidebarTrigger className="h-10 w-10 shrink-0" />
             <h1 className="text-xl font-bold truncate">{title}</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">

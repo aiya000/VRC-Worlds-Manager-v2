@@ -59,7 +59,10 @@ export default function AboutSection() {
   return (
     <div className="min-h-svh flex flex-col overflow-x-hidden">
       <div className="flex-1 container mx-auto p-6 space-y-6">
-        <SidebarTrigger className="h-10 w-10 shrink-0" />
+        {/* Pinned so the sidebar stays reachable once the page scrolls. */}
+        <div className="sticky top-0 z-20 -mx-6 bg-background px-6 py-2">
+          <SidebarTrigger className="h-10 w-10 shrink-0" />
+        </div>
         {/* Web Version Header with aiya000 */}
         <Card>
           <CardHeader>
