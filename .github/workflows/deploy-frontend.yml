@@ -25,7 +25,7 @@ jobs:
         env:
           NEXT_PUBLIC_CF_WORKER_URL: https://vrchat-worlds-manager-web-backend.vrchat-worlds-manager-web.workers.dev
       - name: Deploy
-        run: bun run deploy
+        run: bun run deploy -- --branch ${{ github.ref_name }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_FRONTEND }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
