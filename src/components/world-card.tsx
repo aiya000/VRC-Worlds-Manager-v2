@@ -5,6 +5,7 @@ import {
   WorldDisplayData,
 } from '@/lib/commands'
 import { useLocalization } from '@/hooks/use-localization'
+import { formatDateTime } from '@/lib/utils'
 import { usePatreonContext } from '@/contexts/patreon-context'
 import { PlatformIndicator } from './platform-indicator'
 
@@ -24,7 +25,7 @@ interface WorldCardPreviewProps {
 
 export function WorldCardPreview(props: WorldCardPreviewProps) {
   const { size, world, fieldVisibility = defaultFieldVisibility } = props
-  const { t } = useLocalization()
+  const { t, language } = useLocalization()
   const { supporters } = usePatreonContext()
   const isSupporter = supporters.has(world.authorName)
   const sizeClasses: Record<CardSize, string> = {
@@ -116,7 +117,10 @@ export function WorldCardPreview(props: WorldCardPreviewProps) {
             <div className="flex justify-between whitespace-nowrap">
               {fieldVisibility.lastUpdated && (
                 <span className="text-sm text-muted-foreground truncate">
-                  {t('world-card:updated', world.lastUpdated)}
+                  {t(
+                    'world-card:updated',
+                    formatDateTime(world.lastUpdated, language),
+                  )}
                 </span>
               )}
               {fieldVisibility.favorites && (

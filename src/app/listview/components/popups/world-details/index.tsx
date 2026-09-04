@@ -28,6 +28,7 @@ import { GroupInstanceCreator } from './group-instance-creator'
 import { GroupInstanceType, InstanceType } from '@/types/instances'
 import { InstanceRegion } from '@/lib/commands'
 import { useLocalization } from '@/hooks/use-localization'
+import { formatDate, formatDateTime } from '@/lib/utils'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
@@ -97,7 +98,7 @@ export function WorldDetailPopup({
     selectAuthor,
     selectTag,
   } = useWorldDetailsActions(onOpenChange)
-  const { t } = useLocalization()
+  const { t, language } = useLocalization()
   const { folders } = useFolders()
   const { supporters } = usePatreonContext()
   const [isLoading, setIsLoading] = useState(false)
@@ -705,32 +706,21 @@ export function WorldDetailPopup({
                                 {t('general:date-added')}:
                               </div>
                               <div>
-                                {cachedWorldData.dateAdded
-                                  ? (() => {
-                                      const [date, time] =
-                                        cachedWorldData.dateAdded.split('T')
-                                      const timeWithoutMs = time
-                                        ?.split('.')[0]
-                                        ?.replace('Z', '')
-                                      return (
-                                        <>
-                                          {date}
-                                          {timeWithoutMs && (
-                                            <span className="text-gray-500">
-                                              {' '}
-                                              {timeWithoutMs}
-                                            </span>
-                                          )}
-                                        </>
-                                      )
-                                    })()
-                                  : ''}
+                                {formatDateTime(
+                                  cachedWorldData.dateAdded,
+                                  language,
+                                )}
                               </div>
 
                               <div className="text-gray-500">
                                 {t('world-detail:last-updated')}
                               </div>
-                              <div>{cachedWorldData.lastUpdated}</div>
+                              <div>
+                                {formatDateTime(
+                                  cachedWorldData.lastUpdated,
+                                  language,
+                                )}
+                              </div>
                             </div>
                           </div>
                           <div className="mt-1 flex gap-2 flex-wrap">
@@ -1088,11 +1078,10 @@ export function WorldDetailPopup({
                                 {t('world-detail:published')}
                               </div>
                               <div>
-                                {
-                                  new Date(worldDetails.publicationDate)
-                                    .toISOString()
-                                    .split('T')[0]
-                                }
+                                {formatDate(
+                                  worldDetails.publicationDate,
+                                  language,
+                                )}
                               </div>
                             </>
                           )}
@@ -1101,11 +1090,7 @@ export function WorldDetailPopup({
                             {t('world-detail:last-updated')}
                           </div>
                           <div>
-                            {
-                              new Date(worldDetails.lastUpdated)
-                                .toISOString()
-                                .split('T')[0]
-                            }
+                            {formatDateTime(worldDetails.lastUpdated, language)}
                           </div>
                         </div>
                       </div>

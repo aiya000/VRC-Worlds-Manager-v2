@@ -3,10 +3,11 @@ import { useContext } from 'react'
 
 type Props = {
   t: (key: string, ...args: (string | number)[]) => string
+  language: string
 }
 
 export const useLocalization = (): Props => {
-  const { data, fallbackData } = useContext(LocalizationContext)
+  const { data, fallbackData, language } = useContext(LocalizationContext)
 
   const t = (key: string, ...args: (string | number)[]) => {
     const template = data[key] ?? fallbackData[key] ?? key
@@ -22,5 +23,5 @@ export const useLocalization = (): Props => {
     })
   }
 
-  return { t }
+  return { t, language }
 }

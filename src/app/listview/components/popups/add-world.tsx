@@ -15,6 +15,7 @@ import { commands, WorldDetails } from '@/lib/commands'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { WorldCardPreview } from '@/components/world-card'
 import { useLocalization } from '@/hooks/use-localization'
+import { formatDate } from '@/lib/utils'
 import { useWorlds } from '../../hook/use-worlds'
 import { FolderType } from '@/types/folders'
 
@@ -24,7 +25,7 @@ interface AddWorldPopupProps {
 }
 
 export function AddWorldPopup({ onClose, currentFolder }: AddWorldPopupProps) {
-  const { t } = useLocalization()
+  const { t, language } = useLocalization()
   const [worldInput, setWorldInput] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -252,11 +253,10 @@ export function AddWorldPopup({ onClose, currentFolder }: AddWorldPopupProps) {
                               {t('world-detail:published')}
                             </div>
                             <div>
-                              {
-                                new Date(previewWorld.publicationDate)
-                                  .toISOString()
-                                  .split('T')[0]
-                              }
+                              {formatDate(
+                                previewWorld.publicationDate,
+                                language,
+                              )}
                             </div>
                           </>
                         )}
