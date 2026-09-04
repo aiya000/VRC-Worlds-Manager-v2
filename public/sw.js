@@ -9,7 +9,7 @@
  * - Navigation: Network-first
  */
 
-const CACHE_NAME = 'vrcwm-v1'
+const CACHE_NAME = 'vrcww-v1'
 
 /** @type {string[]} */
 const PRECACHE_URLS = ['/', '/icons/app-icon.PNG']

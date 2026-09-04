@@ -1,6 +1,6 @@
 {
   "name": "VRChat Worlds Manager Web",
-  "short_name": "VRCWM",
+  "short_name": "VRCWW",
   "description": "Manage your VRChat worlds with ease",
   "start_url": "/",
   "display": "standalone",
