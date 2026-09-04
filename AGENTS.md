@@ -291,6 +291,21 @@ conflict in `package.json`. (CI does the same thing in its own step.)
 
 Issue names, issue bodies, PR names, and PR bodies must be written in **Japanese**.
 
+### Work that comes from an Issue goes through a Pull Request
+
+When the work you are doing resolves a GitHub Issue, do not commit it straight to
+`develop`:
+
+1. Branch (`feature/`, `fix/`, `chore/`, … as the change warrants)
+2. Open a PR targeting `develop`, referencing the Issue it closes
+3. Merge it yourself once the checks pass
+
+The Issue tracker is how requests are kept; a PR is how each one is answered, so the
+two stay tied together and the history shows which Issue a change came from.
+
+**Work asked for directly in conversation does not need a PR** — commit it to `develop`
+as usual. The rule is about Issues, not about change size.
+
 ## Commit Messages
 
 Follow Conventional Commits format:
@@ -319,4 +334,3 @@ Always write commit messages in English.
 3. **Test with `bun run typecheck` and `bun run build` before committing**
 4. **This is a static site - ensure all changes work with `output: "export"`**
 5. **Develop on `develop`; never merge to `main` without explicit user instruction**
-
