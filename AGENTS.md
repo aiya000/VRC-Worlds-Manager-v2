@@ -242,6 +242,22 @@ tests/
 - Unit and integration tests: `*.test.ts` / `*.test.tsx`
 - E2E tests: `*.spec.ts`
 
+### Running E2E Tests
+
+`bun install` does **not** fetch the browsers Playwright drives — those live in a
+machine-wide cache (`~/.cache/ms-playwright`) and are tied to the Playwright version,
+so run this once, and again after Playwright is upgraded:
+
+```sh
+bunx playwright install chromium
+```
+
+Without it, `bun run test:e2e` fails with `Executable doesn't exist at
+.../chromium_headless_shell-<build>`. That is a missing download, not a version
+conflict in `package.json`. (CI does the same thing in its own step.)
+
+`bun run test:e2e` starts the dev server itself; nothing needs to be running first.
+
 ### When Implementing Features
 
 - When you implement a new feature, **basically always add tests** for it
