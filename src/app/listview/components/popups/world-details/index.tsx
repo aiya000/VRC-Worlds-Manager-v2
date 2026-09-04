@@ -685,7 +685,7 @@ export function WorldDetailPopup({
                             <div className="text-sm font-semibold mb-3">
                               {t('world-detail:details')}
                             </div>
-                            <div className="grid grid-cols-[1fr_1.5fr] sm:grid-cols-[120px_1fr] gap-x-6 gap-y-2 text-sm">
+                            <div className="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-2 text-sm">
                               <div className="text-gray-500">
                                 {t('world-detail:world-name')}:
                               </div>
@@ -789,8 +789,8 @@ export function WorldDetailPopup({
             ) : (
               worldDetails && (
                 <div className="flex flex-col gap-4">
-                  <div className="flex gap-4 py-4">
-                    <div className="w-[60%]">
+                  <div className="flex flex-col gap-4 py-4 sm:flex-row">
+                    <div className="w-full sm:w-[60%]">
                       <div className="h-[220px] relative overflow-hidden rounded-lg mb-4 bg-black">
                         <a
                           href={`https://vrchat.com/home/world/${worldDetails.worldId}`}
@@ -832,7 +832,7 @@ export function WorldDetailPopup({
                         </span>
                       </div>
                     </div>
-                    <div className="w-2/5">
+                    <div className="w-full sm:w-2/5">
                       <div className="space-y-3">
                         <div>
                           <Label className="text-sm font-medium mb-1 block">
@@ -942,8 +942,8 @@ export function WorldDetailPopup({
                     </div>
                   </div>
                   <Separator className="my-4" />
-                  <div className="flex gap-4">
-                    <div className="flex flex-col gap-4 w-2/3">
+                  <div className="flex flex-col gap-4 sm:flex-row">
+                    <div className="flex flex-col gap-4 w-full sm:w-2/3">
                       <div>
                         <div className="text-sm font-semibold mb-2">
                           {t('world-detail:description')}
@@ -1047,13 +1047,16 @@ export function WorldDetailPopup({
                         )}
                       </div>
                     </div>
-                    <Separator orientation="vertical" />
-                    <div className="flex flex-col gap-4 w-1/3">
+                    <Separator
+                      orientation="vertical"
+                      className="hidden sm:block"
+                    />
+                    <div className="flex flex-col gap-4 w-full sm:w-1/3">
                       <div>
                         <div className="text-sm font-semibold mb-2">
                           {t('world-detail:details')}
                         </div>
-                        <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+                        <div className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
                           <div className="text-gray-500">
                             {t('world-detail:visits')}
                           </div>
@@ -1100,8 +1103,8 @@ export function WorldDetailPopup({
                   {!dontSaveToLocal && (
                     <>
                       <Separator className="my-2" />
-                      <div className="flex gap-4">
-                        <div className="w-2/3">
+                      <div className="flex flex-col gap-4 sm:flex-row">
+                        <div className="w-full sm:w-2/3">
                           <div className="text-sm font-semibold mb-2 flex flex-row items-center gap-2">
                             {t('general:memo')}
                             <Button
@@ -1149,8 +1152,11 @@ export function WorldDetailPopup({
                             )}
                           </div>
                         </div>
-                        <Separator orientation="vertical" />
-                        <div className="w-1/3">
+                        <Separator
+                          orientation="vertical"
+                          className="hidden sm:block"
+                        />
+                        <div className="w-full sm:w-1/3">
                           <div className="text-sm font-semibold mb-2 flex items-center gap-2">
                             {t('general:folders')}
                           </div>

@@ -579,7 +579,7 @@ const WelcomePage: React.FC = () => {
               <p className="text-sm text-muted-foreground text-center mb-4">
                 {t('setup-page:ui-description')}
               </p>
-              <div className="flex flex-row justify-between">
+              <div className="flex flex-col gap-6 sm:flex-row sm:justify-between">
                 <div className="flex flex-col items-left space-y-4">
                   <div className="flex flex-col space-y-1">
                     <Label>{t('setup-page:worlds-label')}</Label>
@@ -623,7 +623,7 @@ const WelcomePage: React.FC = () => {
                     onChange={setFieldVisibility}
                   />
                 </div>
-                <div className="max-w-[300px] w-full">
+                <div className="w-full sm:max-w-[300px]">
                   <div className="flex justify-center">
                     <WorldCardPreview
                       size={selectedSize}
