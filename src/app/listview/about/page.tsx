@@ -1,6 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { SidebarTrigger } from '@/components/ui/sidebar'
 import { useLocalization } from '@/hooks/use-localization'
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
@@ -56,8 +57,9 @@ export default function AboutSection() {
   }, [])
 
   return (
-    <div className="min-h-screen flex flex-col overflow-x-hidden">
+    <div className="min-h-svh flex flex-col overflow-x-hidden">
       <div className="flex-1 container mx-auto p-6 space-y-6">
+        <SidebarTrigger className="h-10 w-10 shrink-0" />
         {/* Web Version Header with aiya000 */}
         <Card>
           <CardHeader>

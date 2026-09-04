@@ -99,8 +99,8 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
 
   return (
     <div className="sticky top-0 z-20 bg-background">
-      <div className="p-4 flex items-center gap-4">
-        <div className="flex-1 flex items-center gap-2">
+      <div className="p-4 flex flex-wrap items-center gap-2 sm:gap-4">
+        <div className="flex w-full items-center gap-2 sm:w-auto sm:min-w-[12rem] sm:flex-1">
           <div className="relative flex-1">
             <div className="relative">
               <Input
@@ -109,13 +109,13 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
                 placeholder={t('world-grid:search-placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 pr-10"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 pr-10"
               />
 
               {/* Advanced Search button */}
               <Button
                 variant="ghost"
-                className="absolute right-0 top-1/2 -translate-y-1/2 h-9 w-9 p-0 m-0"
+                className="absolute right-0 top-1/2 -translate-y-1/2 h-10 w-10 p-0 m-0"
                 onClick={() => setPopup('showAdvancedSearchPanel', true)}
               >
                 <TextSearch className="h-4 w-4" />
@@ -124,12 +124,12 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
           </div>
         </div>
 
-        <div className="flex">
+        <div className="flex w-full min-w-0 items-center gap-1 sm:w-auto sm:flex-none">
           <Select
             value={sortField}
             onValueChange={(value) => handleSort(value as SortField)}
           >
-            <SelectTrigger className="w-[180px] h-9">
+            <SelectTrigger className="h-10 min-w-0 flex-1 sm:w-[180px] sm:flex-none">
               <SelectValue placeholder={t('world-grid:sort-placeholder')} />
             </SelectTrigger>
             <SelectContent>
@@ -157,7 +157,7 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
             onClick={() =>
               setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
             }
-            className="h-9 w-9"
+            className="h-10 w-10 shrink-0"
           >
             {sortDirection === 'asc' ? (
               <SortAsc className="h-4 w-4" />
@@ -175,7 +175,7 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
                 toggleSelectionMode()
               }
             }}
-            className="h-9 w-9"
+            className="h-10 w-10 shrink-0"
           >
             {isSelectionMode ? (
               <CheckSquare className="h-4 w-4" />

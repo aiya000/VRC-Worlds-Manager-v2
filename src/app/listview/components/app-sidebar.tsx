@@ -15,7 +15,7 @@ import { useLocalization } from '@/hooks/use-localization'
 
 import { Separator } from '@/components/ui/separator'
 
-import { SidebarGroup } from '@/components/ui/sidebar'
+import { Sidebar, SidebarGroup } from '@/components/ui/sidebar'
 
 import {
   ContextMenu,
@@ -33,8 +33,8 @@ import { usePopupStore } from '../hook/usePopups/store'
 
 const sidebarStyles = {
   container:
-    'flex flex-col h-screen w-full border-r border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60',
-  header: 'flex h-14 items-center px-6',
+    'flex flex-col h-full w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60',
+  header: 'flex min-h-14 shrink-0 items-center px-4',
   nav: 'flex-1 space-y-0.5 p-1 pb-0',
   link: 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent/50 hover:text-accent-foreground',
   activeLink: 'bg-accent/60 text-accent-foreground',
@@ -43,11 +43,7 @@ const sidebarStyles = {
 
 const SIDEBAR_CLASS = 'app-sidebar'
 
-interface AppSidebarProps {
-  sidebarWidth: number
-}
-
-export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
+export function AppSidebar() {
   const { t } = useLocalization()
   const {
     folders,
@@ -197,59 +193,63 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
   }, [editingFolder, isComposing]) // Add isComposing to deps
 
   return (
-    <aside className={cn(sidebarStyles.container, SIDEBAR_CLASS)}>
-      <header className={sidebarStyles.header}>
-        <div className="flex items-center gap-1">
-          <h2 className="text-lg font-semibold">VRC Worlds Manager</h2>
-          <h3 className="text-sm text-muted-foreground">v2</h3>
-        </div>
-      </header>
-      <Separator className="" />
+    <Sidebar
+      collapsible="offcanvas"
+      className="border-r border-border/40 bg-transparent"
+    >
+      <aside className={cn(sidebarStyles.container, SIDEBAR_CLASS)}>
+        <header className={sidebarStyles.header}>
+          <div className="flex items-center gap-1">
+            <h2 className="text-lg font-semibold">VRC Worlds Manager</h2>
+            <h3 className="text-sm text-muted-foreground">v2</h3>
+          </div>
+        </header>
+        <Separator className="" />
 
-      <nav className={sidebarStyles.nav}>
-        <SidebarGroup>
-          <div
-            className={`
+        <nav className={sidebarStyles.nav}>
+          <SidebarGroup>
+            <div
+              className={`
               px-3 py-2 text-sm font-medium rounded-lg cursor-pointer
               overflow-hidden text-ellipsis whitespace-nowrap flex items-center gap-3
               ${pathname === '/listview/folders/special/all' ? sidebarStyles.activeLink : 'hover:bg-accent/50 hover:text-accent-foreground'}
             `}
-            onClick={() => {
-              if (pathname === '/listview/folders/special/all') {
-                return
-              }
-              router.push('/listview/folders/special/all')
-            }}
-          >
-            <SaturnIcon className="h-[18px] w-[18px]" />
-            <span className="text-sm font-medium">
-              {t('general:all-worlds')}
-            </span>
-          </div>
-        </SidebarGroup>
-        <Separator className="my-2" />
-        <SidebarGroup>
-          <div
-            className={`
+              onClick={() => {
+                if (pathname === '/listview/folders/special/all') {
+                  return
+                }
+                router.push('/listview/folders/special/all')
+              }}
+            >
+              <SaturnIcon className="h-[18px] w-[18px]" />
+              <span className="text-sm font-medium">
+                {t('general:all-worlds')}
+              </span>
+            </div>
+          </SidebarGroup>
+          <Separator className="my-2" />
+          <SidebarGroup>
+            <div
+              className={`
               px-3 py-2 text-sm font-medium rounded-lg cursor-pointer
               overflow-hidden text-ellipsis whitespace-nowrap flex items-center gap-3
               ${pathname === '/listview/folders/special/find' ? sidebarStyles.activeLink : 'hover:bg-accent/50 hover:text-accent-foreground'}
             `}
-            onClick={() => {
-              if (pathname === '/listview/folders/special/find') {
-                return
-              }
-              router.push('/listview/folders/special/find')
-            }}
-          >
-            <History className="h-5 w-5" />
-            <span className="text-sm font-medium">
-              {t('general:find-worlds')}
-            </span>
-          </div>
+              onClick={() => {
+                if (pathname === '/listview/folders/special/find') {
+                  return
+                }
+                router.push('/listview/folders/special/find')
+              }}
+            >
+              <History className="h-5 w-5" />
+              <span className="text-sm font-medium">
+                {t('general:find-worlds')}
+              </span>
+            </div>
 
-          <div
-            className={`
+            <div
+              className={`
               px-3 py-2 text-sm font-medium rounded-lg cursor-pointer
               overflow-hidden text-ellipsis whitespace-nowrap flex items-center gap-3
               ${
@@ -258,50 +258,49 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
                   : 'hover:bg-accent/50 hover:text-accent-foreground'
               }
             `}
-            onClick={() => {
-              if (pathname === '/listview/folders/special/unclassified') {
-                return
-              }
-              router.push('/listview/folders/special/unclassified')
-            }}
-          >
-            <FileQuestion className="h-5 w-5" />
-            <span className="text-sm font-medium">
-              {t('general:unclassified-worlds')}
-            </span>
-          </div>
-        </SidebarGroup>
-        <Separator className="my-2" />
-        <SidebarGroup>
-          <div className="px-3 py-2 text-xs font-medium text-muted-foreground">
-            <span className="text-sm font-medium">{t('general:folders')}</span>
-          </div>
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="folders">
-              {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="h-[calc(100vh-417px)] overflow-x-clip overflow-y-scroll no-webview-scroll-bar pl-8"
-                >
-                  {localFolders.map((folder, index) => (
-                    <Draggable
-                      key={folder.name}
-                      draggableId={folder.name}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <ContextMenu>
-                          <ContextMenuTrigger>
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              style={{
-                                width: `${sidebarWidth - 60}px`,
-                              }}
-                              className={`
-                                px-3 py-2 text-sm font-medium rounded-lg cursor-pointer
+              onClick={() => {
+                if (pathname === '/listview/folders/special/unclassified') {
+                  return
+                }
+                router.push('/listview/folders/special/unclassified')
+              }}
+            >
+              <FileQuestion className="h-5 w-5" />
+              <span className="text-sm font-medium">
+                {t('general:unclassified-worlds')}
+              </span>
+            </div>
+          </SidebarGroup>
+          <Separator className="my-2" />
+          <SidebarGroup>
+            <div className="px-3 py-2 text-xs font-medium text-muted-foreground">
+              <span className="text-sm font-medium">
+                {t('general:folders')}
+              </span>
+            </div>
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="folders">
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="h-[calc(100vh-417px)] overflow-x-clip overflow-y-scroll no-webview-scroll-bar pl-8"
+                  >
+                    {localFolders.map((folder, index) => (
+                      <Draggable
+                        key={folder.name}
+                        draggableId={folder.name}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <ContextMenu>
+                            <ContextMenuTrigger>
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className={`
+                                w-full px-3 py-2 text-sm font-medium rounded-lg cursor-pointer
                                 overflow-hidden text-ellipsis whitespace-nowrap flex items-center gap-3
                                 ${
                                   pathname ===
@@ -310,139 +309,139 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
                                     : 'hover:bg-accent/50 hover:text-accent-foreground'
                                 }
                               `}
-                              onClick={() => {
-                                if (
-                                  pathname ===
-                                  `/listview/folders/userFolder?folderName=${folder.name}`
-                                ) {
-                                  return
-                                }
-                                router.push(
-                                  `/listview/folders/userFolder?folderName=${folder.name}`,
-                                )
-                              }}
-                            >
-                              {editingFolder === folder.name ? (
-                                <Input
-                                  ref={inputRef}
-                                  value={newFolderName}
-                                  onChange={(e) =>
-                                    setNewFolderName(e.target.value)
+                                onClick={() => {
+                                  if (
+                                    pathname ===
+                                    `/listview/folders/userFolder?folderName=${folder.name}`
+                                  ) {
+                                    return
                                   }
-                                  onFocus={() => {
-                                    // Clear any pending blur actions
-                                    if (blurTimeoutRef.current) {
-                                      clearTimeout(blurTimeoutRef.current)
-                                      blurTimeoutRef.current = null
+                                  router.push(
+                                    `/listview/folders/userFolder?folderName=${folder.name}`,
+                                  )
+                                }}
+                              >
+                                {editingFolder === folder.name ? (
+                                  <Input
+                                    ref={inputRef}
+                                    value={newFolderName}
+                                    onChange={(e) =>
+                                      setNewFolderName(e.target.value)
                                     }
-                                  }}
-                                  onKeyDown={(e) => {
-                                    // Prevent event bubbling when typing
-                                    e.stopPropagation()
-
-                                    if (
-                                      e.key === 'Enter' &&
-                                      !composingRef.current
-                                    ) {
-                                      e.preventDefault()
-                                      handleRename(folder.name)
-                                    } else if (e.key === 'Escape') {
-                                      e.preventDefault()
-                                      setEditingFolder(null)
-                                      setNewFolderName('')
-                                    }
-                                  }}
-                                  onClick={(e) => {
-                                    // Prevent click from bubbling to parent
-                                    e.preventDefault()
-                                    e.stopPropagation()
-                                  }}
-                                  onCompositionStart={() => {
-                                    composingRef.current = true
-                                    setIsComposing(true)
-                                  }}
-                                  onCompositionEnd={() => {
-                                    composingRef.current = false
-
-                                    // Use a longer timeout for IME operations
-                                    setTimeout(() => {
-                                      if (inputRef.current) {
-                                        const textLength =
-                                          inputRef.current.value.length
-                                        inputRef.current.focus()
-                                        inputRef.current.setSelectionRange(
-                                          textLength,
-                                          textLength,
-                                        )
+                                    onFocus={() => {
+                                      // Clear any pending blur actions
+                                      if (blurTimeoutRef.current) {
+                                        clearTimeout(blurTimeoutRef.current)
+                                        blurTimeoutRef.current = null
                                       }
-                                      setIsComposing(false)
-                                    }, 150)
-                                  }}
-                                  className="h-6 py-0 w-full folder-edit-container" // Ensure no horizontal overflow
-                                  autoFocus={true}
-                                />
-                              ) : (
-                                <span className="flex items-center w-full">
-                                  <span className="font-mono text-xs text-muted-foreground w-10 text-left flex-shrink-0">
-                                    ({folder.world_count})
+                                    }}
+                                    onKeyDown={(e) => {
+                                      // Prevent event bubbling when typing
+                                      e.stopPropagation()
+
+                                      if (
+                                        e.key === 'Enter' &&
+                                        !composingRef.current
+                                      ) {
+                                        e.preventDefault()
+                                        handleRename(folder.name)
+                                      } else if (e.key === 'Escape') {
+                                        e.preventDefault()
+                                        setEditingFolder(null)
+                                        setNewFolderName('')
+                                      }
+                                    }}
+                                    onClick={(e) => {
+                                      // Prevent click from bubbling to parent
+                                      e.preventDefault()
+                                      e.stopPropagation()
+                                    }}
+                                    onCompositionStart={() => {
+                                      composingRef.current = true
+                                      setIsComposing(true)
+                                    }}
+                                    onCompositionEnd={() => {
+                                      composingRef.current = false
+
+                                      // Use a longer timeout for IME operations
+                                      setTimeout(() => {
+                                        if (inputRef.current) {
+                                          const textLength =
+                                            inputRef.current.value.length
+                                          inputRef.current.focus()
+                                          inputRef.current.setSelectionRange(
+                                            textLength,
+                                            textLength,
+                                          )
+                                        }
+                                        setIsComposing(false)
+                                      }, 150)
+                                    }}
+                                    className="h-6 py-0 w-full folder-edit-container" // Ensure no horizontal overflow
+                                    autoFocus={true}
+                                  />
+                                ) : (
+                                  <span className="flex items-center w-full">
+                                    <span className="font-mono text-xs text-muted-foreground w-10 text-left flex-shrink-0">
+                                      ({folder.world_count})
+                                    </span>
+                                    <span className="truncate flex-1 pl-1 cursor-default">
+                                      {folder.name}
+                                    </span>
                                   </span>
-                                  <span className="truncate flex-1 pl-1 cursor-default">
-                                    {folder.name}
-                                  </span>
-                                </span>
-                              )}
-                            </div>
-                          </ContextMenuTrigger>
-                          <ContextMenuContent>
-                            <ContextMenuItem
-                              onClick={() => {
-                                // First set the editing state
-                                setEditingFolder(folder.name)
-                                setNewFolderName(folder.name)
-                                // Use double RAF to ensure DOM has updated and context menu has closed
-                                requestAnimationFrame(() => {
+                                )}
+                              </div>
+                            </ContextMenuTrigger>
+                            <ContextMenuContent>
+                              <ContextMenuItem
+                                onClick={() => {
+                                  // First set the editing state
+                                  setEditingFolder(folder.name)
+                                  setNewFolderName(folder.name)
+                                  // Use double RAF to ensure DOM has updated and context menu has closed
                                   requestAnimationFrame(() => {
-                                    inputRef.current?.focus()
-                                    inputRef.current?.select() // Also select the text for convenience
+                                    requestAnimationFrame(() => {
+                                      inputRef.current?.focus()
+                                      inputRef.current?.select() // Also select the text for convenience
+                                    })
                                   })
-                                })
-                              }}
-                            >
-                              {t('app-sidebar:rename')}
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                              className="text-destructive"
-                              onClick={() => deleteFolder(folder.name)}
-                            >
-                              {t('general:delete')}
-                            </ContextMenuItem>
-                          </ContextMenuContent>
-                        </ContextMenu>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-          <Separator className="my-2" />
-          <div
-            className={`${sidebarStyles.link} cursor-pointer`}
-            onClick={() => {
-              setPopup('showCreateFolder', true)
-            }}
-          >
-            <Plus className="h-5 w-5" />
-            {t('app-sidebar:add-folder')}
-          </div>
-        </SidebarGroup>
-      </nav>
-      <Separator />
-      <footer className={sidebarStyles.footer}>
-        <SidebarGroup>
-          <div
-            className={`
+                                }}
+                              >
+                                {t('app-sidebar:rename')}
+                              </ContextMenuItem>
+                              <ContextMenuItem
+                                className="text-destructive"
+                                onClick={() => deleteFolder(folder.name)}
+                              >
+                                {t('general:delete')}
+                              </ContextMenuItem>
+                            </ContextMenuContent>
+                          </ContextMenu>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+            <Separator className="my-2" />
+            <div
+              className={`${sidebarStyles.link} cursor-pointer`}
+              onClick={() => {
+                setPopup('showCreateFolder', true)
+              }}
+            >
+              <Plus className="h-5 w-5" />
+              {t('app-sidebar:add-folder')}
+            </div>
+          </SidebarGroup>
+        </nav>
+        <Separator />
+        <footer className={sidebarStyles.footer}>
+          <SidebarGroup>
+            <div
+              className={`
               px-3 py-2 cursor-pointer text-sm font-medium rounded-lg overflow-hidden text-ellipsis whitespace-nowrap flex items-center gap-3
               ${
                 pathname === `/listview/about`
@@ -450,18 +449,18 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
                   : 'hover:bg-accent/50 hover:text-accent-foreground'
               }
             `}
-            onClick={() => {
-              if (pathname === `/listview/about`) {
-                return
-              }
-              router.push('/listview/about')
-            }}
-          >
-            <Info className="h-5 w-5" />
-            <span>{t('app-sidebar:about')}</span>
-          </div>
-          <div
-            className={`
+              onClick={() => {
+                if (pathname === `/listview/about`) {
+                  return
+                }
+                router.push('/listview/about')
+              }}
+            >
+              <Info className="h-5 w-5" />
+              <span>{t('app-sidebar:about')}</span>
+            </div>
+            <div
+              className={`
               px-3 py-2 cursor-pointer text-sm font-medium rounded-lg overflow-hidden text-ellipsis whitespace-nowrap flex items-center gap-3
               ${
                 pathname === `/listview/settings`
@@ -469,20 +468,21 @@ export function AppSidebar({ sidebarWidth }: AppSidebarProps) {
                   : 'hover:bg-accent/50 hover:text-accent-foreground'
               }
             `}
-            onClick={() => {
-              if (pathname === `/listview/settings`) {
-                return
-              }
-              router.push('/listview/settings')
-            }}
-          >
-            <div className="h-5 w-5 flex items-center justify-center">
-              <GearIcon className="h-[18px] w-[18px]" />
+              onClick={() => {
+                if (pathname === `/listview/settings`) {
+                  return
+                }
+                router.push('/listview/settings')
+              }}
+            >
+              <div className="h-5 w-5 flex items-center justify-center">
+                <GearIcon className="h-[18px] w-[18px]" />
+              </div>
+              <span>{t('general:settings')}</span>
             </div>
-            <span>{t('general:settings')}</span>
-          </div>
-        </SidebarGroup>
-      </footer>
-    </aside>
+          </SidebarGroup>
+        </footer>
+      </aside>
+    </Sidebar>
   )
 }
