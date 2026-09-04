@@ -454,6 +454,45 @@ const WelcomePage: React.FC = () => {
                     {t('setup-page:migration-description')}
                   </p>
                 </div>
+                <details className="mt-4 rounded-md border p-3">
+                  <summary className="cursor-pointer font-medium">
+                    {t('setup-page:migration-guide-title')}
+                  </summary>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {t('setup-page:migration-guide-description')}
+                  </p>
+                  <div className="mt-3 space-y-3">
+                    {[
+                      [
+                        'https://github.com/user-attachments/assets/efef27df-7228-45bf-a038-9e8e0c03020f',
+                        'setup-page:migration-guide-step-1',
+                      ],
+                      [
+                        'https://github.com/user-attachments/assets/9d7455a6-8dad-499b-a01d-2e6a3d6e2d52',
+                        'setup-page:migration-guide-step-2',
+                      ],
+                      [
+                        'https://github.com/user-attachments/assets/9c0b6a4c-20d7-4f3e-a29d-69b6209236d6',
+                        'setup-page:migration-guide-step-3',
+                      ],
+                    ].map(([src, caption]) => (
+                      <figure key={src}>
+                        <a href={src} target="_blank" rel="noreferrer">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={src}
+                            alt={t(caption)}
+                            className="max-h-40 w-full rounded-md object-contain"
+                            loading="lazy"
+                          />
+                        </a>
+                        <figcaption className="mt-1 text-center text-xs text-muted-foreground">
+                          {t(caption)}
+                        </figcaption>
+                      </figure>
+                    ))}
+                  </div>
+                </details>
 
                 <div className="space-y-4 mt-4">
                   {/* Worlds file selection */}

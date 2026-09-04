@@ -51,4 +51,18 @@ describe('locales', () => {
       )
     }
   })
+
+  it('includes migration guide translations', () => {
+    const locales = readLocaleFiles()
+
+    for (const locale of Object.values(locales)) {
+      expect(locale['setup-page:migration-guide-title']).toBeTruthy()
+      expect(locale['setup-page:migration-guide-description']).toContain(
+        'worlds.json',
+      )
+      expect(locale['setup-page:migration-guide-description']).toContain(
+        'folders.json',
+      )
+    }
+  })
 })
