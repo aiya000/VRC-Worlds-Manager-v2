@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Open the backup folder">
+  <rect width="800" height="450" rx="24" fill="#18181b"/>
+  <rect x="48" y="48" width="704" height="354" rx="16" fill="#27272a"/>
+  <path d="M96 126h170l32 36h406v180H96z" fill="#f59e0b"/>
+  <path d="M96 126h170l32 36H96z" fill="#fbbf24"/>
+  <path d="m410 218 28 28 58-64" fill="none" stroke="#18181b" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="96" y="370" fill="#fafafa" font-family="sans-serif" font-size="28">Open the backup folder</text>
+</svg>

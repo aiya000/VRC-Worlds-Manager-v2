@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useContext } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
@@ -464,24 +465,25 @@ const WelcomePage: React.FC = () => {
                   <div className="mt-3 space-y-3">
                     {[
                       [
-                        'https://github.com/user-attachments/assets/efef27df-7228-45bf-a038-9e8e0c03020f',
+                        '/migration-guide/step-1.svg',
                         'setup-page:migration-guide-step-1',
                       ],
                       [
-                        'https://github.com/user-attachments/assets/9d7455a6-8dad-499b-a01d-2e6a3d6e2d52',
+                        '/migration-guide/step-2.svg',
                         'setup-page:migration-guide-step-2',
                       ],
                       [
-                        'https://github.com/user-attachments/assets/9c0b6a4c-20d7-4f3e-a29d-69b6209236d6',
+                        '/migration-guide/step-3.svg',
                         'setup-page:migration-guide-step-3',
                       ],
                     ].map(([src, caption]) => (
                       <figure key={src}>
-                        <a href={src} target="_blank" rel="noreferrer">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
+                        <a href={src} target="_blank" rel="noopener noreferrer">
+                          <Image
                             src={src}
                             alt={t(caption)}
+                            width={800}
+                            height={450}
                             className="max-h-40 w-full rounded-md object-contain"
                             loading="lazy"
                           />

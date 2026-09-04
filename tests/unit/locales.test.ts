@@ -63,6 +63,9 @@ describe('locales', () => {
       expect(locale['setup-page:migration-guide-description']).toContain(
         'folders.json',
       )
+      expect(locale['setup-page:migration-guide-step-1']).toBeTruthy()
+      expect(locale['setup-page:migration-guide-step-2']).toBeTruthy()
+      expect(locale['setup-page:migration-guide-step-3']).toBeTruthy()
     }
   })
 })
