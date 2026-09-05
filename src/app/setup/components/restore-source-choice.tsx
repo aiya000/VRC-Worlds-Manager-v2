@@ -19,6 +19,15 @@ const CHOICES: {
   titleKey: string
   descriptionKey: string
 }[] = [
+  // First because it is the commonest answer, and because the three below it
+  // each ask "do you have X?" -- someone who has none of them should not have
+  // to read all three to find that out.
+  {
+    source: 'fresh',
+    icon: <Sparkles className="h-6 w-6" />,
+    titleKey: 'setup-page:restore-source-fresh-title',
+    descriptionKey: 'setup-page:restore-source-fresh-description',
+  },
   {
     source: 'v2',
     icon: <HardDriveDownload className="h-6 w-6" />,
@@ -36,12 +45,6 @@ const CHOICES: {
     icon: <FolderOpen className="h-6 w-6" />,
     titleKey: 'setup-page:restore-source-backup-title',
     descriptionKey: 'setup-page:restore-source-backup-description',
-  },
-  {
-    source: 'fresh',
-    icon: <Sparkles className="h-6 w-6" />,
-    titleKey: 'setup-page:restore-source-fresh-title',
-    descriptionKey: 'setup-page:restore-source-fresh-description',
   },
 ]
 
