@@ -336,6 +336,22 @@ Always write commit messages in English.
 - **Do NOT routinely merge into `main` or create PRs targeting `main`**:
   - The `main` branch represents production releases (e.g. deployed to https://vrchat-worlds-manager-web.pages.dev/ ).
   - **Only merge `develop` into `main` (via PR) when explicitly instructed by the user** (i.e. when a production release is specifically desired).
+- **Do not pass `--delete-branch` when merging a release PR** — the head branch is `develop`, and deleting it would remove the primary working branch.
+
+### Releases are announced through GitHub Releases
+
+After a release PR lands on `main`, tag the release and publish GitHub Release notes:
+
+```sh
+git tag v<version>
+git push origin v<version>
+gh release create v<version> --title 'v<version>' --notes '<what users should know>'
+```
+
+The release notes are the app's user-facing changelog — the About page links to
+https://github.com/aiya000/VRChat-Worlds-Manager-Web/releases and the app ships no
+changelog of its own. Write the notes for users, not for developers: what changed
+that they will notice, not every commit.
 
 ## Remember
 

@@ -26,7 +26,6 @@ import type {
   GroupInstancePermissionInfo,
   InstanceInfo,
   InstanceRegion,
-  LocalizedChanges,
   PatreonData,
   PatreonVRChatNames,
   PreviousMetadata,
@@ -110,15 +109,6 @@ export const commands = {
     )
   },
 
-  async getChangelog(): Promise<Result<LocalizedChanges[], string>> {
-    return run(
-      Effect.gen(function* () {
-        const svc = yield* ExternalDataService
-        return yield* svc.getChangelog()
-      }),
-    )
-  },
-
   async getTaskStatus(id: string): Promise<Result<TaskStatus, string>> {
     return run(
       Effect.gen(function* () {
@@ -144,22 +134,6 @@ export const commands = {
         return yield* svc.getTaskError(id)
       }),
     )
-  },
-
-  async checkForUpdate(): Promise<Result<boolean, string>> {
-    return { status: 'ok', data: false }
-  },
-
-  async downloadUpdate(): Promise<Result<string, string>> {
-    return { status: 'ok', data: '' }
-  },
-
-  async installUpdate(): Promise<Result<null, string>> {
-    return { status: 'ok', data: null }
-  },
-
-  async doNotNotifyUpdate(): Promise<Result<boolean, string>> {
-    return { status: 'ok', data: true }
   },
 
   async addWorldToFolder(
@@ -516,14 +490,6 @@ export const commands = {
         yield* svc.setFolderRemovalPreference(dontShowRemoveFromFolder)
       }),
     )
-  },
-
-  async getUpdateChannel(): Promise<Result<string, string>> {
-    return { status: 'ok', data: 'stable' }
-  },
-
-  async setUpdateChannel(_channel: string): Promise<Result<null, string>> {
-    return { status: 'ok', data: null }
   },
 
   async getSortPreferences(): Promise<Result<[string, string], string>> {
@@ -1075,37 +1041,6 @@ export const events = {
       )
     },
   },
-  updateProgress: {
-    listen: (
-      cb: (event: { payload: { progress: number } }) => void,
-    ): (() => void) => {
-      const handler = (e: Event) => {
-        cb({ payload: (e as CustomEvent).detail })
-      }
-      eventTarget.addEventListener('updateProgress', handler)
-      return () => {
-        eventTarget.removeEventListener('updateProgress', handler)
-      }
-    },
-    once: (
-      cb: (event: { payload: { progress: number } }) => void,
-    ): (() => void) => {
-      const handler = (e: Event) => {
-        cb({ payload: (e as CustomEvent).detail })
-      }
-      eventTarget.addEventListener('updateProgress', handler, {
-        once: true,
-      })
-      return () => {
-        eventTarget.removeEventListener('updateProgress', handler)
-      }
-    },
-    emit: (payload: { progress: number }): void => {
-      eventTarget.dispatchEvent(
-        new CustomEvent('updateProgress', { detail: payload }),
-      )
-    },
-  },
 }
 
 // Re-export all types for compatibility
@@ -1124,15 +1059,12 @@ export type {
   GroupRole,
   InstanceInfo,
   InstanceRegion,
-  LocalizedChanges,
   PatreonData,
   PatreonVRChatNames,
   Platform,
   PreviousMetadata,
   TaskStatus,
   TaskStatusChanged,
-  UpdateChannel,
-  UpdateProgress,
   UserGroup,
   WorldBlacklist,
   WorldCardFieldVisibility,

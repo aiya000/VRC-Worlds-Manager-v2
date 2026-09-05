@@ -97,14 +97,6 @@ export type InstanceInfo = {
 
 export type InstanceRegion = 'us' | 'use' | 'eu' | 'jp'
 
-export type LocalizedChanges = {
-  version: string
-  pre_release: boolean
-  features: string[]
-  fixes: string[]
-  others: string[]
-}
-
 export type PatreonData = {
   platinumSupporter: string[]
   goldSupporter: string[]
@@ -135,10 +127,6 @@ export type PreviousMetadata = {
 export type TaskStatus = 'Running' | 'Completed' | 'Cancelled' | 'Failed'
 
 export type TaskStatusChanged = { id: string; status: TaskStatus }
-
-export type UpdateChannel = 'stable' | 'pre-release'
-
-export type UpdateProgress = { progress: number }
 
 export type UserGroup = {
   id: string
