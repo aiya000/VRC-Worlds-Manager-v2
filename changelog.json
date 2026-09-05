@@ -1,5 +1,131 @@
 [
   {
+    "version": "2.1.0",
+    "features": [
+      {
+        "text": "Added a page for putting folders in order, reachable from beside the Folders heading",
+        "langs": [
+          {
+            "lang": ["ja-JP"],
+            "text": "フォルダを並び替えるページを追加（サイドバーの「フォルダ」見出しの横から開けます）"
+          }
+        ]
+      },
+      {
+        "text": "The fields shown under Details on a world can now be turned off individually",
+        "langs": [
+          {
+            "lang": ["ja-JP"],
+            "text": "ワールド詳細の「詳細」に表示する項目を、個別に選べるようにしました"
+          }
+        ]
+      },
+      {
+        "text": "The instance type chosen when creating an instance is remembered for next time",
+        "langs": [
+          {
+            "lang": ["ja-JP"],
+            "text": "「インスタンスを作成」で選んだインスタンスタイプを記憶するようにしました"
+          }
+        ]
+      }
+    ],
+    "fixes": [
+      {
+        "text": "The folder list in the sidebar now scrolls instead of running off the bottom, and dragging a row no longer reorders folders by accident",
+        "langs": [
+          {
+            "lang": ["ja-JP"],
+            "text": "サイドバーのフォルダ一覧が画面外にはみ出さずスクロールするようになり、行をドラッグしても並び替えが暴発しなくなりました"
+          }
+        ]
+      },
+      {
+        "text": "The bottom of the sidebar is no longer hidden behind the browser's URL bar",
+        "langs": [
+          {
+            "lang": ["ja-JP"],
+            "text": "サイドバーの下部がブラウザのURLバーに隠れなくなりました"
+          }
+        ]
+      },
+      {
+        "text": "A rejected two-factor code is reported as such instead of showing the raw API error",
+        "langs": [
+          {
+            "lang": ["ja-JP"],
+            "text": "2要素認証のコードが誤っているときに、生のAPIエラーではなく分かりやすい案内を出すようにしました"
+          }
+        ]
+      },
+      {
+        "text": "Fixed layouts that broke on a phone because of fixed widths and heights",
+        "langs": [
+          {
+            "lang": ["ja-JP"],
+            "text": "固定の幅や高さのせいでスマホで崩れていた表示を修正しました"
+          }
+        ]
+      },
+      {
+        "text": "The selection checkbox is now visible against any thumbnail",
+        "langs": [
+          {
+            "lang": ["ja-JP"],
+            "text": "選択用のチェックボックスが、どのサムネイルの上でも見えるようにしました"
+          }
+        ]
+      },
+      {
+        "text": "The sidebar button stays on screen while scrolling",
+        "langs": [
+          {
+            "lang": ["ja-JP"],
+            "text": "スクロールしてもサイドバーを開くボタンが画面に残るようにしました"
+          }
+        ]
+      },
+      {
+        "text": "The service worker failed to install because it preloaded a file that does not exist, so none of the offline caching was running",
+        "langs": [
+          {
+            "lang": ["ja-JP"],
+            "text": "存在しないファイルを事前読み込みしていたためService Workerのインストールが失敗し、オフラインキャッシュが全く動いていなかった問題を修正しました"
+          }
+        ]
+      }
+    ],
+    "others": [
+      {
+        "text": "New site and PWA icons of this project's own",
+        "langs": [
+          {
+            "lang": ["ja-JP"],
+            "text": "サイトアイコンとPWAアイコンを、このプロジェクト独自のものに差し替えました"
+          }
+        ]
+      },
+      {
+        "text": "The source code and Discord links now point at this project",
+        "langs": [
+          {
+            "lang": ["ja-JP"],
+            "text": "「ソースコード」とDiscordのリンクを、このプロジェクトのものに更新しました"
+          }
+        ]
+      },
+      {
+        "text": "The app names itself VRChat Worlds Manager Web where it refers to itself",
+        "langs": [
+          {
+            "lang": ["ja-JP"],
+            "text": "アプリが自分自身を名乗る箇所を VRChat Worlds Manager Web に統一しました"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.3.1",
     "fixes": [
       {
