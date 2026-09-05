@@ -1071,23 +1071,6 @@ export const commands = {
     )
   },
 
-  async exportToPortalLibrarySystem(
-    folders: string[],
-    sortField: string,
-    sortDirection: string,
-  ): Promise<Result<null, string>> {
-    return runVoid(
-      Effect.gen(function* () {
-        const svc = yield* BackupService
-        yield* svc.exportToPortalLibrarySystem(
-          folders,
-          sortField,
-          sortDirection,
-        )
-      }),
-    )
-  },
-
   async migrateDataFromFiles(
     worldsFile: File,
     foldersFile: File,

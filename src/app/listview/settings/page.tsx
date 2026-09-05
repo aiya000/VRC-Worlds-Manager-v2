@@ -18,15 +18,7 @@ import { WorldDetailFieldToggles } from '@/components/world-detail-field-toggles
 import { WorldDetailPreview } from '@/components/world-detail-preview'
 
 import { FolderRemovalPreference } from '@/lib/commands'
-import {
-  LogOut,
-  Trash2,
-  Upload,
-  FolderOpen,
-  Save,
-  FolderUp,
-  Users,
-} from 'lucide-react'
+import { LogOut, Trash2, Upload, FolderOpen, Save, Users } from 'lucide-react'
 import { useState } from 'react'
 import { Card } from '../../../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -35,7 +27,6 @@ import { MigrationPopup } from '@/app/listview/settings/components/popups/migrat
 import { DeleteDataConfirmationDialog } from '@/app/listview/settings/components/popups/delete-data-confirmation'
 import { PurgeVrchatFavoritesDialog } from '@/app/listview/settings/components/popups/purge-vrchat-favorites-dialog'
 import { ImportFavoritesFromAccountDialog } from '@/app/listview/settings/components/popups/import-favorites-from-account-dialog'
-import { ExportPopup } from './components/popups/export'
 import { useSettingsPage } from './hook'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 
@@ -54,11 +45,8 @@ export default function SettingsPage() {
     setShowMigrateDialog,
     showRestoreDialog,
     setShowRestoreDialog,
-    showExportDialog,
-    setShowExportDialog,
     showPurgeFavoritesDialog,
     setShowPurgeFavoritesDialog,
-    handleExportConfirm,
     handleBackup,
     handleRestoreConfirm,
     handleMigrationConfirm,
@@ -344,25 +332,6 @@ export default function SettingsPage() {
           <Card className="flex flex-row items-center justify-between p-4 rounded-lg border">
             <div className="flex flex-col space-y-1.5">
               <Label className="text-base font-medium">
-                {t('settings-page:export-title')}
-              </Label>
-              <div className="text-sm text-muted-foreground">
-                {t('settings-page:export-description')}
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => setShowExportDialog(true)}
-              className="gap-2"
-            >
-              <FolderUp className="h-4 w-4" />
-              <span className="text-sm">{t('settings-page:export-data')}</span>
-            </Button>
-          </Card>
-
-          <Card className="flex flex-row items-center justify-between p-4 rounded-lg border">
-            <div className="flex flex-col space-y-1.5">
-              <Label className="text-base font-medium">
                 {t('settings-page:import-favorites-title')}
               </Label>
               <div className="text-sm text-muted-foreground">
@@ -509,11 +478,6 @@ export default function SettingsPage() {
         open={showRestoreDialog}
         onOpenChange={setShowRestoreDialog}
         onConfirm={handleRestoreConfirm}
-      />
-      <ExportPopup
-        open={showExportDialog}
-        onOpenChange={setShowExportDialog}
-        onConfirm={handleExportConfirm}
       />
       <MigrationPopup
         open={showMigrateDialog}
