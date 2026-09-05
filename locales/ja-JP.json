@@ -340,7 +340,7 @@
   "settings-page:error-save-preferences": "設定の保存に失敗しました",
   "settings-page:select-backup-directory": "バックアップ場所を選択",
   "settings-page:select-restore-directory": "復元するバックアップを選択",
-  "settings-page:restore-backup-description": "バックアップを選択してワールドとフォルダを復元します",
+  "settings-page:restore-backup-description": "バックアップを選択して、ワールドとフォルダを取り込みます",
   "settings-page:backup-location": "バックアップ場所",
   "settings-page:select-backup": "バックアップを選択",
   "settings-page:loading-backup-info": "バックアップ情報を読み込み中...",
@@ -525,5 +525,12 @@
   "export-popup:sort-order": "並び順",
   "stale-bundle:title": "新しいバージョンがあります",
   "stale-bundle:description": "このページは古いバージョンのままです。保存されているデータは新しい形式に更新されているため、再読み込みが必要です。",
-  "stale-bundle:reload": "再読み込み"
+  "stale-bundle:reload": "再読み込み",
+  "settings-page:restore-mode-merge": "取り込む",
+  "settings-page:restore-mode-merge-description": "バックアップの内容を、今のデータに足します。今あるものは消えません。",
+  "settings-page:restore-mode-replace": "置き換える",
+  "settings-page:restore-mode-replace-description": "今のデータをすべて捨てて、バックアップの内容にします。",
+  "settings-page:restore-mode-label": "取り込み方",
+  "settings-page:merge-success-description": "バックアップの内容を取り込みました。",
+  "settings-page:error-unreadable-backup": "このファイルはこのアプリのバックアップではないようです。"
 }

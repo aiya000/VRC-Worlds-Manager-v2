@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useLocalization } from '@/hooks/use-localization'
 import { commands } from '@/lib/commands'
+import type { RestoreMode } from '@/lib/services/backup-service'
+import { cn } from '@/lib/utils'
 import { FolderOpen } from 'lucide-react'
 import { Calendar, Info, AlertTriangle, Loader2, Folder } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -25,7 +27,7 @@ interface BackupMetadata {
 interface RestoreBackupDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onConfirm: (file: File) => Promise<void>
+  onConfirm: (file: File, mode: RestoreMode) => Promise<void>
 }
 
 export function RestoreBackupDialog({
@@ -38,6 +40,9 @@ export function RestoreBackupDialog({
   const [metadata, setMetadata] = useState<BackupMetadata | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  // Merging is the default because it cannot destroy anything; replacing is
+  // there for when that is genuinely what someone wants.
+  const [mode, setMode] = useState<RestoreMode>('merge')
 
   const handleDateConversion = (dateString: string) => {
     const dateParts = dateString.split('_')
@@ -92,9 +97,10 @@ export function RestoreBackupDialog({
       return
     }
     try {
-      await onConfirm(selectedFile)
+      await onConfirm(selectedFile, mode)
       setSelectedFile(null)
       setMetadata(null)
+      setMode('merge')
       onOpenChange(false)
     } catch (_e) {
       // Error handling is done in the parent component
@@ -182,19 +188,50 @@ export function RestoreBackupDialog({
                 </div>
               </div>
 
-              <div className="bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 rounded-md p-4 flex items-start">
-                <AlertTriangle className="h-5 w-5 text-amber-500 mr-3 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-amber-800 dark:text-amber-300">
-                    {t('settings-page:warning')}
-                  </h4>
-                  <p className="text-sm text-amber-700 dark:text-amber-400">
-                    {t('settings-page:warning-text-1')}
-                    <br />
-                    {t('settings-page:warning-text-2')}
-                  </p>
-                </div>
+              <div className="space-y-2">
+                <span className="text-sm font-medium">
+                  {t('settings-page:restore-mode-label')}
+                </span>
+                {/* Two large targets rather than radio buttons: this is aimed
+                    at with a VR controller's laser as often as with a mouse. */}
+                {(['merge', 'replace'] as const).map((candidate) => (
+                  <button
+                    key={candidate}
+                    type="button"
+                    aria-pressed={mode === candidate}
+                    onClick={() => setMode(candidate)}
+                    className={cn(
+                      'w-full rounded-md border p-3 text-left',
+                      mode === candidate
+                        ? 'border-primary bg-primary/10'
+                        : 'border-input',
+                    )}
+                  >
+                    <span className="block font-medium">
+                      {t(`settings-page:restore-mode-${candidate}`)}
+                    </span>
+                    <span className="block text-sm text-muted-foreground">
+                      {t(`settings-page:restore-mode-${candidate}-description`)}
+                    </span>
+                  </button>
+                ))}
               </div>
+
+              {mode === 'replace' && (
+                <div className="bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 rounded-md p-4 flex items-start">
+                  <AlertTriangle className="h-5 w-5 text-amber-500 mr-3 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-amber-800 dark:text-amber-300">
+                      {t('settings-page:warning')}
+                    </h4>
+                    <p className="text-sm text-amber-700 dark:text-amber-400">
+                      {t('settings-page:warning-text-1')}
+                      <br />
+                      {t('settings-page:warning-text-2')}
+                    </p>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -206,7 +243,7 @@ export function RestoreBackupDialog({
             onClick={handleConfirm}
             className="bg-primary"
           >
-            {t('settings-page:restore-confirm')}
+            {t(`settings-page:restore-mode-${mode}`)}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

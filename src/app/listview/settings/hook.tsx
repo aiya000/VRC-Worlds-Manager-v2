@@ -1,4 +1,5 @@
 import { useLocalization } from '@/hooks/use-localization'
+import type { RestoreMode } from '@/lib/services/backup-service'
 import {
   CardSize,
   commands,
@@ -226,10 +227,10 @@ export const useSettingsPage = () => {
     }
   }
 
-  const handleRestoreConfirm = async (file: File) => {
+  const handleRestoreConfirm = async (file: File, mode: RestoreMode) => {
     try {
-      console.info(`Restoring from backup: ${file.name}`)
-      const result = await commands.restoreFromBackupFile(file)
+      console.info(`Restoring from backup: ${file.name} (${mode})`)
+      const result = await commands.restoreFromBackupFile(file, mode)
 
       if (result.status === 'error') {
         console.error(`Restore failed: ${result.error}`)
@@ -241,7 +242,10 @@ export const useSettingsPage = () => {
 
       console.info('Restore completed successfully')
       toast(t('settings-page:restore-success-title'), {
-        description: t('settings-page:restore-success-description'),
+        description:
+          mode === 'merge'
+            ? t('settings-page:merge-success-description')
+            : t('settings-page:restore-success-description'),
       })
       onDataChange()
     } catch (e) {

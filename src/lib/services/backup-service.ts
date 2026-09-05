@@ -1,30 +1,39 @@
 import { Context, Effect, Layer } from 'effect'
-import type { BackupMetaData, WorldDisplayData, FolderData } from '@/lib/types'
-import { db, FOLDER_ORDER_KEY, isActive, isMember } from './db'
+import type { BackupMetaData } from '@/lib/types'
+import { mergeSnapshot } from '@/lib/sync/merge'
+import type { Snapshot } from '@/lib/sync/types'
+import { db, isActive, type SyncMeta } from './db'
 import {
   activeFolders,
   deviceId,
   folderNamesById,
   folderNamesOf,
-  memberTagNames,
-  tagRefFor,
-  touched,
 } from './sync-meta'
+import {
+  applySnapshot,
+  parseBackupFile,
+  readSnapshot,
+  UnreadableBackupError,
+} from './snapshot'
 
-interface BackupData {
-  metadata: BackupMetaData
-  worlds: WorldDisplayData[]
-  folders: FolderData[]
-  hiddenWorlds: string[]
-  memos: Record<string, string>
-  customTags: Record<string, string[]>
-}
+/**
+ * How an incoming backup meets what is already here.
+ *
+ * `merge` is the one to reach for: it adds what the backup knows and takes
+ * nothing away, so a backup from last month cannot remove a folder made since.
+ * `replace` is the old behaviour, kept for when someone really does mean to
+ * throw the current data out.
+ */
+export type RestoreMode = 'merge' | 'replace'
 
 export class BackupService extends Context.Tag('BackupService')<
   BackupService,
   {
     readonly createBackup: () => Effect.Effect<void, Error>
-    readonly restoreFromBackup: (file: File) => Effect.Effect<void, Error>
+    readonly restoreFromBackup: (
+      file: File,
+      mode: RestoreMode,
+    ) => Effect.Effect<void, Error>
     readonly getBackupMetadataFromFile: (
       file: File,
     ) => Effect.Effect<BackupMetaData, Error>
@@ -48,183 +57,97 @@ function download(contents: unknown, filename: string): void {
   URL.revokeObjectURL(url)
 }
 
+/** Marks every row as written here and now, which is what replacing means. */
+function restamped(snapshot: Snapshot, at: number, origin: string): Snapshot {
+  const meta = (row: SyncMeta): SyncMeta => ({
+    updatedAt: at,
+    deletedAt: row.deletedAt === null ? null : at,
+    origin,
+  })
+
+  return {
+    ...snapshot,
+    worlds: snapshot.worlds.map((row) => ({ ...row, ...meta(row) })),
+    folders: snapshot.folders.map((row) => ({ ...row, ...meta(row) })),
+    folderOrder: { ...snapshot.folderOrder, updatedAt: at, origin },
+    hiddenWorlds: snapshot.hiddenWorlds.map((row) => ({
+      ...row,
+      ...meta(row),
+    })),
+    memos: snapshot.memos.map((row) => ({ ...row, ...meta(row) })),
+    customTags: snapshot.customTags.map((row) => ({ ...row, ...meta(row) })),
+  }
+}
+
+async function clearUserData(): Promise<void> {
+  await db.transaction(
+    'rw',
+    [
+      db.worlds,
+      db.foldersById,
+      db.folderOrder,
+      db.hiddenWorlds,
+      db.memos,
+      db.customTags,
+    ],
+    async () => {
+      await db.worlds.clear()
+      await db.foldersById.clear()
+      await db.folderOrder.clear()
+      await db.hiddenWorlds.clear()
+      await db.memos.clear()
+      await db.customTags.clear()
+    },
+  )
+}
+
 export const BackupServiceLive = Layer.succeed(BackupService, {
   createBackup: () =>
     Effect.tryPromise({
       try: async () => {
-        const folders = await activeFolders()
-        const nameById = folderNamesById(folders)
-        const worlds = (await db.worlds.toArray()).filter(isActive)
-        const hiddenWorlds = (await db.hiddenWorlds.toArray())
-          .filter(isActive)
-          .map((h) => h.worldId)
-
-        const memos: Record<string, string> = {}
-        for (const memo of (await db.memos.toArray()).filter(isActive)) {
-          memos[memo.worldId] = memo.memo
-        }
-
-        const customTags: Record<string, string[]> = {}
-        for (const record of (await db.customTags.toArray()).filter(isActive)) {
-          customTags[record.worldId] = memberTagNames(record.tagRefs)
-        }
-
-        const worldDisplayData: WorldDisplayData[] = worlds.map((w) => ({
-          worldId: w.worldId,
-          name: w.name,
-          thumbnailUrl: w.thumbnailUrl,
-          authorName: w.authorName,
-          favorites: w.favorites,
-          lastUpdated: w.lastUpdated,
-          visits: w.visits,
-          dateAdded: w.dateAdded,
-          platform: w.platform,
-          folders: folderNamesOf(w, nameById),
-          tags: w.tags,
-          capacity: w.capacity,
-        }))
-
-        const foldersData: FolderData[] = folders.map((folder) => ({
-          name: folder.name,
-          world_count: worlds.filter((world) =>
-            world.folderRefs.some(
-              (ref) => ref.folderId === folder.id && isMember(ref),
-            ),
-          ).length,
-        }))
-
-        const backup: BackupData = {
-          metadata: {
-            date: new Date().toISOString(),
-            number_of_folders: foldersData.length,
-            number_of_worlds: worldDisplayData.length,
-            app_version: process.env.NEXT_PUBLIC_APP_VERSION ?? 'unknown',
-          },
-          worlds: worldDisplayData,
-          folders: foldersData,
-          hiddenWorlds,
-          memos,
-          customTags,
-        }
-
+        const snapshot = await readSnapshot()
         download(
-          backup,
+          snapshot,
           `vrcww-backup-${new Date().toISOString().slice(0, 10)}.json`,
         )
       },
       catch: (e) => new Error(`Failed to create backup: ${e}`),
     }),
 
-  restoreFromBackup: (file) =>
+  restoreFromBackup: (file, mode) =>
     Effect.tryPromise({
       try: async () => {
-        const text = await file.text()
-        const backup = JSON.parse(text) as BackupData
-        const meta = await touched()
-        const now = Date.now()
         const origin = await deviceId()
+        const incoming = parseBackupFile(await file.text(), origin)
 
-        await db.transaction(
-          'rw',
-          [
-            db.worlds,
-            db.foldersById,
-            db.folderOrder,
-            db.hiddenWorlds,
-            db.memos,
-            db.customTags,
-          ],
-          async () => {
-            await db.worlds.clear()
-            await db.foldersById.clear()
-            await db.folderOrder.clear()
-            await db.hiddenWorlds.clear()
-            await db.memos.clear()
-            await db.customTags.clear()
+        if (mode === 'replace') {
+          await clearUserData()
+          await applySnapshot(restamped(incoming, Date.now(), origin))
+          return
+        }
 
-            const folderIdByName = new Map<string, string>()
-            for (const folder of backup.folders) {
-              if (!folderIdByName.has(folder.name)) {
-                folderIdByName.set(folder.name, crypto.randomUUID())
-              }
-            }
-            // A world may name a folder the folder list forgot to mention.
-            for (const world of backup.worlds) {
-              for (const name of world.folders) {
-                if (!folderIdByName.has(name)) {
-                  folderIdByName.set(name, crypto.randomUUID())
-                }
-              }
-            }
-
-            for (const [name, id] of folderIdByName) {
-              await db.foldersById.put({ id, name, ...meta })
-            }
-            await db.folderOrder.put({
-              key: FOLDER_ORDER_KEY,
-              ids: backup.folders.map(
-                (folder) => folderIdByName.get(folder.name) as string,
-              ),
-              updatedAt: now,
-              origin,
-            })
-
-            for (const world of backup.worlds) {
-              await db.worlds.put({
-                worldId: world.worldId,
-                name: world.name,
-                thumbnailUrl: world.thumbnailUrl,
-                authorName: world.authorName,
-                favorites: world.favorites,
-                lastUpdated: world.lastUpdated,
-                visits: world.visits,
-                dateAdded: world.dateAdded,
-                platform: world.platform,
-                folderRefs: world.folders.map((name) => ({
-                  folderId: folderIdByName.get(name) as string,
-                  addedAt: now,
-                  removedAt: null,
-                })),
-                tags: world.tags,
-                capacity: world.capacity,
-                ...meta,
-              })
-            }
-
-            for (const worldId of backup.hiddenWorlds) {
-              await db.hiddenWorlds.put({ worldId, ...meta })
-            }
-
-            for (const [worldId, memo] of Object.entries(backup.memos)) {
-              await db.memos.put({
-                worldId,
-                memo,
-                conflictBackup: null,
-                ...meta,
-              })
-            }
-
-            for (const [worldId, tags] of Object.entries(backup.customTags)) {
-              await db.customTags.put({
-                worldId,
-                tagRefs: tags.map((name) => tagRefFor(name, now)),
-                ...meta,
-              })
-            }
-          },
-        )
+        // The whole of this feature: the same merge the sync will use. A
+        // backup with no timestamps is all unknowns, and unknowns are unioned
+        // rather than resolved, so nothing made since it was taken is lost.
+        const { snapshot } = mergeSnapshot(await readSnapshot(), incoming)
+        await applySnapshot(snapshot)
       },
-      catch: (e) => new Error(`Failed to restore backup: ${e}`),
+      catch: (e) =>
+        e instanceof UnreadableBackupError
+          ? e
+          : new Error(`Failed to restore backup: ${e}`),
     }),
 
   getBackupMetadataFromFile: (file) =>
     Effect.tryPromise({
       try: async () => {
-        const text = await file.text()
-        const backup = JSON.parse(text) as BackupData
-        return backup.metadata
+        const snapshot = parseBackupFile(await file.text(), await deviceId())
+        return snapshot.metadata
       },
-      catch: (e) => new Error(`Failed to read backup metadata: ${e}`),
+      catch: (e) =>
+        e instanceof UnreadableBackupError
+          ? e
+          : new Error(`Failed to read backup metadata: ${e}`),
     }),
 
   exportToPortalLibrarySystem: (folders, sortField, sortDirection) =>
