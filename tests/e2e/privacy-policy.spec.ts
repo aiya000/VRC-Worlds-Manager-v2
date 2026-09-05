@@ -39,6 +39,27 @@ test('the About footer links to the privacy policy', async ({ page }) => {
   ).toHaveAttribute('href', PRIVACY)
 })
 
+// The two screens someone reaches before they have agreed to anything: the
+// first-run setup, and the form that asks for a VRChat password.
+test('the setup screen links to the privacy policy', async ({ page }) => {
+  await page.goto('/setup')
+  await page.addStyleTag({
+    content: 'nextjs-portal { display: none !important; }',
+  })
+
+  await expect(
+    page.getByRole('link', { name: jaJP['privacy-policy:link-label'] }),
+  ).toHaveAttribute('href', PRIVACY)
+})
+
+test('the login screen links to the privacy policy', async ({ page }) => {
+  await page.goto('/login')
+
+  await expect(
+    page.getByRole('link', { name: jaJP['privacy-policy:link-label'] }),
+  ).toHaveAttribute('href', PRIVACY)
+})
+
 /**
  * Google's brand verification fetches the home page and looks for the privacy
  * policy linked from it. It is not a browser session: nothing waits for the
