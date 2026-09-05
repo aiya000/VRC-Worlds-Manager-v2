@@ -1,21 +1,39 @@
 import { Context, Effect, Layer } from 'effect'
-import type { BackupMetaData, WorldDisplayData, FolderData } from '@/lib/types'
-import { db } from './db'
+import type { BackupMetaData } from '@/lib/types'
+import { mergeSnapshot } from '@/lib/sync/merge'
+import type { Snapshot } from '@/lib/sync/types'
+import { db, isActive, type SyncMeta } from './db'
+import {
+  activeFolders,
+  deviceId,
+  folderNamesById,
+  folderNamesOf,
+} from './sync-meta'
+import {
+  applySnapshot,
+  parseBackupFile,
+  readSnapshot,
+  UnreadableBackupError,
+} from './snapshot'
 
-interface BackupData {
-  metadata: BackupMetaData
-  worlds: WorldDisplayData[]
-  folders: FolderData[]
-  hiddenWorlds: string[]
-  memos: Record<string, string>
-  customTags: Record<string, string[]>
-}
+/**
+ * How an incoming backup meets what is already here.
+ *
+ * `merge` is the one to reach for: it adds what the backup knows and takes
+ * nothing away, so a backup from last month cannot remove a folder made since.
+ * `replace` is the old behaviour, kept for when someone really does mean to
+ * throw the current data out.
+ */
+export type RestoreMode = 'merge' | 'replace'
 
 export class BackupService extends Context.Tag('BackupService')<
   BackupService,
   {
     readonly createBackup: () => Effect.Effect<void, Error>
-    readonly restoreFromBackup: (file: File) => Effect.Effect<void, Error>
+    readonly restoreFromBackup: (
+      file: File,
+      mode: RestoreMode,
+    ) => Effect.Effect<void, Error>
     readonly getBackupMetadataFromFile: (
       file: File,
     ) => Effect.Effect<BackupMetaData, Error>
@@ -27,154 +45,121 @@ export class BackupService extends Context.Tag('BackupService')<
   }
 >() {}
 
+function download(contents: unknown, filename: string): void {
+  const blob = new Blob([JSON.stringify(contents, null, 2)], {
+    type: 'application/json',
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+/** Marks every row as written here and now, which is what replacing means. */
+function restamped(snapshot: Snapshot, at: number, origin: string): Snapshot {
+  const meta = (row: SyncMeta): SyncMeta => ({
+    updatedAt: at,
+    deletedAt: row.deletedAt === null ? null : at,
+    origin,
+  })
+
+  return {
+    ...snapshot,
+    worlds: snapshot.worlds.map((row) => ({ ...row, ...meta(row) })),
+    folders: snapshot.folders.map((row) => ({ ...row, ...meta(row) })),
+    folderOrder: { ...snapshot.folderOrder, updatedAt: at, origin },
+    hiddenWorlds: snapshot.hiddenWorlds.map((row) => ({
+      ...row,
+      ...meta(row),
+    })),
+    memos: snapshot.memos.map((row) => ({ ...row, ...meta(row) })),
+    customTags: snapshot.customTags.map((row) => ({ ...row, ...meta(row) })),
+  }
+}
+
+async function clearUserData(): Promise<void> {
+  await db.transaction(
+    'rw',
+    [
+      db.worlds,
+      db.foldersById,
+      db.folderOrder,
+      db.hiddenWorlds,
+      db.memos,
+      db.customTags,
+    ],
+    async () => {
+      await db.worlds.clear()
+      await db.foldersById.clear()
+      await db.folderOrder.clear()
+      await db.hiddenWorlds.clear()
+      await db.memos.clear()
+      await db.customTags.clear()
+    },
+  )
+}
+
 export const BackupServiceLive = Layer.succeed(BackupService, {
   createBackup: () =>
     Effect.tryPromise({
       try: async () => {
-        const worlds = await db.worlds.toArray()
-        const folderRecords = await db.folders.orderBy('order').toArray()
-        const hiddenWorlds = (await db.hiddenWorlds.toArray()).map(
-          (h) => h.worldId,
+        const snapshot = await readSnapshot()
+        download(
+          snapshot,
+          `vrcww-backup-${new Date().toISOString().slice(0, 10)}.json`,
         )
-        const memoRecords = await db.memos.toArray()
-        const tagRecords = await db.customTags.toArray()
-
-        const memos: Record<string, string> = {}
-        for (const m of memoRecords) {
-          memos[m.worldId] = m.memo
-        }
-
-        const customTags: Record<string, string[]> = {}
-        for (const t of tagRecords) {
-          customTags[t.worldId] = t.tags
-        }
-
-        const foldersData: FolderData[] = []
-        for (const folder of folderRecords) {
-          const count = worlds.filter((w) =>
-            w.folders.includes(folder.name),
-          ).length
-          foldersData.push({ name: folder.name, world_count: count })
-        }
-
-        const worldDisplayData: WorldDisplayData[] = worlds.map((w) => ({
-          worldId: w.worldId,
-          name: w.name,
-          thumbnailUrl: w.thumbnailUrl,
-          authorName: w.authorName,
-          favorites: w.favorites,
-          lastUpdated: w.lastUpdated,
-          visits: w.visits,
-          dateAdded: w.dateAdded,
-          platform: w.platform,
-          folders: w.folders,
-          tags: w.tags,
-          capacity: w.capacity,
-        }))
-
-        const backup: BackupData = {
-          metadata: {
-            date: new Date().toISOString(),
-            number_of_folders: foldersData.length,
-            number_of_worlds: worldDisplayData.length,
-            app_version: process.env.NEXT_PUBLIC_APP_VERSION ?? 'unknown',
-          },
-          worlds: worldDisplayData,
-          folders: foldersData,
-          hiddenWorlds,
-          memos,
-          customTags,
-        }
-
-        const blob = new Blob([JSON.stringify(backup, null, 2)], {
-          type: 'application/json',
-        })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `vrcww-backup-${new Date().toISOString().slice(0, 10)}.json`
-        a.click()
-        URL.revokeObjectURL(url)
       },
       catch: (e) => new Error(`Failed to create backup: ${e}`),
     }),
 
-  restoreFromBackup: (file) =>
+  restoreFromBackup: (file, mode) =>
     Effect.tryPromise({
       try: async () => {
-        const text = await file.text()
-        const backup = JSON.parse(text) as BackupData
+        const origin = await deviceId()
+        const incoming = parseBackupFile(await file.text(), origin)
 
-        await db.transaction(
-          'rw',
-          [db.worlds, db.folders, db.hiddenWorlds, db.memos, db.customTags],
-          async () => {
-            await db.worlds.clear()
-            await db.folders.clear()
-            await db.hiddenWorlds.clear()
-            await db.memos.clear()
-            await db.customTags.clear()
+        if (mode === 'replace') {
+          await clearUserData()
+          await applySnapshot(restamped(incoming, Date.now(), origin))
+          return
+        }
 
-            for (const world of backup.worlds) {
-              await db.worlds.put({
-                worldId: world.worldId,
-                name: world.name,
-                thumbnailUrl: world.thumbnailUrl,
-                authorName: world.authorName,
-                favorites: world.favorites,
-                lastUpdated: world.lastUpdated,
-                visits: world.visits,
-                dateAdded: world.dateAdded,
-                platform: world.platform,
-                folders: world.folders,
-                tags: world.tags,
-                capacity: world.capacity,
-              })
-            }
-
-            for (let i = 0; i < backup.folders.length; i++) {
-              await db.folders.put({
-                name: backup.folders[i].name,
-                order: i,
-              })
-            }
-
-            for (const worldId of backup.hiddenWorlds) {
-              await db.hiddenWorlds.put({ worldId })
-            }
-
-            for (const [worldId, memo] of Object.entries(backup.memos)) {
-              await db.memos.put({ worldId, memo })
-            }
-
-            for (const [worldId, tags] of Object.entries(backup.customTags)) {
-              await db.customTags.put({ worldId, tags })
-            }
-          },
-        )
+        // The whole of this feature: the same merge the sync will use. A
+        // backup with no timestamps is all unknowns, and unknowns are unioned
+        // rather than resolved, so nothing made since it was taken is lost.
+        const { snapshot } = mergeSnapshot(await readSnapshot(), incoming)
+        await applySnapshot(snapshot)
       },
-      catch: (e) => new Error(`Failed to restore backup: ${e}`),
+      catch: (e) =>
+        e instanceof UnreadableBackupError
+          ? e
+          : new Error(`Failed to restore backup: ${e}`),
     }),
 
   getBackupMetadataFromFile: (file) =>
     Effect.tryPromise({
       try: async () => {
-        const text = await file.text()
-        const backup = JSON.parse(text) as BackupData
-        return backup.metadata
+        const snapshot = parseBackupFile(await file.text(), await deviceId())
+        return snapshot.metadata
       },
-      catch: (e) => new Error(`Failed to read backup metadata: ${e}`),
+      catch: (e) =>
+        e instanceof UnreadableBackupError
+          ? e
+          : new Error(`Failed to read backup metadata: ${e}`),
     }),
 
   exportToPortalLibrarySystem: (folders, sortField, sortDirection) =>
     Effect.tryPromise({
       try: async () => {
-        const allWorlds = await db.worlds.toArray()
+        const nameById = folderNamesById(await activeFolders())
+        const allWorlds = (await db.worlds.toArray()).filter(isActive)
 
         const categories = []
         for (const folderName of folders) {
           const worlds = allWorlds
-            .filter((w) => w.folders.includes(folderName))
+            .filter((w) => folderNamesOf(w, nameById).includes(folderName))
             .sort((a, b) => {
               const dir = sortDirection === 'asc' ? 1 : -1
               switch (sortField) {
@@ -206,16 +191,7 @@ export const BackupServiceLive = Layer.succeed(BackupService, {
           })
         }
 
-        const plsData = { Categorys: categories }
-        const blob = new Blob([JSON.stringify(plsData, null, 2)], {
-          type: 'application/json',
-        })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = 'pls-export.json'
-        a.click()
-        URL.revokeObjectURL(url)
+        download({ Categorys: categories }, 'pls-export.json')
       },
       catch: (e) => new Error(`Failed to export: ${e}`),
     }),

@@ -1,6 +1,16 @@
 import { Context, Effect, Layer } from 'effect'
 import type { FolderData } from '@/lib/types'
-import { db } from './db'
+import { db, FOLDER_ORDER_KEY, isActive, isMember } from './db'
+import {
+  activeFolderByName,
+  activeFolders,
+  deviceId,
+  folderNamesById,
+  folderNamesOf,
+  tombstoned,
+  touched,
+  withoutMember,
+} from './sync-meta'
 
 export class FolderService extends Context.Tag('FolderService')<
   FolderService,
@@ -22,19 +32,30 @@ export class FolderService extends Context.Tag('FolderService')<
   }
 >() {}
 
+async function writeFolderOrder(ids: string[]): Promise<void> {
+  await db.folderOrder.put({
+    key: FOLDER_ORDER_KEY,
+    ids,
+    updatedAt: Date.now(),
+    origin: await deviceId(),
+  })
+}
+
 export const FolderServiceLive = Layer.succeed(FolderService, {
   getFolders: () =>
     Effect.tryPromise({
       try: async () => {
-        const folders = await db.folders.orderBy('order').toArray()
-        const result: FolderData[] = []
-        for (const folder of folders) {
-          const worldCount = await db.worlds
-            .filter((w) => w.folders.includes(folder.name))
-            .count()
-          result.push({ name: folder.name, world_count: worldCount })
-        }
-        return result
+        const folders = await activeFolders()
+        const worlds = (await db.worlds.toArray()).filter(isActive)
+
+        return folders.map((folder) => ({
+          name: folder.name,
+          world_count: worlds.filter((world) =>
+            world.folderRefs.some(
+              (ref) => ref.folderId === folder.id && isMember(ref),
+            ),
+          ).length,
+        }))
       },
       catch: (e) => new Error(`Failed to get folders: ${e}`),
     }),
@@ -42,13 +63,28 @@ export const FolderServiceLive = Layer.succeed(FolderService, {
   createFolder: (name) =>
     Effect.tryPromise({
       try: async () => {
-        const existing = await db.folders.get(name)
-        if (existing) {
+        const existing = await db.foldersById.where('name').equals(name).first()
+        if (existing !== undefined && isActive(existing)) {
           throw new Error(`Folder "${name}" already exists`)
         }
-        const maxOrder = await db.folders.orderBy('order').last()
-        const order = (maxOrder?.order ?? -1) + 1
-        await db.folders.add({ name, order })
+
+        // A folder deleted earlier still holds the name, because its tombstone
+        // has to outlive it for other devices. Reusing the row keeps the world
+        // memberships that pointed at it.
+        if (existing !== undefined) {
+          await db.foldersById.update(existing.id, { ...(await touched()) })
+          const order = await db.folderOrder.get(FOLDER_ORDER_KEY)
+          const ids = order?.ids ?? []
+          if (!ids.includes(existing.id)) {
+            await writeFolderOrder([...ids, existing.id])
+          }
+          return name
+        }
+
+        const id = crypto.randomUUID()
+        await db.foldersById.add({ id, name, ...(await touched()) })
+        const order = await db.folderOrder.get(FOLDER_ORDER_KEY)
+        await writeFolderOrder([...(order?.ids ?? []), id])
         return name
       },
       catch: (e) => new Error(`Failed to create folder: ${e}`),
@@ -57,15 +93,44 @@ export const FolderServiceLive = Layer.succeed(FolderService, {
   deleteFolder: (name) =>
     Effect.tryPromise({
       try: async () => {
-        await db.folders.delete(name)
-        const worldsInFolder = await db.worlds
-          .filter((w) => w.folders.includes(name))
-          .toArray()
-        for (const world of worldsInFolder) {
-          await db.worlds.update(world.worldId, {
-            folders: world.folders.filter((f) => f !== name),
-          })
+        const folder = await activeFolderByName(name)
+        if (folder === undefined) {
+          return
         }
+        const gone = await tombstoned()
+        const now = Date.now()
+
+        await db.transaction(
+          'rw',
+          [db.foldersById, db.folderOrder, db.worlds],
+          async () => {
+            await db.foldersById.update(folder.id, { ...gone })
+
+            const order = await db.folderOrder.get(FOLDER_ORDER_KEY)
+            if (order !== undefined) {
+              await writeFolderOrder(order.ids.filter((id) => id !== folder.id))
+            }
+
+            const worlds = await db.worlds.toArray()
+            for (const world of worlds) {
+              if (
+                !world.folderRefs.some(
+                  (ref) => ref.folderId === folder.id && isMember(ref),
+                )
+              ) {
+                continue
+              }
+              await db.worlds.update(world.worldId, {
+                ...(await touched()),
+                folderRefs: withoutMember(
+                  world.folderRefs,
+                  (ref) => ref.folderId === folder.id,
+                  now,
+                ),
+              })
+            }
+          },
+        )
       },
       catch: (e) => new Error(`Failed to delete folder: ${e}`),
     }),
@@ -73,18 +138,16 @@ export const FolderServiceLive = Layer.succeed(FolderService, {
   moveFolder: (folderName, newIndex) =>
     Effect.tryPromise({
       try: async () => {
-        const allFolders = await db.folders.orderBy('order').toArray()
-        const currentIndex = allFolders.findIndex((f) => f.name === folderName)
+        const folders = await activeFolders()
+        const currentIndex = folders.findIndex((f) => f.name === folderName)
         if (currentIndex === -1) {
           throw new Error(`Folder "${folderName}" not found`)
         }
-        const [moved] = allFolders.splice(currentIndex, 1)
-        allFolders.splice(newIndex, 0, moved)
-        await db.transaction('rw', db.folders, async () => {
-          for (let i = 0; i < allFolders.length; i++) {
-            await db.folders.update(allFolders[i].name, { order: i })
-          }
-        })
+
+        const ids = folders.map((folder) => folder.id)
+        const [moved] = ids.splice(currentIndex, 1)
+        ids.splice(newIndex, 0, moved)
+        await writeFolderOrder(ids)
       },
       catch: (e) => new Error(`Failed to move folder: ${e}`),
     }),
@@ -92,21 +155,21 @@ export const FolderServiceLive = Layer.succeed(FolderService, {
   renameFolder: (oldName, newName) =>
     Effect.tryPromise({
       try: async () => {
-        const existing = await db.folders.get(oldName)
-        if (!existing) {
+        const folder = await activeFolderByName(oldName)
+        if (folder === undefined) {
           throw new Error(`Folder "${oldName}" not found`)
         }
-        await db.transaction('rw', [db.folders, db.worlds], async () => {
-          await db.folders.delete(oldName)
-          await db.folders.add({ name: newName, order: existing.order })
-          const worldsInFolder = await db.worlds
-            .filter((w) => w.folders.includes(oldName))
-            .toArray()
-          for (const world of worldsInFolder) {
-            await db.worlds.update(world.worldId, {
-              folders: world.folders.map((f) => (f === oldName ? newName : f)),
-            })
-          }
+        const clash = await db.foldersById.where('name').equals(newName).first()
+        if (clash !== undefined && clash.id !== folder.id) {
+          throw new Error(`Folder "${newName}" already exists`)
+        }
+
+        // Renaming is now one field on one row. It used to delete the folder
+        // and add another, which lost the row's identity along with any record
+        // that the two were ever the same folder.
+        await db.foldersById.update(folder.id, {
+          name: newName,
+          ...(await touched()),
         })
       },
       catch: (e) => new Error(`Failed to rename folder: ${e}`),
@@ -116,7 +179,10 @@ export const FolderServiceLive = Layer.succeed(FolderService, {
     Effect.tryPromise({
       try: async () => {
         const world = await db.worlds.get(worldId)
-        return world?.folders ?? []
+        if (world === undefined || !isActive(world)) {
+          return []
+        }
+        return folderNamesOf(world, folderNamesById(await activeFolders()))
       },
       catch: (e) => new Error(`Failed to get folders for world: ${e}`),
     }),

@@ -3,7 +3,6 @@ import type {
   PatreonData,
   PatreonVRChatNames,
   WorldBlacklist,
-  LocalizedChanges,
 } from '@/lib/types'
 
 /**
@@ -28,7 +27,6 @@ export class ExternalDataService extends Context.Tag('ExternalDataService')<
       Error
     >
     readonly fetchBlacklist: () => Effect.Effect<WorldBlacklist, Error>
-    readonly getChangelog: () => Effect.Effect<LocalizedChanges[], Error>
   }
 >() {}
 
@@ -43,16 +41,4 @@ export const ExternalDataServiceLive = Layer.succeed(ExternalDataService, {
 
   fetchBlacklist: () =>
     Effect.fail(notImplementedBecauseOfCors('fetching the world blacklist')),
-
-  getChangelog: () =>
-    Effect.tryPromise({
-      try: async () => {
-        const res = await fetch('/changelog.json')
-        if (!res.ok) {
-          return []
-        }
-        return (await res.json()) as LocalizedChanges[]
-      },
-      catch: () => new Error('Failed to load changelog'),
-    }),
 })

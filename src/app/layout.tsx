@@ -8,6 +8,7 @@ import { LocalizationContextProvider } from '@/components/localization-context'
 import { DeepLinkProvider } from '@/components/deep-link-provider'
 import { PatreonProvider } from '@/contexts/patreon-context'
 import { SwRegister } from '@/components/sw-register'
+import { StaleBundleNotice } from '@/components/stale-bundle-notice'
 
 const _geistSans = Geist({
   variable: '--font-geist-sans',
@@ -50,6 +51,7 @@ export default function RootLayout({
               <PatreonProvider>
                 <main>{children}</main>
               </PatreonProvider>
+              <StaleBundleNotice />
             </LocalizationContextProvider>
           </ThemeProvider>
           <Toaster richColors />

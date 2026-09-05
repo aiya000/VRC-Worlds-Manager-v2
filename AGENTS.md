@@ -305,10 +305,15 @@ When the work you are doing resolves a GitHub Issue, do not commit it straight t
    ```
 
 **Merge with `--merge`, not `--squash`.** Keeping the merge commit is what this
-repository does. It also avoids a practical snag: Claude Code's permission
-classifier refused `gh pr merge --squash` in a session where the `--merge` form
-of the same command went through, so an agent that reaches for squash may find
-itself stuck partway through a task for no reason it can act on.
+repository does.
+
+**Expect `gh pr merge` to be refused, and do not treat that as a failure of the
+work.** Claude Code's permission classifier has blocked it in both forms --
+`--squash` in one session, and `--merge`, with and without `--delete-branch`, in
+another -- so whether it goes through is not something an agent can predict or
+work around. When it is refused, say so, give the exact command, and let the
+user run it; the branch is pushed and the checks have passed, so nothing is
+lost. Do not go looking for another route to the same merge.
 
 The Issue tracker is how requests are kept; a PR is how each one is answered, so the
 two stay tied together and the history shows which Issue a change came from.
@@ -336,6 +341,22 @@ Always write commit messages in English.
 - **Do NOT routinely merge into `main` or create PRs targeting `main`**:
   - The `main` branch represents production releases (e.g. deployed to https://vrchat-worlds-manager-web.pages.dev/ ).
   - **Only merge `develop` into `main` (via PR) when explicitly instructed by the user** (i.e. when a production release is specifically desired).
+- **Do not pass `--delete-branch` when merging a release PR** — the head branch is `develop`, and deleting it would remove the primary working branch.
+
+### Releases are announced through GitHub Releases
+
+After a release PR lands on `main`, tag the release and publish GitHub Release notes:
+
+```sh
+git tag v<version>
+git push origin v<version>
+gh release create v<version> --title 'v<version>' --notes '<what users should know>'
+```
+
+The release notes are the app's user-facing changelog — the About page links to
+https://github.com/aiya000/VRChat-Worlds-Manager-Web/releases and the app ships no
+changelog of its own. Write the notes for users, not for developers: what changed
+that they will notice, not every commit.
 
 ## Remember
 

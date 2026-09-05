@@ -28,7 +28,8 @@ import { GroupInstanceCreator } from './group-instance-creator'
 import { GroupInstanceType, InstanceType } from '@/types/instances'
 import { InstanceRegion } from '@/lib/commands'
 import { useLocalization } from '@/hooks/use-localization'
-import { formatDate, formatDateTime } from '@/lib/utils'
+import { formatDateTime } from '@/lib/utils'
+import { WorldDetailFields } from '@/components/world-detail-fields'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
@@ -1105,67 +1106,17 @@ export function WorldDetailPopup({
                           <div className="text-sm font-semibold mb-2">
                             {t('world-detail:details')}
                           </div>
-                          <div className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
-                            {detailFields.visits && (
-                              <>
-                                <div className="text-gray-500">
-                                  {t('world-detail:visits')}
-                                </div>
-                                <div>{worldDetails.visits}</div>
-                              </>
-                            )}
-
-                            {detailFields.favorites && (
-                              <>
-                                <div className="text-gray-500">
-                                  {t('world-detail:favorites')}
-                                </div>
-                                <div>{worldDetails.favorites}</div>
-                              </>
-                            )}
-
-                            {detailFields.capacity && (
-                              <>
-                                <div className="text-gray-500">
-                                  {t('world-detail:capacity')}
-                                </div>
-                                <div>
-                                  {worldDetails.recommendedCapacity
-                                    ? `${worldDetails.recommendedCapacity} (${t('world-detail:max')} ${worldDetails.capacity})`
-                                    : worldDetails.capacity}
-                                </div>
-                              </>
-                            )}
-
-                            {detailFields.published &&
-                              worldDetails.publicationDate && (
-                                <>
-                                  <div className="text-gray-500">
-                                    {t('world-detail:published')}
-                                  </div>
-                                  <div>
-                                    {formatDate(
-                                      worldDetails.publicationDate,
-                                      language,
-                                    )}
-                                  </div>
-                                </>
-                              )}
-
-                            {detailFields.lastUpdated && (
-                              <>
-                                <div className="text-gray-500">
-                                  {t('world-detail:last-updated')}
-                                </div>
-                                <div>
-                                  {formatDateTime(
-                                    worldDetails.lastUpdated,
-                                    language,
-                                  )}
-                                </div>
-                              </>
-                            )}
-                          </div>
+                          <WorldDetailFields
+                            visibility={detailFields}
+                            visits={worldDetails.visits}
+                            favorites={worldDetails.favorites}
+                            capacity={worldDetails.capacity}
+                            recommendedCapacity={
+                              worldDetails.recommendedCapacity
+                            }
+                            publicationDate={worldDetails.publicationDate}
+                            lastUpdated={worldDetails.lastUpdated}
+                          />
                         </div>
                       )}
                     </div>

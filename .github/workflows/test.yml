@@ -3,9 +3,7 @@ on:
   push:
     branches:
       - 'main'
-      - 'pre-release'
       - 'develop'
-      - 'feature/web'
   pull_request:
     types:
       - reopened

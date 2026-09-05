@@ -13,6 +13,7 @@ import {
 import { WorldCardPreview } from '@/components/world-card'
 import { WorldCardFieldToggles } from '@/components/world-card-field-toggles'
 import { WorldDetailFieldToggles } from '@/components/world-detail-field-toggles'
+import { WorldDetailPreview } from '@/components/world-detail-preview'
 
 import { FolderRemovalPreference } from '@/lib/commands'
 import {
@@ -224,6 +225,7 @@ export default function SettingsPage() {
                 onChange={handleDetailFieldVisibilityChange}
               />
             </div>
+            <WorldDetailPreview fieldVisibility={detailFieldVisibility} />
           </Card>
         </TabsContent>
 
