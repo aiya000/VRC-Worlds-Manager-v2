@@ -1,6 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
 import { commands } from '@/lib/commands'
 import { useLocalization } from '@/hooks/use-localization'
@@ -47,6 +48,16 @@ export default function Home() {
     <div className="h-screen w-screen flex flex-col items-center justify-center gap-4">
       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       <p className="text-sm text-muted-foreground">{t('general:loading')}</p>
+      {/* Google's brand verification fetches the app's home page and expects
+          to find the privacy policy linked from it, so this link has to live
+          in the statically exported HTML of `/` rather than only past the
+          redirect above. */}
+      <Link
+        href="/privacy"
+        className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+      >
+        {t('privacy-policy:link-label')}
+      </Link>
     </div>
   )
 }
