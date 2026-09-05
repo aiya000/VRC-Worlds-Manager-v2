@@ -34,7 +34,9 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
-        <link rel="apple-touch-icon" href="/icons/icon-512.png" />
+        {/* iOS paints transparency black and does not crop, so this one is
+            opaque and full-bleed rather than the transparent icon. */}
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
       <body>
         <DeepLinkProvider>
