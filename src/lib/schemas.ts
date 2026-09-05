@@ -51,14 +51,6 @@ export const worldBlacklistSchema = Schema.Struct({
   worlds: Schema.Array(Schema.String),
 })
 
-export const localizedChangesSchema = Schema.Struct({
-  version: Schema.String,
-  pre_release: Schema.Boolean,
-  features: Schema.Array(Schema.String),
-  fixes: Schema.Array(Schema.String),
-  others: Schema.Array(Schema.String),
-})
-
 export const worldDetailsSchema = Schema.Struct({
   worldId: Schema.String,
   name: Schema.String,

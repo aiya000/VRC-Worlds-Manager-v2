@@ -6,6 +6,7 @@ import { useLocalization } from '@/hooks/use-localization'
 import { Button } from '@/components/ui/button'
 import { UserProfile } from '@/app/listview/about/components/user-profile'
 import { SiGithub, SiDiscord } from '@icons-pack/react-simple-icons'
+import { ScrollText } from 'lucide-react'
 
 export default function AboutSection() {
   const { t } = useLocalization()
@@ -144,12 +145,23 @@ export default function AboutSection() {
 
       {/* Footer */}
       <div className="w-full border-t bg-background/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-2 flex justify-between items-center">
+        <div className="container mx-auto px-4 py-2 flex flex-wrap justify-between items-center gap-y-1">
           <div className="text-sm text-muted-foreground">
             VRChat Worlds Manager Web {appVersion}
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            <Button variant="ghost" size="sm" asChild>
+              <a
+                href="https://github.com/aiya000/VRChat-Worlds-Manager-Web/releases"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-row gap-2"
+              >
+                <ScrollText className="h-4 w-4" />
+                {t('about-section:changelog')}
+              </a>
+            </Button>
             <Button variant="ghost" size="sm" asChild>
               <a
                 href="https://github.com/aiya000/VRChat-Worlds-Manager-Web"
