@@ -383,6 +383,25 @@ two stay tied together and the history shows which Issue a change came from.
 **Work asked for directly in conversation does not need a PR** — commit it to `develop`
 as usual. The rule is about Issues, not about change size.
 
+**Which route applies is decided by looking, not by guessing.** Before choosing, check
+whether an open Issue already describes the thing being fixed (`gh issue list`). A bug
+noticed in conversation is conversation work even when it is a real bug, and work that
+happens to touch an Issue's area is still Issue work.
+
+### Finished work gets pushed without being asked
+
+Neither route stops to ask permission to leave this machine. Once `typecheck`, `lint`,
+`build` and the tests pass, push — `develop` for conversation work, the feature branch
+for an Issue's PR — and then say what landed.
+
+Both branches deploy to a URL of their own, so pushing is what turns a change into
+something the user can open on a phone or in a headset. Asking "shall I push?" about work
+that is already verified only puts a wait in front of that. **Watch the GitHub Actions
+deploy through to the end and report the result.**
+
+This does not extend to `main`: a production release is merged only when asked for, as
+below.
+
 ## Commit Messages
 
 Follow Conventional Commits format:
