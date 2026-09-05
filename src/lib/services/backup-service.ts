@@ -1,6 +1,15 @@
 import { Context, Effect, Layer } from 'effect'
 import type { BackupMetaData, WorldDisplayData, FolderData } from '@/lib/types'
-import { db } from './db'
+import { db, FOLDER_ORDER_KEY, isActive, isMember } from './db'
+import {
+  activeFolders,
+  deviceId,
+  folderNamesById,
+  folderNamesOf,
+  memberTagNames,
+  tagRefFor,
+  touched,
+} from './sync-meta'
 
 interface BackupData {
   metadata: BackupMetaData
@@ -27,34 +36,37 @@ export class BackupService extends Context.Tag('BackupService')<
   }
 >() {}
 
+function download(contents: unknown, filename: string): void {
+  const blob = new Blob([JSON.stringify(contents, null, 2)], {
+    type: 'application/json',
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export const BackupServiceLive = Layer.succeed(BackupService, {
   createBackup: () =>
     Effect.tryPromise({
       try: async () => {
-        const worlds = await db.worlds.toArray()
-        const folderRecords = await db.folders.orderBy('order').toArray()
-        const hiddenWorlds = (await db.hiddenWorlds.toArray()).map(
-          (h) => h.worldId,
-        )
-        const memoRecords = await db.memos.toArray()
-        const tagRecords = await db.customTags.toArray()
+        const folders = await activeFolders()
+        const nameById = folderNamesById(folders)
+        const worlds = (await db.worlds.toArray()).filter(isActive)
+        const hiddenWorlds = (await db.hiddenWorlds.toArray())
+          .filter(isActive)
+          .map((h) => h.worldId)
 
         const memos: Record<string, string> = {}
-        for (const m of memoRecords) {
-          memos[m.worldId] = m.memo
+        for (const memo of (await db.memos.toArray()).filter(isActive)) {
+          memos[memo.worldId] = memo.memo
         }
 
         const customTags: Record<string, string[]> = {}
-        for (const t of tagRecords) {
-          customTags[t.worldId] = t.tags
-        }
-
-        const foldersData: FolderData[] = []
-        for (const folder of folderRecords) {
-          const count = worlds.filter((w) =>
-            w.folders.includes(folder.name),
-          ).length
-          foldersData.push({ name: folder.name, world_count: count })
+        for (const record of (await db.customTags.toArray()).filter(isActive)) {
+          customTags[record.worldId] = memberTagNames(record.tagRefs)
         }
 
         const worldDisplayData: WorldDisplayData[] = worlds.map((w) => ({
@@ -67,9 +79,18 @@ export const BackupServiceLive = Layer.succeed(BackupService, {
           visits: w.visits,
           dateAdded: w.dateAdded,
           platform: w.platform,
-          folders: w.folders,
+          folders: folderNamesOf(w, nameById),
           tags: w.tags,
           capacity: w.capacity,
+        }))
+
+        const foldersData: FolderData[] = folders.map((folder) => ({
+          name: folder.name,
+          world_count: worlds.filter((world) =>
+            world.folderRefs.some(
+              (ref) => ref.folderId === folder.id && isMember(ref),
+            ),
+          ).length,
         }))
 
         const backup: BackupData = {
@@ -86,15 +107,10 @@ export const BackupServiceLive = Layer.succeed(BackupService, {
           customTags,
         }
 
-        const blob = new Blob([JSON.stringify(backup, null, 2)], {
-          type: 'application/json',
-        })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `vrcww-backup-${new Date().toISOString().slice(0, 10)}.json`
-        a.click()
-        URL.revokeObjectURL(url)
+        download(
+          backup,
+          `vrcww-backup-${new Date().toISOString().slice(0, 10)}.json`,
+        )
       },
       catch: (e) => new Error(`Failed to create backup: ${e}`),
     }),
@@ -104,16 +120,54 @@ export const BackupServiceLive = Layer.succeed(BackupService, {
       try: async () => {
         const text = await file.text()
         const backup = JSON.parse(text) as BackupData
+        const meta = await touched()
+        const now = Date.now()
+        const origin = await deviceId()
 
         await db.transaction(
           'rw',
-          [db.worlds, db.folders, db.hiddenWorlds, db.memos, db.customTags],
+          [
+            db.worlds,
+            db.foldersById,
+            db.folderOrder,
+            db.hiddenWorlds,
+            db.memos,
+            db.customTags,
+          ],
           async () => {
             await db.worlds.clear()
-            await db.folders.clear()
+            await db.foldersById.clear()
+            await db.folderOrder.clear()
             await db.hiddenWorlds.clear()
             await db.memos.clear()
             await db.customTags.clear()
+
+            const folderIdByName = new Map<string, string>()
+            for (const folder of backup.folders) {
+              if (!folderIdByName.has(folder.name)) {
+                folderIdByName.set(folder.name, crypto.randomUUID())
+              }
+            }
+            // A world may name a folder the folder list forgot to mention.
+            for (const world of backup.worlds) {
+              for (const name of world.folders) {
+                if (!folderIdByName.has(name)) {
+                  folderIdByName.set(name, crypto.randomUUID())
+                }
+              }
+            }
+
+            for (const [name, id] of folderIdByName) {
+              await db.foldersById.put({ id, name, ...meta })
+            }
+            await db.folderOrder.put({
+              key: FOLDER_ORDER_KEY,
+              ids: backup.folders.map(
+                (folder) => folderIdByName.get(folder.name) as string,
+              ),
+              updatedAt: now,
+              origin,
+            })
 
             for (const world of backup.worlds) {
               await db.worlds.put({
@@ -126,29 +180,36 @@ export const BackupServiceLive = Layer.succeed(BackupService, {
                 visits: world.visits,
                 dateAdded: world.dateAdded,
                 platform: world.platform,
-                folders: world.folders,
+                folderRefs: world.folders.map((name) => ({
+                  folderId: folderIdByName.get(name) as string,
+                  addedAt: now,
+                  removedAt: null,
+                })),
                 tags: world.tags,
                 capacity: world.capacity,
-              })
-            }
-
-            for (let i = 0; i < backup.folders.length; i++) {
-              await db.folders.put({
-                name: backup.folders[i].name,
-                order: i,
+                ...meta,
               })
             }
 
             for (const worldId of backup.hiddenWorlds) {
-              await db.hiddenWorlds.put({ worldId })
+              await db.hiddenWorlds.put({ worldId, ...meta })
             }
 
             for (const [worldId, memo] of Object.entries(backup.memos)) {
-              await db.memos.put({ worldId, memo })
+              await db.memos.put({
+                worldId,
+                memo,
+                conflictBackup: null,
+                ...meta,
+              })
             }
 
             for (const [worldId, tags] of Object.entries(backup.customTags)) {
-              await db.customTags.put({ worldId, tags })
+              await db.customTags.put({
+                worldId,
+                tagRefs: tags.map((name) => tagRefFor(name, now)),
+                ...meta,
+              })
             }
           },
         )
@@ -169,12 +230,13 @@ export const BackupServiceLive = Layer.succeed(BackupService, {
   exportToPortalLibrarySystem: (folders, sortField, sortDirection) =>
     Effect.tryPromise({
       try: async () => {
-        const allWorlds = await db.worlds.toArray()
+        const nameById = folderNamesById(await activeFolders())
+        const allWorlds = (await db.worlds.toArray()).filter(isActive)
 
         const categories = []
         for (const folderName of folders) {
           const worlds = allWorlds
-            .filter((w) => w.folders.includes(folderName))
+            .filter((w) => folderNamesOf(w, nameById).includes(folderName))
             .sort((a, b) => {
               const dir = sortDirection === 'asc' ? 1 : -1
               switch (sortField) {
@@ -206,16 +268,7 @@ export const BackupServiceLive = Layer.succeed(BackupService, {
           })
         }
 
-        const plsData = { Categorys: categories }
-        const blob = new Blob([JSON.stringify(plsData, null, 2)], {
-          type: 'application/json',
-        })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = 'pls-export.json'
-        a.click()
-        URL.revokeObjectURL(url)
+        download({ Categorys: categories }, 'pls-export.json')
       },
       catch: (e) => new Error(`Failed to export: ${e}`),
     }),

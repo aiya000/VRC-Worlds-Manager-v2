@@ -7,7 +7,7 @@ const DB_NAME = 'VRChatWorldsManager'
 // by ten, so a future `version(2)` is version 20 as far as IndexedDB is
 // concerned. Using the real number keeps this test honest about the situation
 // it is standing in for.
-const NEXT_SCHEMA_IDB_VERSION = 20
+const NEXT_SCHEMA_IDB_VERSION = 40
 
 /**
  * Puts the browser in the state a stale bundle finds itself in: a database
