@@ -127,6 +127,23 @@ export function twoFactorVerifyPath(twoFactorType: string): string {
 // generic `Login failed: ...` wrapping must not swallow it.
 class TwoFactorRequiredError extends Error {}
 
+/**
+ * Keeps the status alongside the message so a caller can tell a rejected input
+ * apart from a broken request without parsing the text back out.
+ */
+export class VRChatApiError extends Error {
+  constructor(
+    readonly status: number,
+    readonly body: string,
+  ) {
+    super(`API error ${status}: ${body}`)
+  }
+}
+
+export const INVALID_TWO_FACTOR_CODE_ERROR = 'invalid-2fa-code'
+
+class InvalidTwoFactorCodeError extends Error {}
+
 function apiUrl(path: string): string {
   return `${CF_WORKER_URL}/api/1${path}`
 }
@@ -163,7 +180,7 @@ async function apiFetch(
   await storeIssuedTokens(res)
   if (!res.ok) {
     const text = await res.text()
-    throw new Error(`API error ${res.status}: ${text}`)
+    throw new VRChatApiError(res.status, text)
   }
   return res
 }
@@ -272,10 +289,21 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
         })
         const body = (await res.json()) as { verified?: boolean }
         if (body.verified === false) {
-          throw new Error('The code was rejected by VRChat')
+          throw new InvalidTwoFactorCodeError(INVALID_TWO_FACTOR_CODE_ERROR)
         }
       },
-      catch: (e) => new Error(`2FA failed: ${e}`),
+      // A wrong code comes back as 400 with `{"verified":false}` rather than as
+      // a 200 body, so both shapes have to end up as the same reported cause --
+      // otherwise the raw API text is what the person reads.
+      catch: (e) => {
+        if (e instanceof InvalidTwoFactorCodeError) {
+          return e
+        }
+        if (e instanceof VRChatApiError && e.status === 400) {
+          return new Error(INVALID_TWO_FACTOR_CODE_ERROR)
+        }
+        return new Error(`2FA failed: ${e}`)
+      },
     }),
 
   logout: () =>

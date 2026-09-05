@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { commands } from '@/lib/commands'
+import { INVALID_TWO_FACTOR_CODE_ERROR } from '@/lib/services/vrchat-api'
 import { useLocalization } from '@/hooks/use-localization'
 import { Loader2 } from 'lucide-react'
 export default function Login() {
@@ -67,9 +68,14 @@ export default function Login() {
       )
 
       if (result.status === 'error') {
-        const errorMessage = result.error || t('login-page:error-invalid-2fa')
-        console.error(`2FA verification failed: ${errorMessage}`)
-        setE(errorMessage)
+        console.error(`2FA verification failed: ${result.error}`)
+        // A rejected code is the ordinary case here, and the raw API text is
+        // not something to put in front of the person typing it.
+        setE(
+          result.error === INVALID_TWO_FACTOR_CODE_ERROR
+            ? t('login-page:error-invalid-2fa')
+            : result.error || t('login-page:error-invalid-2fa'),
+        )
         return
       }
       console.info('2FA verification successful, redirecting to listview')

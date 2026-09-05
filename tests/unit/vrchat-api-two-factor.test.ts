@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Effect } from 'effect'
 import {
   EMAIL_TWO_FACTOR_REQUIRED_ERROR,
+  INVALID_TWO_FACTOR_CODE_ERROR,
   TWO_FACTOR_REQUIRED_ERROR,
   VRChatApiService,
   VRChatApiServiceLive,
@@ -209,5 +210,42 @@ describe('VRChatApiService session token relay', () => {
     expect(calls[1].headers['X-VRC-Auth']).toBe('authcookie_abc')
     expect(calls[2].headers['X-VRC-Auth']).toBe('authcookie_abc')
     expect(calls[2].headers['X-VRC-Two-Factor-Auth']).toBe('twofactorauth_xyz')
+  })
+})
+
+describe('VRChatApiService.loginWith2fa rejected codes', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  // VRChat answers a wrong code with 400 rather than a 200 body, so without
+  // this the raw `API error 400: {"verified":false}` reached the login screen.
+  it('reports a plain code when VRChat rejects with 400', async () => {
+    stubFetch(
+      () => new Response(JSON.stringify({ verified: false }), { status: 400 }),
+    )
+
+    expect(await verify2fa('000000', 'totp')).toBe(
+      INVALID_TWO_FACTOR_CODE_ERROR,
+    )
+  })
+
+  it('reports the same code when VRChat rejects with 200', async () => {
+    stubFetch(
+      () => new Response(JSON.stringify({ verified: false }), { status: 200 }),
+    )
+
+    expect(await verify2fa('000000', 'totp')).toBe(
+      INVALID_TWO_FACTOR_CODE_ERROR,
+    )
+  })
+
+  it('does not disguise an unrelated failure as a bad code', async () => {
+    stubFetch(() => new Response('gateway blew up', { status: 502 }))
+
+    const message = await verify2fa('123456', 'totp')
+
+    expect(message).not.toBe(INVALID_TWO_FACTOR_CODE_ERROR)
+    expect(message).toContain('2FA failed')
   })
 })

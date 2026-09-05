@@ -73,6 +73,56 @@ test.describe('list view layout', () => {
     ).toBeVisible()
   })
 
+  // The sidebar has no other way in on a phone, so the trigger must not be
+  // something the world grid can scroll off the top of the screen.
+  test('keeps the sidebar trigger reachable after the list scrolls', async ({
+    page,
+  }) => {
+    await openListView(page, PHONE)
+
+    const scrolled = await page.evaluate(() => {
+      const trigger = document.querySelector('[data-sidebar="trigger"]')
+      if (trigger === null) {
+        return null
+      }
+      let sticky: HTMLElement | null = trigger.parentElement
+      while (
+        sticky !== null &&
+        getComputedStyle(sticky).position !== 'sticky'
+      ) {
+        sticky = sticky.parentElement
+      }
+      if (sticky === null || sticky.parentElement === null) {
+        return null
+      }
+      // Stand in for a long list of worlds, which a fresh browser has none of.
+      const spacer = document.createElement('div')
+      spacer.style.flex = '0 0 2000px'
+      spacer.style.height = '2000px'
+      sticky.parentElement.appendChild(spacer)
+
+      let scroller: HTMLElement | null = sticky.parentElement
+      while (
+        scroller !== null &&
+        !/(auto|scroll)/.test(getComputedStyle(scroller).overflowY)
+      ) {
+        scroller = scroller.parentElement
+      }
+      if (scroller === null) {
+        return null
+      }
+      scroller.scrollTop = 900
+      return scroller.scrollTop
+    })
+
+    expect(scrolled).toBeGreaterThan(0)
+
+    const box = await sidebarTrigger(page).boundingBox()
+    expect(box).not.toBe(null)
+    expect(box!.y).toBeGreaterThanOrEqual(0)
+    expect(box!.y).toBeLessThan(PHONE.height / 2)
+  })
+
   test('closes the phone drawer once it has been used to navigate', async ({
     page,
   }) => {

@@ -44,11 +44,14 @@ export function SetupLayout({
         value={((currentPage - 1) / (totalPages - 1)) * 100}
         className="mb-8"
       />
-      <Card className="h-[480px]">
+      {/* Fixed heights let a step's content spill over the footer once the
+          viewport is narrow enough to wrap it. Let the card grow instead, and
+          scroll the step's own content when it outgrows the screen. */}
+      <Card className="flex min-h-[480px] max-h-[85svh] flex-col">
         <CardHeader>
           <CardTitle>{title}</CardTitle>
         </CardHeader>
-        <CardContent className="h-[355px]">{children}</CardContent>
+        <CardContent className="flex-1 overflow-y-auto">{children}</CardContent>
         <CardFooter className="flex justify-between">
           {/* Only show the Back button if not on the first page */}
           {!isFirstPage ? (

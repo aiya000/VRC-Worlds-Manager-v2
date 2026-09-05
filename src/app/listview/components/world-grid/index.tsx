@@ -149,29 +149,24 @@ export function WorldGrid({
                 </div>
                 {(isSelectionMode || alwaysShowSelection) && (
                   <div className="absolute top-2 left-2 z-10 flex items-center gap-2">
-                    {isSelected ? (
-                      <div
-                        className="relative w-10 h-10 flex items-center justify-center cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleSelect(world.worldId, e)
-                        }}
-                      >
-                        <Square className="w-5 h-5 z-10 text-primary" />
-                        <div className="absolute inset-[12px] bg-background rounded" />
-                        <Check className="absolute inset-0 m-auto w-3 h-3 text-primary" />
-                      </div>
-                    ) : (
-                      <div
-                        className="relative w-10 h-10 flex items-center justify-center cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleSelect(world.worldId, e)
-                        }}
-                      >
-                        <Square className="w-5 h-5 text-muted-foreground" />
-                      </div>
-                    )}
+                    <div
+                      className="relative w-10 h-10 flex items-center justify-center cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleSelect(world.worldId, e)
+                      }}
+                    >
+                      {/* The thumbnail behind this box can be any colour, so an
+                          outline on its own disappears against a busy one. Give
+                          the box an opaque backing in both states. */}
+                      <div className="absolute h-6 w-6 rounded bg-background ring-1 ring-foreground/40 shadow-sm" />
+                      <Square
+                        className={`relative w-5 h-5 ${isSelected ? 'text-primary' : 'text-foreground'}`}
+                      />
+                      {isSelected && (
+                        <Check className="absolute inset-0 m-auto w-3.5 h-3.5 text-primary" />
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

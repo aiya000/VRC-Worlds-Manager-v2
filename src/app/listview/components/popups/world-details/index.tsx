@@ -22,7 +22,7 @@ import {
   FolderData,
 } from '@/lib/commands'
 import { WorldDisplayData } from '@/lib/commands'
-import { WorldDetails } from '@/lib/commands'
+import { WorldDetails, WorldDetailFieldVisibility } from '@/lib/commands'
 import { WorldCardPreview } from '@/components/world-card'
 import { GroupInstanceCreator } from './group-instance-creator'
 import { GroupInstanceType, InstanceType } from '@/types/instances'
@@ -104,6 +104,13 @@ export function WorldDetailPopup({
   const [isLoading, setIsLoading] = useState(false)
   const [worldDetails, setWorldDetails] = useState<WorldDetails | null>(null)
   const [errorState, setErrorState] = useState<string | null>(null)
+  const [detailFields, setDetailFields] = useState<WorldDetailFieldVisibility>({
+    visits: true,
+    favorites: true,
+    capacity: true,
+    published: true,
+    lastUpdated: true,
+  })
   const [selectedInstanceType, setSelectedInstanceType] =
     useState<InstanceType>('public')
   const [selectedRegion, setSelectedRegion] = useState<InstanceRegion>('jp')
@@ -256,6 +263,24 @@ export function WorldDetailPopup({
     [customTags, dontSaveToLocal, isSavingCustomTags, persistCustomTags],
   )
 
+  // With every field switched off there is nothing left to head, so the
+  // heading goes too rather than sitting above an empty grid.
+  const showAnyDetailField = Object.values(detailFields).some(Boolean)
+
+  // Read this every time the dialog opens rather than once on mount: the popup
+  // stays mounted, so a change made on the settings page would otherwise not
+  // show up until a reload.
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+    commands.getWorldDetailFieldVisibility().then((result) => {
+      if (result.status === 'ok') {
+        setDetailFields(result.data)
+      }
+    })
+  }, [open])
+
   useEffect(() => {
     const fetchWorldDetails = async () => {
       if (!open) {
@@ -381,23 +406,35 @@ export function WorldDetailPopup({
     loadCustomTags()
   }, [dontSaveToLocal, loadCustomTags, open, worldId])
 
+  // Keyed on `open` rather than running once on mount: the popup stays mounted,
+  // and the group instance creator writes the region preference too, so a
+  // mount-only read would show a stale choice for the rest of the session.
   useEffect(() => {
-    const loadRegionPreference = async () => {
+    if (!open) {
+      return
+    }
+
+    const loadInstancePreferences = async () => {
       try {
-        const regionResult = await commands.getRegion()
+        const [regionResult, instanceTypeResult] = await Promise.all([
+          commands.getRegion(),
+          commands.getInstanceType(),
+        ])
         if (regionResult.status === 'ok') {
           setSelectedRegion(regionResult.data)
-          console.info(`Loaded region preference: ${regionResult.data}`)
+        }
+        if (instanceTypeResult.status === 'ok') {
+          setSelectedInstanceType(instanceTypeResult.data)
         }
       } catch (e) {
-        console.error(`Failed to load region preference: ${e}`)
+        console.error(`Failed to load instance preferences: ${e}`)
         // Fall back to JP if we can't load the preference
         setSelectedRegion('jp' as InstanceRegion)
       }
     }
 
-    loadRegionPreference()
-  }, []) // Empty dependency array means this runs once on mount
+    loadInstancePreferences()
+  }, [open])
 
   const setRegionPreference = async (region: InstanceRegion) => {
     try {
@@ -405,6 +442,15 @@ export function WorldDetailPopup({
       console.info(`Region preference set to ${region}`)
     } catch (e) {
       console.error(`Failed to set region preference: ${e}`)
+    }
+  }
+
+  const setInstanceTypePreference = async (instanceType: InstanceType) => {
+    try {
+      await commands.setInstanceType(instanceType)
+      console.info(`Instance type preference set to ${instanceType}`)
+    } catch (e) {
+      console.error(`Failed to set instance type preference: ${e}`)
     }
   }
 
@@ -417,6 +463,7 @@ export function WorldDetailPopup({
         selectedRegion,
       )
       setRegionPreference(selectedRegion)
+      setInstanceTypePreference(selectedInstanceType)
     } catch (e) {
       console.error(`Failed to create instance: ${e}`)
       setErrorState(`Failed to create instance: ${e}`)
@@ -457,6 +504,7 @@ export function WorldDetailPopup({
         isLoading: false,
       }))
       setRegionPreference(selectedRegion)
+      setInstanceTypePreference(selectedInstanceType)
     } catch (e) {
       console.error(`Failed to load groups: ${e}`)
       setGroupInstanceState((prev) => ({
@@ -685,7 +733,7 @@ export function WorldDetailPopup({
                             <div className="text-sm font-semibold mb-3">
                               {t('world-detail:details')}
                             </div>
-                            <div className="grid grid-cols-[1fr_1.5fr] sm:grid-cols-[120px_1fr] gap-x-6 gap-y-2 text-sm">
+                            <div className="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-2 text-sm">
                               <div className="text-gray-500">
                                 {t('world-detail:world-name')}:
                               </div>
@@ -789,8 +837,8 @@ export function WorldDetailPopup({
             ) : (
               worldDetails && (
                 <div className="flex flex-col gap-4">
-                  <div className="flex gap-4 py-4">
-                    <div className="w-[60%]">
+                  <div className="flex flex-col gap-4 py-4 sm:flex-row">
+                    <div className="w-full sm:w-[60%]">
                       <div className="h-[220px] relative overflow-hidden rounded-lg mb-4 bg-black">
                         <a
                           href={`https://vrchat.com/home/world/${worldDetails.worldId}`}
@@ -832,7 +880,7 @@ export function WorldDetailPopup({
                         </span>
                       </div>
                     </div>
-                    <div className="w-2/5">
+                    <div className="w-full sm:w-2/5">
                       <div className="space-y-3">
                         <div>
                           <Label className="text-sm font-medium mb-1 block">
@@ -942,8 +990,8 @@ export function WorldDetailPopup({
                     </div>
                   </div>
                   <Separator className="my-4" />
-                  <div className="flex gap-4">
-                    <div className="flex flex-col gap-4 w-2/3">
+                  <div className="flex flex-col gap-4 sm:flex-row">
+                    <div className="flex flex-col gap-4 w-full sm:w-2/3">
                       <div>
                         <div className="text-sm font-semibold mb-2">
                           {t('world-detail:description')}
@@ -1047,61 +1095,87 @@ export function WorldDetailPopup({
                         )}
                       </div>
                     </div>
-                    <Separator orientation="vertical" />
-                    <div className="flex flex-col gap-4 w-1/3">
-                      <div>
-                        <div className="text-sm font-semibold mb-2">
-                          {t('world-detail:details')}
+                    <Separator
+                      orientation="vertical"
+                      className="hidden sm:block"
+                    />
+                    <div className="flex flex-col gap-4 w-full sm:w-1/3">
+                      {showAnyDetailField && (
+                        <div>
+                          <div className="text-sm font-semibold mb-2">
+                            {t('world-detail:details')}
+                          </div>
+                          <div className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
+                            {detailFields.visits && (
+                              <>
+                                <div className="text-gray-500">
+                                  {t('world-detail:visits')}
+                                </div>
+                                <div>{worldDetails.visits}</div>
+                              </>
+                            )}
+
+                            {detailFields.favorites && (
+                              <>
+                                <div className="text-gray-500">
+                                  {t('world-detail:favorites')}
+                                </div>
+                                <div>{worldDetails.favorites}</div>
+                              </>
+                            )}
+
+                            {detailFields.capacity && (
+                              <>
+                                <div className="text-gray-500">
+                                  {t('world-detail:capacity')}
+                                </div>
+                                <div>
+                                  {worldDetails.recommendedCapacity
+                                    ? `${worldDetails.recommendedCapacity} (${t('world-detail:max')} ${worldDetails.capacity})`
+                                    : worldDetails.capacity}
+                                </div>
+                              </>
+                            )}
+
+                            {detailFields.published &&
+                              worldDetails.publicationDate && (
+                                <>
+                                  <div className="text-gray-500">
+                                    {t('world-detail:published')}
+                                  </div>
+                                  <div>
+                                    {formatDate(
+                                      worldDetails.publicationDate,
+                                      language,
+                                    )}
+                                  </div>
+                                </>
+                              )}
+
+                            {detailFields.lastUpdated && (
+                              <>
+                                <div className="text-gray-500">
+                                  {t('world-detail:last-updated')}
+                                </div>
+                                <div>
+                                  {formatDateTime(
+                                    worldDetails.lastUpdated,
+                                    language,
+                                  )}
+                                </div>
+                              </>
+                            )}
+                          </div>
                         </div>
-                        <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-                          <div className="text-gray-500">
-                            {t('world-detail:visits')}
-                          </div>
-                          <div>{worldDetails.visits}</div>
-
-                          <div className="text-gray-500">
-                            {t('world-detail:favorites')}
-                          </div>
-                          <div>{worldDetails.favorites}</div>
-                          <div className="text-gray-500">
-                            {t('world-detail:capacity')}
-                          </div>
-                          <div>
-                            {worldDetails.recommendedCapacity
-                              ? `${worldDetails.recommendedCapacity} (${t('world-detail:max')} ${worldDetails.capacity})`
-                              : worldDetails.capacity}
-                          </div>
-
-                          {worldDetails.publicationDate && (
-                            <>
-                              <div className="text-gray-500">
-                                {t('world-detail:published')}
-                              </div>
-                              <div>
-                                {formatDate(
-                                  worldDetails.publicationDate,
-                                  language,
-                                )}
-                              </div>
-                            </>
-                          )}
-
-                          <div className="text-gray-500">
-                            {t('world-detail:last-updated')}
-                          </div>
-                          <div>
-                            {formatDateTime(worldDetails.lastUpdated, language)}
-                          </div>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
 
                   {!dontSaveToLocal && (
                     <>
                       <Separator className="my-2" />
-                      <div className="flex gap-4">
-                        <div className="w-2/3">
+                      <div className="flex flex-col gap-4 sm:flex-row">
+                        <div className="w-full sm:w-2/3">
                           <div className="text-sm font-semibold mb-2 flex flex-row items-center gap-2">
                             {t('general:memo')}
                             <Button
@@ -1149,8 +1223,11 @@ export function WorldDetailPopup({
                             )}
                           </div>
                         </div>
-                        <Separator orientation="vertical" />
-                        <div className="w-1/3">
+                        <Separator
+                          orientation="vertical"
+                          className="hidden sm:block"
+                        />
+                        <div className="w-full sm:w-1/3">
                           <div className="text-sm font-semibold mb-2 flex items-center gap-2">
                             {t('general:folders')}
                           </div>

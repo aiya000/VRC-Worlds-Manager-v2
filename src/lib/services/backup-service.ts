@@ -77,7 +77,7 @@ export const BackupServiceLive = Layer.succeed(BackupService, {
             date: new Date().toISOString(),
             number_of_folders: foldersData.length,
             number_of_worlds: worldDisplayData.length,
-            app_version: '2.0.0',
+            app_version: process.env.NEXT_PUBLIC_APP_VERSION ?? 'unknown',
           },
           worlds: worldDisplayData,
           folders: foldersData,

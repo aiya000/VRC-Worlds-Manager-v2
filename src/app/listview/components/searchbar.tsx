@@ -20,6 +20,7 @@ import { useSelectedWorldsStore } from '../hook/use-selected-worlds'
 import { useRef, useEffect } from 'react'
 import { usePopupStore } from '../hook/usePopups/store'
 import { Badge } from '@/components/ui/badge'
+import { SidebarTrigger } from '@/components/ui/sidebar'
 import { FolderType } from '@/types/folders'
 import { useWorldFiltersStore } from '../hook/use-filters'
 
@@ -101,6 +102,9 @@ export function SearchBar({ currentFolder }: SearchBarProps) {
     <div className="sticky top-0 z-20 bg-background">
       <div className="p-4 flex flex-wrap items-center gap-2 sm:gap-4">
         <div className="flex w-full items-center gap-2 sm:w-auto sm:min-w-[12rem] sm:flex-1">
+          {/* This row is the one that stays pinned while the grid scrolls, so
+              it is the only place the sidebar stays reachable from. */}
+          <SidebarTrigger className="h-10 w-10 shrink-0" />
           <div className="relative flex-1">
             <div className="relative">
               <Input

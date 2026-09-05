@@ -29,6 +29,14 @@ export type WorldCardFieldVisibility = {
   favorites: boolean
 }
 
+export type WorldDetailFieldVisibility = {
+  visits: boolean
+  favorites: boolean
+  capacity: boolean
+  published: boolean
+  lastUpdated: boolean
+}
+
 export type GroupInstanceCreateAllowedType = {
   normal: boolean
   plus: boolean

@@ -11,8 +11,10 @@
 
 const CACHE_NAME = 'vrcww-v1'
 
+// `cache.addAll` rejects the whole install if any of these 404s, so every entry
+// here has to be a file that actually ships.
 /** @type {string[]} */
-const PRECACHE_URLS = ['/', '/icons/app-icon.PNG']
+const PRECACHE_URLS = ['/', '/icons/icon-192.png']
 
 /**
  * Install event: precache static assets

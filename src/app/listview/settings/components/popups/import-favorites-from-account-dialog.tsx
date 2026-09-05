@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { commands, WorldDetails } from '@/lib/commands'
+import { INVALID_TWO_FACTOR_CODE_ERROR } from '@/lib/services/vrchat-api'
 
 interface ImportFavoritesFromAccountDialogProps {
   open: boolean
@@ -157,7 +158,14 @@ export function ImportFavoritesFromAccountDialog({
         twoFactorCodeType,
       )
       if (result.status === 'error') {
-        setErrorMessage(result.error || t('login-page:error-invalid-2fa'))
+        console.error(`[ImportFavorites] 2FA failed: ${result.error}`)
+        // A rejected code is the ordinary case here, and the raw API text is
+        // not something to put in front of the person typing it.
+        setErrorMessage(
+          result.error === INVALID_TWO_FACTOR_CODE_ERROR
+            ? t('login-page:error-invalid-2fa')
+            : result.error || t('login-page:error-invalid-2fa'),
+        )
         return
       }
       await fetchFavorites()

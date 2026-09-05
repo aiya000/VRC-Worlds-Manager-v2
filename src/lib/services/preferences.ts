@@ -5,7 +5,9 @@ import type {
   FolderRemovalPreference,
   InstanceRegion,
   WorldCardFieldVisibility,
+  WorldDetailFieldVisibility,
 } from '@/lib/types'
+import type { InstanceType } from '@/types/instances'
 
 const defaultWorldCardFieldVisibility: WorldCardFieldVisibility = {
   name: true,
@@ -13,6 +15,14 @@ const defaultWorldCardFieldVisibility: WorldCardFieldVisibility = {
   visits: true,
   lastUpdated: true,
   favorites: true,
+}
+
+const defaultWorldDetailFieldVisibility: WorldDetailFieldVisibility = {
+  visits: true,
+  favorites: true,
+  capacity: true,
+  published: true,
+  lastUpdated: true,
 }
 
 export class PreferencesService extends Context.Tag('PreferencesService')<
@@ -26,6 +36,10 @@ export class PreferencesService extends Context.Tag('PreferencesService')<
     readonly setCardSize: (cardSize: CardSize) => Effect.Effect<void>
     readonly getRegion: () => Effect.Effect<InstanceRegion>
     readonly setRegion: (region: InstanceRegion) => Effect.Effect<void>
+    readonly getInstanceType: () => Effect.Effect<InstanceType>
+    readonly setInstanceType: (
+      instanceType: InstanceType,
+    ) => Effect.Effect<void>
     readonly getStarredFilterItems: (
       id: FilterItemSelectorStarredType,
     ) => Effect.Effect<string[]>
@@ -45,6 +59,10 @@ export class PreferencesService extends Context.Tag('PreferencesService')<
     readonly getWorldCardFieldVisibility: () => Effect.Effect<WorldCardFieldVisibility>
     readonly setWorldCardFieldVisibility: (
       visibility: WorldCardFieldVisibility,
+    ) => Effect.Effect<void>
+    readonly getWorldDetailFieldVisibility: () => Effect.Effect<WorldDetailFieldVisibility>
+    readonly setWorldDetailFieldVisibility: (
+      visibility: WorldDetailFieldVisibility,
     ) => Effect.Effect<void>
   }
 >() {}
@@ -80,6 +98,10 @@ export const PreferencesServiceLive = Layer.succeed(PreferencesService, {
   setCardSize: (cardSize) => Effect.sync(() => setItem('cardSize', cardSize)),
   getRegion: () => Effect.succeed(getItem<InstanceRegion>('region', 'us')),
   setRegion: (region) => Effect.sync(() => setItem('region', region)),
+  getInstanceType: () =>
+    Effect.succeed(getItem<InstanceType>('instanceType', 'public')),
+  setInstanceType: (instanceType) =>
+    Effect.sync(() => setItem('instanceType', instanceType)),
   getStarredFilterItems: (id) =>
     Effect.succeed(getItem<string[]>(`starredFilterItems_${id}`, [])),
   setStarredFilterItems: (id, values) =>
@@ -105,4 +127,13 @@ export const PreferencesServiceLive = Layer.succeed(PreferencesService, {
     ),
   setWorldCardFieldVisibility: (visibility) =>
     Effect.sync(() => setItem('worldCardFieldVisibility', visibility)),
+  getWorldDetailFieldVisibility: () =>
+    Effect.succeed(
+      getItem<WorldDetailFieldVisibility>(
+        'worldDetailFieldVisibility',
+        defaultWorldDetailFieldVisibility,
+      ),
+    ),
+  setWorldDetailFieldVisibility: (visibility) =>
+    Effect.sync(() => setItem('worldDetailFieldVisibility', visibility)),
 })
