@@ -33,9 +33,12 @@ import { usePopupStore } from '../hook/usePopups/store'
 
 const sidebarStyles = {
   container:
-    'flex flex-col h-full w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60',
+    'flex flex-col h-full w-full overflow-hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60',
   header: 'flex min-h-14 shrink-0 items-center px-4',
-  nav: 'flex-1 space-y-0.5 p-1 pb-0',
+  // `min-h-0` lets this shrink below its content so the folder list inside can
+  // own the leftover space and scroll; `overflow-y-auto` is the fallback for a
+  // viewport too short even for the list's minimum height.
+  nav: 'flex min-h-0 flex-1 flex-col space-y-0.5 overflow-y-auto p-1 pb-0',
   link: 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent/50 hover:text-accent-foreground',
   activeLink: 'bg-accent/60 text-accent-foreground',
   footer: 'sticky bottom-0 left-0 mt-auto p-1 pb-2',
@@ -276,7 +279,7 @@ export function AppSidebar() {
             </div>
           </SidebarGroup>
           <Separator className="my-2" />
-          <SidebarGroup>
+          <SidebarGroup className="min-h-0 flex-1">
             <div className="flex items-center justify-between px-3 py-2 text-xs font-medium text-muted-foreground">
               <span className="text-sm font-medium">
                 {t('general:folders')}
