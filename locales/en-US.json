@@ -163,7 +163,7 @@
   "world-card:android": "This world is an Android world",
   "world-card:ios": "This world is an iOS world",
   "world-card:visits": "Visits: {0}",
-  "world-card:updated": "Updated: {0}",
+  "world-card:updated": "Last Updated: {0}",
   "world-card:by-author": "By {0}",
   "world-card:field-name": "World Name",
   "world-card:field-author": "Author Name",
