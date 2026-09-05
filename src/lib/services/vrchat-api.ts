@@ -149,6 +149,22 @@ function apiUrl(path: string): string {
   return `${CF_WORKER_URL}/api/1${path}`
 }
 
+/**
+ * The `Basic` credential VRChat expects: each half percent-encoded first, then
+ * the pair base64-encoded.
+ *
+ * VRChat's API documents the percent-encoding, and it is also what makes this
+ * work at all for a name outside Latin-1 -- `btoa` throws
+ * `InvalidCharacterError` on such a string, so a Japanese username failed
+ * before the request was ever sent.
+ */
+export function basicAuthCredential(
+  username: string,
+  password: string,
+): string {
+  return btoa(`${encodeURIComponent(username)}:${encodeURIComponent(password)}`)
+}
+
 async function apiFetch(
   path: string,
   options?: RequestInit,
@@ -268,7 +284,7 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
         await clearTokens()
         const res = await apiFetch('/auth/user', {
           headers: {
-            Authorization: `Basic ${btoa(`${username}:${password}`)}`,
+            Authorization: `Basic ${basicAuthCredential(username, password)}`,
           },
         })
         const requirement = twoFactorRequirementOf(await res.json())
