@@ -7,6 +7,7 @@ import {
   type LaunchedInstanceInput,
 } from './services/launched-instance-service'
 import type { LaunchedInstanceRecord } from './services/db'
+import { GoogleAuthService } from './services/google-auth-service'
 import { AppLayer } from '@/lib/services/layers'
 import { PreferencesService } from '@/lib/services/preferences'
 import { FolderService } from '@/lib/services/folder-service'
@@ -847,6 +848,36 @@ export const commands = {
       Effect.gen(function* () {
         const svc = yield* LaunchedInstanceService
         yield* svc.forgetLaunchedInstance(id)
+        return null
+      }),
+    )
+  },
+
+  async isGoogleDriveConnected(): Promise<Result<boolean, string>> {
+    return run(
+      Effect.gen(function* () {
+        const svc = yield* GoogleAuthService
+        return yield* svc.isConnected()
+      }),
+    )
+  },
+
+  /** Must be called from inside a click handler -- see `GoogleAuthService`. */
+  async connectGoogleDrive(): Promise<Result<null, string>> {
+    return run(
+      Effect.gen(function* () {
+        const svc = yield* GoogleAuthService
+        yield* svc.connect()
+        return null
+      }),
+    )
+  },
+
+  async disconnectGoogleDrive(): Promise<Result<null, string>> {
+    return run(
+      Effect.gen(function* () {
+        const svc = yield* GoogleAuthService
+        yield* svc.disconnect()
         return null
       }),
     )

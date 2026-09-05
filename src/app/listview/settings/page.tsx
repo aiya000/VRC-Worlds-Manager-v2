@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { DeviceOnlySettingToggle } from '@/components/device-only-setting-toggle'
+import { GoogleDriveSection } from './components/google-drive-section'
 import { WorldCardPreview } from '@/components/world-card'
 import { WorldCardFieldToggles } from '@/components/world-card-field-toggles'
 import { WorldDetailFieldToggles } from '@/components/world-detail-field-toggles'
@@ -84,9 +85,12 @@ export default function SettingsPage() {
       </div>
       <Tabs defaultValue="preferences" className="w-full">
         <div className="sticky top-0 z-10 bg-background pt-2 pb-2">
-          <TabsList className="grid grid-cols-3">
+          <TabsList className="grid grid-cols-4">
             <TabsTrigger value="preferences">
               {t('settings-page:section-preferences')}
+            </TabsTrigger>
+            <TabsTrigger value="sync">
+              {t('settings-page:section-sync')}
             </TabsTrigger>
             <TabsTrigger value="data-management">
               {t('settings-page:section-data-management')}
@@ -279,6 +283,10 @@ export default function SettingsPage() {
               }
             />
           </Card>
+        </TabsContent>
+
+        <TabsContent value="sync" className="space-y-4">
+          <GoogleDriveSection />
         </TabsContent>
 
         <TabsContent value="data-management" className="space-y-4">
