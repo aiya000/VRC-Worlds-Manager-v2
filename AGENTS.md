@@ -305,10 +305,15 @@ When the work you are doing resolves a GitHub Issue, do not commit it straight t
    ```
 
 **Merge with `--merge`, not `--squash`.** Keeping the merge commit is what this
-repository does. It also avoids a practical snag: Claude Code's permission
-classifier refused `gh pr merge --squash` in a session where the `--merge` form
-of the same command went through, so an agent that reaches for squash may find
-itself stuck partway through a task for no reason it can act on.
+repository does.
+
+**Expect `gh pr merge` to be refused, and do not treat that as a failure of the
+work.** Claude Code's permission classifier has blocked it in both forms --
+`--squash` in one session, and `--merge`, with and without `--delete-branch`, in
+another -- so whether it goes through is not something an agent can predict or
+work around. When it is refused, say so, give the exact command, and let the
+user run it; the branch is pushed and the checks have passed, so nothing is
+lost. Do not go looking for another route to the same merge.
 
 The Issue tracker is how requests are kept; a PR is how each one is answered, so the
 two stay tied together and the history shows which Issue a change came from.
