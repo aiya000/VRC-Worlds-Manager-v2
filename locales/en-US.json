@@ -593,5 +593,21 @@
   "settings-page:google-drive-dismissed": "The Google window was closed, so the sync was stopped.",
   "settings-page:google-drive-unanswered": "The Google window never answered. If you opened this from an app added to your home screen, opening it in the browser instead may get through.",
   "settings-page:google-drive-installed-warning": "Opened from the home screen, the app may not be able to get back from Google's sign-in window. If connecting does not work, open the site in a browser and try again there.",
-  "settings-page:google-drive-state-unreadable": "Could not read whether this device is connected. Please reload the page."
+  "settings-page:google-drive-state-unreadable": "Could not read whether this device is connected. Please reload the page.",
+  "setup-page:restore-source-description": "Where should this app start from?",
+  "setup-page:restore-source-change": "Choose a different way",
+  "setup-page:restore-source-v2-title": "Bring data over from the desktop app",
+  "setup-page:restore-source-v2-description": "If you used the desktop VRChat Worlds Manager v2. Reads the worlds.json and folders.json it wrote",
+  "setup-page:restore-source-drive-title": "Take it from Google Drive",
+  "setup-page:restore-source-drive-description": "If you already use this app on another device. Picks up whatever that device has synced",
+  "setup-page:restore-source-backup-title": "Restore from a backup file",
+  "setup-page:restore-source-backup-description": "If you have a backup file this app wrote earlier",
+  "setup-page:restore-source-fresh-title": "Start fresh",
+  "setup-page:restore-source-fresh-description": "Brings nothing in. You can do any of the above later from the settings screen",
+  "setup-page:restore-backup-description": "Choose a backup file written from this app's settings screen. It is added to what is already here, so nothing gets removed.",
+  "setup-page:restore-backup-file-label": "Backup file",
+  "setup-page:restore-backup-placeholder": "Choose a file",
+  "setup-page:restore-backup-button": "Bring it in",
+  "setup-page:restore-backup-done": "Brought in",
+  "setup-page:restore-source-title": "Bringing your data over"
 }

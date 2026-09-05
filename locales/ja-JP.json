@@ -593,5 +593,21 @@
   "settings-page:google-drive-dismissed": "Google の画面が閉じられたため、同期を中止しました。",
   "settings-page:google-drive-unanswered": "Google の画面から応答がありませんでした。ホーム画面に追加したアプリから開いている場合は、ブラウザで開き直すと通ることがあります。",
   "settings-page:google-drive-installed-warning": "ホーム画面から起動したアプリでは、Google のログイン画面から戻ってこられないことがあります。接続できない場合は、ブラウザで開き直してから試してください。",
-  "settings-page:google-drive-state-unreadable": "接続の状態を読み取れませんでした。ページを再読み込みしてください。"
+  "settings-page:google-drive-state-unreadable": "接続の状態を読み取れませんでした。ページを再読み込みしてください。",
+  "setup-page:restore-source-description": "このアプリを、どこから始めますか？",
+  "setup-page:restore-source-change": "別の方法を選ぶ",
+  "setup-page:restore-source-v2-title": "デスクトップ版から移行する",
+  "setup-page:restore-source-v2-description": "デスクトップ版 VRChat Worlds Manager v2 を使っていた場合。書き出された worlds.json と folders.json を読み込みます",
+  "setup-page:restore-source-drive-title": "Google Drive から取り込む",
+  "setup-page:restore-source-drive-description": "他の端末でこのアプリを使っている場合。同期しているデータをそのまま引き継げます",
+  "setup-page:restore-source-backup-title": "バックアップファイルから復元する",
+  "setup-page:restore-source-backup-description": "このアプリで書き出したバックアップファイルがある場合",
+  "setup-page:restore-source-fresh-title": "最初から始める",
+  "setup-page:restore-source-fresh-description": "何も取り込みません。あとから設定画面でいつでも取り込めます",
+  "setup-page:restore-backup-description": "このアプリの設定画面で書き出したバックアップファイルを選んでください。いまのデータに追加する形で取り込むので、何かが消えることはありません。",
+  "setup-page:restore-backup-file-label": "バックアップファイル",
+  "setup-page:restore-backup-placeholder": "ファイルを選択してください",
+  "setup-page:restore-backup-button": "取り込む",
+  "setup-page:restore-backup-done": "取り込みました",
+  "setup-page:restore-source-title": "データの引き継ぎ"
 }
