@@ -97,24 +97,32 @@ async function seedLegacyDatabase(page: Page) {
 }
 
 async function readMigratedDatabase(page: Page) {
-  // Opening without a version before Dexie has upgraded lands on the old
-  // schema, so wait for the upgrade to have happened first.
-  await page.waitForFunction(
-    async () => {
-      const databases = await indexedDB.databases()
-      const found = databases.find((d) => d.name === 'VRChatWorldsManager')
-      return found?.version === 30
-    },
-    undefined,
-    { timeout: 20_000 },
-  )
-
   return page.evaluate(async (name) => {
-    const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(name)
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
-    })
+    // Opening without a version lands on whatever schema is current, which
+    // before the upgrade finishes is still the old one -- and the reported
+    // database version turns over before the stores are in place. So wait for
+    // the stores themselves rather than for a number.
+    const openUpgraded = async (): Promise<IDBDatabase> => {
+      for (let attempt = 0; attempt < 200; attempt++) {
+        const candidate = await new Promise<IDBDatabase>((resolve, reject) => {
+          const request = indexedDB.open(name)
+          request.onsuccess = () => resolve(request.result)
+          request.onerror = () => reject(request.error)
+        })
+        if (
+          candidate.objectStoreNames.contains('foldersById') &&
+          candidate.objectStoreNames.contains('folderOrder') &&
+          !candidate.objectStoreNames.contains('folders')
+        ) {
+          return candidate
+        }
+        candidate.close()
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+      throw new Error('the upgraded stores never appeared')
+    }
+
+    const db = await openUpgraded()
     const all = <T>(store: string) =>
       new Promise<T[]>((resolve, reject) => {
         const request = db
