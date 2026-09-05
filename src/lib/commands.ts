@@ -658,11 +658,21 @@ export const commands = {
     )
   },
 
-  async getFavoriteWorldIds(): Promise<Result<string[], string>> {
+  /**
+   * Reads the signed-in account's favorites without touching the local
+   * database, for the caller to show and let the user pick from.
+   *
+   * `getFavoriteWorlds` above stores what it reads, which is right when
+   * refreshing your own list and wrong when the account signed in is somebody
+   * else's.
+   */
+  async fetchFavoriteWorlds(
+    onProgress?: (fetched: number) => void,
+  ): Promise<Result<WorldDisplayData[], string>> {
     return run(
       Effect.gen(function* () {
         const svc = yield* VRChatApiService
-        return yield* svc.getFavoriteWorldIds()
+        return yield* svc.getFavoriteWorlds(onProgress)
       }),
     )
   },

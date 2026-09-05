@@ -199,11 +199,12 @@ export class VRChatApiService extends Context.Tag('VRChatApiService')<
       twoFactorType: string,
     ) => Effect.Effect<void, Error>
     readonly logout: () => Effect.Effect<void, Error>
-    readonly getFavoriteWorlds: () => Effect.Effect<WorldDisplayData[], Error>
+    readonly getFavoriteWorlds: (
+      onProgress?: (fetched: number) => void,
+    ) => Effect.Effect<WorldDisplayData[], Error>
     readonly purgeAllFavoriteWorlds: (
       onProgress?: (done: number, total: number) => void,
     ) => Effect.Effect<{ deleted: number; failed: number }, Error>
-    readonly getFavoriteWorldIds: () => Effect.Effect<string[], Error>
     readonly getCurrentUser: () => Effect.Effect<
       { id: string; displayName: string },
       Error
@@ -323,7 +324,7 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
   // per page is enough. Walking `/favorites` and fetching each world instead
   // would cost one request per favorite and quickly hit the Worker's hourly
   // per-IP limit for anyone with a few hundred favorites.
-  getFavoriteWorlds: () =>
+  getFavoriteWorlds: (onProgress) =>
     Effect.tryPromise({
       try: async () => {
         const PAGE_SIZE = 100
@@ -340,6 +341,7 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
               toWorldDisplayData(parseVRChatWorld(raw), fetchedAt, []),
             )
           }
+          onProgress?.(worlds.length)
           if (page.length < PAGE_SIZE) {
             break
           }
@@ -389,28 +391,6 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
         return { deleted, failed }
       },
       catch: (e) => new Error(`Failed to purge favorites: ${e}`),
-    }),
-
-  getFavoriteWorldIds: () =>
-    Effect.tryPromise({
-      try: async () => {
-        const PAGE_SIZE = 100
-        const favoriteIds: string[] = []
-        let offset = 0
-        for (;;) {
-          const res = await apiFetch(
-            `/favorites?type=world&n=${PAGE_SIZE}&offset=${offset}`,
-          )
-          const page = (await res.json()) as Array<{ favoriteId: string }>
-          favoriteIds.push(...page.map((f) => f.favoriteId))
-          if (page.length < PAGE_SIZE) {
-            break
-          }
-          offset += PAGE_SIZE
-        }
-        return favoriteIds
-      },
-      catch: (e) => new Error(`Failed to get favorite world IDs: ${e}`),
     }),
 
   getCurrentUser: () =>
