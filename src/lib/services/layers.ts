@@ -13,6 +13,7 @@ import { ShareServiceLive } from './share-service'
 import { TaskServiceLive } from './task-service'
 import { VRChatApiServiceLive } from './vrchat-api'
 import { QuotaServiceLive } from './quota-manager'
+import { LaunchedInstanceServiceLive } from './launched-instance-service'
 
 export const AppLayer = Layer.mergeAll(
   PreferencesServiceLive,
@@ -29,4 +30,5 @@ export const AppLayer = Layer.mergeAll(
   TaskServiceLive,
   VRChatApiServiceLive,
   QuotaServiceLive,
+  LaunchedInstanceServiceLive,
 )

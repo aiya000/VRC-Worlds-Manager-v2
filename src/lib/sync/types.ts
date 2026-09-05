@@ -96,6 +96,27 @@ export interface CustomTagSyncRecord extends SyncMeta {
   tagRefs: TagRef[]
 }
 
+/**
+ * An instance the user made for a world, kept so it can be entered again.
+ *
+ * A launch URL is `worldId:instanceId` and nothing else, so a saved row is
+ * enough to get back into a world VRChat will no longer serve -- which is the
+ * point: a world that has stopped being public can still be entered through an
+ * instance of it.
+ */
+export interface LaunchedInstanceSyncRecord extends SyncMeta {
+  /** `worldId:instanceId`. Two devices cannot mint the same one. */
+  id: string
+  worldId: string
+  instanceId: string
+  shortName: string | null
+  /** What was asked for when it was made: `public`, `friends`, a group type. */
+  instanceType: string
+  region: string
+  /** When it was made. What the list is ordered by. */
+  launchedAt: number
+}
+
 export interface SyncedSetting {
   value: string
   updatedAt: number
@@ -113,6 +134,13 @@ export interface Snapshot {
   hiddenWorlds: HiddenWorldSyncRecord[]
   memos: MemoSyncRecord[]
   customTags: CustomTagSyncRecord[]
+  /**
+   * Added after `formatVersion` 2 was already being written. The version is
+   * deliberately not bumped for it: a file that predates the field is still a
+   * perfectly good backup, and rejecting one would take away the ability to
+   * restore anything written by 2.2.0.
+   */
+  launchedInstances: LaunchedInstanceSyncRecord[]
   settings: Record<string, SyncedSetting>
 }
 

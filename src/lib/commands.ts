@@ -2,6 +2,11 @@ import { Effect } from 'effect'
 // Shadows TypeScript's built-in `InstanceType<T>` utility on purpose: within
 // this file the app's own instance type is the one that is meant.
 import type { InstanceType } from '@/types/instances'
+import {
+  LaunchedInstanceService,
+  type LaunchedInstanceInput,
+} from './services/launched-instance-service'
+import type { LaunchedInstanceRecord } from './services/db'
 import { AppLayer } from '@/lib/services/layers'
 import { PreferencesService } from '@/lib/services/preferences'
 import { FolderService } from '@/lib/services/folder-service'
@@ -803,6 +808,46 @@ export const commands = {
       Effect.gen(function* () {
         const svc = yield* VRChatApiService
         return yield* svc.openInstanceInClient(worldId, instanceId)
+      }),
+    )
+  },
+
+  /**
+   * Remembers an instance so it can be entered again later.
+   *
+   * The only place a launch URL used to exist was the toast shown the moment
+   * an instance was made, so closing it lost the instance for good -- and a
+   * world that stops being public can only be entered through one.
+   */
+  async recordLaunchedInstance(
+    input: LaunchedInstanceInput,
+  ): Promise<Result<null, string>> {
+    return run(
+      Effect.gen(function* () {
+        const svc = yield* LaunchedInstanceService
+        yield* svc.recordLaunchedInstance(input)
+        return null
+      }),
+    )
+  },
+
+  async getLaunchedInstances(
+    worldId: string,
+  ): Promise<Result<LaunchedInstanceRecord[], string>> {
+    return run(
+      Effect.gen(function* () {
+        const svc = yield* LaunchedInstanceService
+        return yield* svc.getLaunchedInstances(worldId)
+      }),
+    )
+  },
+
+  async forgetLaunchedInstance(id: string): Promise<Result<null, string>> {
+    return run(
+      Effect.gen(function* () {
+        const svc = yield* LaunchedInstanceService
+        yield* svc.forgetLaunchedInstance(id)
+        return null
       }),
     )
   },
