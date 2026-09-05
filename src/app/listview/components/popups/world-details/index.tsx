@@ -406,23 +406,35 @@ export function WorldDetailPopup({
     loadCustomTags()
   }, [dontSaveToLocal, loadCustomTags, open, worldId])
 
+  // Keyed on `open` rather than running once on mount: the popup stays mounted,
+  // and the group instance creator writes the region preference too, so a
+  // mount-only read would show a stale choice for the rest of the session.
   useEffect(() => {
-    const loadRegionPreference = async () => {
+    if (!open) {
+      return
+    }
+
+    const loadInstancePreferences = async () => {
       try {
-        const regionResult = await commands.getRegion()
+        const [regionResult, instanceTypeResult] = await Promise.all([
+          commands.getRegion(),
+          commands.getInstanceType(),
+        ])
         if (regionResult.status === 'ok') {
           setSelectedRegion(regionResult.data)
-          console.info(`Loaded region preference: ${regionResult.data}`)
+        }
+        if (instanceTypeResult.status === 'ok') {
+          setSelectedInstanceType(instanceTypeResult.data)
         }
       } catch (e) {
-        console.error(`Failed to load region preference: ${e}`)
+        console.error(`Failed to load instance preferences: ${e}`)
         // Fall back to JP if we can't load the preference
         setSelectedRegion('jp' as InstanceRegion)
       }
     }
 
-    loadRegionPreference()
-  }, []) // Empty dependency array means this runs once on mount
+    loadInstancePreferences()
+  }, [open])
 
   const setRegionPreference = async (region: InstanceRegion) => {
     try {
@@ -430,6 +442,15 @@ export function WorldDetailPopup({
       console.info(`Region preference set to ${region}`)
     } catch (e) {
       console.error(`Failed to set region preference: ${e}`)
+    }
+  }
+
+  const setInstanceTypePreference = async (instanceType: InstanceType) => {
+    try {
+      await commands.setInstanceType(instanceType)
+      console.info(`Instance type preference set to ${instanceType}`)
+    } catch (e) {
+      console.error(`Failed to set instance type preference: ${e}`)
     }
   }
 
@@ -442,6 +463,7 @@ export function WorldDetailPopup({
         selectedRegion,
       )
       setRegionPreference(selectedRegion)
+      setInstanceTypePreference(selectedInstanceType)
     } catch (e) {
       console.error(`Failed to create instance: ${e}`)
       setErrorState(`Failed to create instance: ${e}`)
@@ -482,6 +504,7 @@ export function WorldDetailPopup({
         isLoading: false,
       }))
       setRegionPreference(selectedRegion)
+      setInstanceTypePreference(selectedInstanceType)
     } catch (e) {
       console.error(`Failed to load groups: ${e}`)
       setGroupInstanceState((prev) => ({

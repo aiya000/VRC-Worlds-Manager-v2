@@ -7,6 +7,7 @@ import type {
   WorldCardFieldVisibility,
   WorldDetailFieldVisibility,
 } from '@/lib/types'
+import type { InstanceType } from '@/types/instances'
 
 const defaultWorldCardFieldVisibility: WorldCardFieldVisibility = {
   name: true,
@@ -35,6 +36,10 @@ export class PreferencesService extends Context.Tag('PreferencesService')<
     readonly setCardSize: (cardSize: CardSize) => Effect.Effect<void>
     readonly getRegion: () => Effect.Effect<InstanceRegion>
     readonly setRegion: (region: InstanceRegion) => Effect.Effect<void>
+    readonly getInstanceType: () => Effect.Effect<InstanceType>
+    readonly setInstanceType: (
+      instanceType: InstanceType,
+    ) => Effect.Effect<void>
     readonly getStarredFilterItems: (
       id: FilterItemSelectorStarredType,
     ) => Effect.Effect<string[]>
@@ -93,6 +98,10 @@ export const PreferencesServiceLive = Layer.succeed(PreferencesService, {
   setCardSize: (cardSize) => Effect.sync(() => setItem('cardSize', cardSize)),
   getRegion: () => Effect.succeed(getItem<InstanceRegion>('region', 'us')),
   setRegion: (region) => Effect.sync(() => setItem('region', region)),
+  getInstanceType: () =>
+    Effect.succeed(getItem<InstanceType>('instanceType', 'public')),
+  setInstanceType: (instanceType) =>
+    Effect.sync(() => setItem('instanceType', instanceType)),
   getStarredFilterItems: (id) =>
     Effect.succeed(getItem<string[]>(`starredFilterItems_${id}`, [])),
   setStarredFilterItems: (id, values) =>
