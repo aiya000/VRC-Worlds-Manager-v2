@@ -39,6 +39,23 @@ test('the About footer links to the privacy policy', async ({ page }) => {
   ).toHaveAttribute('href', PRIVACY)
 })
 
+// Reachable from the sidebar too, from wherever someone happens to be. A
+// policy that has to be hunted for reads as one that would rather not be read.
+test('the sidebar reaches the privacy policy from anywhere in the app', async ({
+  page,
+}) => {
+  await page.goto('/listview/folders/special/all')
+
+  await page
+    .getByText(jaJP['privacy-policy:link-label'], { exact: true })
+    .click()
+
+  await expect(page).toHaveURL(new RegExp(`${PRIVACY}$`))
+  await expect(
+    page.getByRole('heading', { name: jaJP['privacy-policy:title'] }),
+  ).toBeVisible()
+})
+
 // The two screens someone reaches before they have agreed to anything: the
 // first-run setup, and the form that asks for a VRChat password.
 test('the setup screen links to the privacy policy', async ({ page }) => {
