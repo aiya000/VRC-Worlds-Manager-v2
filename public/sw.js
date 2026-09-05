@@ -9,7 +9,13 @@
  * - Navigation: Network-first
  */
 
-const CACHE_NAME = 'vrcww-v1'
+// Registration passes the app version as `?v=`, so a release gets its own cache
+// and the `activate` handler below throws the previous one away. A fixed name
+// would keep serving the previous release's precached `/` to an offline user
+// forever, which matters once a release changes the IndexedDB schema: the old
+// bundle cannot open the upgraded database at all.
+const VERSION = new URL(self.location.href).searchParams.get('v') ?? 'dev'
+const CACHE_NAME = `vrcww-${VERSION}`
 
 // `cache.addAll` rejects the whole install if any of these 404s, so every entry
 // here has to be a file that actually ships.

@@ -522,5 +522,8 @@
   "share-world:toast-url-copied": "ワールドURLをコピーしました。",
   "share-world:toast-share-text-copied": "共有テキストをコピーしました。",
   "share-world:toast-twitter-opened": "Twitter共有を開きました。",
-  "export-popup:sort-order": "並び順"
+  "export-popup:sort-order": "並び順",
+  "stale-bundle:title": "新しいバージョンがあります",
+  "stale-bundle:description": "このページは古いバージョンのままです。保存されているデータは新しい形式に更新されているため、再読み込みが必要です。",
+  "stale-bundle:reload": "再読み込み"
 }
