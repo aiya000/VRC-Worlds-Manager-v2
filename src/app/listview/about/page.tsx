@@ -4,57 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { useLocalization } from '@/hooks/use-localization'
 import { Button } from '@/components/ui/button'
-import { useEffect, useState } from 'react'
 import { UserProfile } from '@/app/listview/about/components/user-profile'
-import { Heart } from 'lucide-react'
 import { SiGithub, SiDiscord } from '@icons-pack/react-simple-icons'
-import { toast } from 'sonner'
-import { commands } from '@/lib/commands'
 
 export default function AboutSection() {
   const { t } = useLocalization()
-  const [orderedSupporters, setOrderedSupporters] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const appVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? 'unknown'
-
-  // Helper function to sort supporters
-  const sortSupporters = (data: Record<string, string[]>) => {
-    const platinumNames = (data.platinumSupporter || []).sort()
-    const goldNames = (data.goldSupporter || []).sort()
-    const silverNames = (data.silverSupporter || []).sort()
-    const bronzeNames = (data.bronzeSupporter || []).sort()
-    const basicNames = (data.basicSupporter || []).sort()
-
-    return [
-      ...platinumNames,
-      ...goldNames,
-      ...silverNames,
-      ...bronzeNames,
-      ...basicNames,
-    ]
-  }
-
-  useEffect(() => {
-    async function fetchPatreonData() {
-      try {
-        const result = await commands.fetchPatreonData()
-        if (result.status === 'ok') {
-          setOrderedSupporters(sortSupporters(result.data))
-        } else {
-          throw new Error(result.error)
-        }
-      } catch (e) {
-        console.error(`Failed to fetch Patreon data: ${e}`)
-        toast('Error', {
-          description: 'Failed to load supporter data.',
-        })
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchPatreonData()
-  }, [])
 
   return (
     <div className="min-h-svh flex flex-col overflow-x-hidden">
@@ -182,50 +137,6 @@ export default function AboutSection() {
                   </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Supporters Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Heart className="h-5 w-5 text-pink-500" />
-              {t('about-section:supporters')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <p className="text-muted-foreground">
-              {t('about-section:supporters-description:foretext')}
-              <a
-                href="https://raifa.fanbox.cc/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-pink-500 hover:underline"
-              >
-                {t('about-section:supporters-description:link-text')}
-              </a>
-              {t('about-section:supporters-description:posttext')}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {isLoading ? (
-                <span className="text-muted-foreground">
-                  {t('about-section:loading-supporters')}
-                </span>
-              ) : orderedSupporters.length > 0 ? (
-                orderedSupporters.map((name) => (
-                  <span
-                    key={name}
-                    className="px-1 py-1 text-pink-500 dark:text-pink-400 rounded-full text-sm font-medium"
-                  >
-                    {name}
-                  </span>
-                ))
-              ) : (
-                <span className="text-muted-foreground">
-                  {t('about-section:no-supporters')}
-                </span>
-              )}
             </div>
           </CardContent>
         </Card>
