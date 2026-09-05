@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import jaJP from '../../locales/ja-JP.json'
+import { seedFolders } from './seed-folders'
 
 const LIST_VIEW = '/listview/folders/special/all'
 const FOLDER_LIST = '[data-folder-list]'
@@ -17,30 +18,6 @@ const VIEWPORTS = [
   { width: 390, height: 640 },
 ]
 
-/**
- * A fresh browser has no folders, so put some in the database Dexie creates on
- * the first visit, rather than driving the folder-creation UI fifteen times.
- */
-async function seedFolders(page: Page) {
-  await page.goto(LIST_VIEW)
-  await expect(page.locator('[data-sidebar="trigger"]')).toBeVisible()
-
-  await page.evaluate(async (names: string[]) => {
-    const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open('VRChatWorldsManager')
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
-    })
-    await new Promise<void>((resolve, reject) => {
-      const transaction = db.transaction('folders', 'readwrite')
-      const store = transaction.objectStore('folders')
-      names.forEach((name, order) => store.put({ name, order }))
-      transaction.oncomplete = () => resolve()
-      transaction.onerror = () => reject(transaction.error)
-    })
-  }, SEEDED)
-}
-
 async function openSidebar(page: Page) {
   await page.goto(LIST_VIEW)
   await page.locator('[data-sidebar="trigger"]').click()
@@ -54,7 +31,8 @@ for (const viewport of VIEWPORTS) {
   test.describe(`sidebar folder list at ${viewport.width}x${viewport.height}`, () => {
     test.beforeEach(async ({ page }) => {
       await page.setViewportSize(viewport)
-      await seedFolders(page)
+      await page.goto(LIST_VIEW)
+      await seedFolders(page, SEEDED)
     })
 
     test('scrolls instead of running off the sidebar', async ({ page }) => {
