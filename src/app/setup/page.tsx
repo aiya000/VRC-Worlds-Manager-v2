@@ -420,7 +420,7 @@ const WelcomePage: React.FC = () => {
                 <p className="text-sm text-muted-foreground">
                   {t('setup-page:not-first-time:foretext')}
                   <a
-                    href="https://github.com/aiya000/VRC-Worlds-Manager-v2/issues/new"
+                    href="https://github.com/aiya000/VRChat-Worlds-Manager-Web/issues/new"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-blue-500 hover:underline"
@@ -748,7 +748,7 @@ const WelcomePage: React.FC = () => {
                   <p className="text-sm text-muted-foreground">
                     {t('setup-page:need-help:foretext')}
                     <a
-                      href="https://github.com/aiya000/VRC-Worlds-Manager-v2/issues/new"
+                      href="https://github.com/aiya000/VRChat-Worlds-Manager-Web/issues/new"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-blue-500 hover:underline"

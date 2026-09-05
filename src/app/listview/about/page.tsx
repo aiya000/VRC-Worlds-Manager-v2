@@ -152,7 +152,7 @@ export default function AboutSection() {
           <div className="flex gap-4">
             <Button variant="ghost" size="sm" asChild>
               <a
-                href="https://github.com/Raifa21/vrc-worlds-manager-v2"
+                href="https://github.com/aiya000/VRChat-Worlds-Manager-Web"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex flex-row gap-2"
@@ -163,7 +163,7 @@ export default function AboutSection() {
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <a
-                href="https://discord.gg/gNzbpux5xW"
+                href="https://discord.gg/g5nq5GuGPJ"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex flex-row gap-2"

@@ -79,7 +79,7 @@ export function ErrorContent() {
         <div className="flex flex-col gap-4 items-center">
           <Button variant="secondary" className="gap-2 w-full" asChild>
             <a
-              href="https://github.com/aiya000/VRC-Worlds-Manager-v2/issues/new"
+              href="https://github.com/aiya000/VRChat-Worlds-Manager-Web/issues/new"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center"
