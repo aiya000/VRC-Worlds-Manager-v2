@@ -437,6 +437,29 @@ https://github.com/aiya000/VRChat-Worlds-Manager-Web/releases and the app ships 
 changelog of its own. Write the notes for users, not for developers: what changed
 that they will notice, not every commit.
 
+## Say When the Session Has Grown Too Long
+
+Work here runs long: a schema migration, a design thread on an Issue, and several PRs in
+sequence can all live in one session. That is fine, but it has a cost, and the cost is not
+visible to the person you are working with.
+
+**Tell them when a long session starts to cost you accuracy. Do not quietly degrade.**
+
+You cannot measure your own context usage — there is no percentage available to you. These are
+the signs you can actually observe, and any one of them is worth mentioning:
+
+- The conversation was summarised or compacted
+- You are re-reading files, or re-deriving facts, already established earlier in the session
+- You are unsure whether something was already decided, and have to ask about a decision that
+  was settled
+- You made a claim and had to correct it, on something the session had already covered
+
+Say it in a line or two, plainly, and offer to write a handoff note so a fresh session can pick
+the work up. Then let them decide — do not stop on your own initiative. Carrying on at reduced
+accuracy without saying so is the failure, not the length of the session.
+
+**Never claim a number you do not have.** Say what you observed, not "I am at 80% context".
+
 ## Remember
 
 1. **Always use Bun, never npm/yarn/pnpm**
