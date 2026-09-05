@@ -9,7 +9,7 @@ import { WorldService } from '@/lib/services/world-service'
 import { MemoService } from '@/lib/services/memo-service'
 import { CustomTagsService } from '@/lib/services/custom-tags-service'
 import { AuthService } from '@/lib/services/auth-service'
-import { BackupService } from '@/lib/services/backup-service'
+import { BackupService, type RestoreMode } from '@/lib/services/backup-service'
 import { MigrationService } from '@/lib/services/migration-service'
 import { InitService } from '@/lib/services/init-service'
 import { ExternalDataService } from '@/lib/services/external-data-service'
@@ -915,11 +915,14 @@ export const commands = {
     }
   },
 
-  async restoreFromBackupFile(file: File): Promise<Result<null, string>> {
+  async restoreFromBackupFile(
+    file: File,
+    mode: RestoreMode = 'merge',
+  ): Promise<Result<null, string>> {
     return runVoid(
       Effect.gen(function* () {
         const svc = yield* BackupService
-        yield* svc.restoreFromBackup(file)
+        yield* svc.restoreFromBackup(file, mode)
       }),
     )
   },
