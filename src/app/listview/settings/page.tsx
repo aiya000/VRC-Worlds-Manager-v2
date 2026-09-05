@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select'
 import { WorldCardPreview } from '@/components/world-card'
 import { WorldCardFieldToggles } from '@/components/world-card-field-toggles'
+import { WorldDetailFieldToggles } from '@/components/world-detail-field-toggles'
 
 import { FolderRemovalPreference } from '@/lib/commands'
 import {
@@ -43,6 +44,7 @@ export default function SettingsPage() {
     language,
     folderRemovalPreference,
     fieldVisibility,
+    detailFieldVisibility,
     showDeleteConfirm,
     setShowDeleteConfirm,
     showMigrateDialog,
@@ -63,6 +65,7 @@ export default function SettingsPage() {
     handleLanguageChange,
     handleCardSizeChange,
     handleFieldVisibilityChange,
+    handleDetailFieldVisibilityChange,
     handleFolderRemovalPreferenceChange,
     openHiddenFolder,
     t,
@@ -202,6 +205,23 @@ export default function SettingsPage() {
               <WorldCardFieldToggles
                 value={fieldVisibility}
                 onChange={handleFieldVisibilityChange}
+              />
+            </div>
+          </Card>
+
+          <Card className="flex flex-col items-start justify-between space-y-3 p-4 rounded-lg border">
+            <div className="flex flex-col space-y-1.5">
+              <Label className="text-base font-medium">
+                {t('settings-page:world-detail-fields')}
+              </Label>
+              <div className="text-sm text-muted-foreground">
+                {t('settings-page:world-detail-fields-description')}
+              </div>
+            </div>
+            <div className="w-full">
+              <WorldDetailFieldToggles
+                value={detailFieldVisibility}
+                onChange={handleDetailFieldVisibilityChange}
               />
             </div>
           </Card>

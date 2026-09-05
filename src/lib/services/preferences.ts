@@ -5,6 +5,7 @@ import type {
   FolderRemovalPreference,
   InstanceRegion,
   WorldCardFieldVisibility,
+  WorldDetailFieldVisibility,
 } from '@/lib/types'
 
 const defaultWorldCardFieldVisibility: WorldCardFieldVisibility = {
@@ -13,6 +14,14 @@ const defaultWorldCardFieldVisibility: WorldCardFieldVisibility = {
   visits: true,
   lastUpdated: true,
   favorites: true,
+}
+
+const defaultWorldDetailFieldVisibility: WorldDetailFieldVisibility = {
+  visits: true,
+  favorites: true,
+  capacity: true,
+  published: true,
+  lastUpdated: true,
 }
 
 export class PreferencesService extends Context.Tag('PreferencesService')<
@@ -45,6 +54,10 @@ export class PreferencesService extends Context.Tag('PreferencesService')<
     readonly getWorldCardFieldVisibility: () => Effect.Effect<WorldCardFieldVisibility>
     readonly setWorldCardFieldVisibility: (
       visibility: WorldCardFieldVisibility,
+    ) => Effect.Effect<void>
+    readonly getWorldDetailFieldVisibility: () => Effect.Effect<WorldDetailFieldVisibility>
+    readonly setWorldDetailFieldVisibility: (
+      visibility: WorldDetailFieldVisibility,
     ) => Effect.Effect<void>
   }
 >() {}
@@ -105,4 +118,13 @@ export const PreferencesServiceLive = Layer.succeed(PreferencesService, {
     ),
   setWorldCardFieldVisibility: (visibility) =>
     Effect.sync(() => setItem('worldCardFieldVisibility', visibility)),
+  getWorldDetailFieldVisibility: () =>
+    Effect.succeed(
+      getItem<WorldDetailFieldVisibility>(
+        'worldDetailFieldVisibility',
+        defaultWorldDetailFieldVisibility,
+      ),
+    ),
+  setWorldDetailFieldVisibility: (visibility) =>
+    Effect.sync(() => setItem('worldDetailFieldVisibility', visibility)),
 })

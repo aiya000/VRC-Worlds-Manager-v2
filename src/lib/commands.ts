@@ -31,6 +31,7 @@ import type {
   UserGroup,
   WorldBlacklist,
   WorldCardFieldVisibility,
+  WorldDetailFieldVisibility,
   WorldDetails,
   WorldDisplayData,
   TaskStatusChanged,
@@ -541,6 +542,28 @@ export const commands = {
       Effect.gen(function* () {
         const svc = yield* PreferencesService
         yield* svc.setWorldCardFieldVisibility(visibility)
+      }),
+    )
+  },
+
+  async getWorldDetailFieldVisibility(): Promise<
+    Result<WorldDetailFieldVisibility, string>
+  > {
+    return run(
+      Effect.gen(function* () {
+        const svc = yield* PreferencesService
+        return yield* svc.getWorldDetailFieldVisibility()
+      }),
+    )
+  },
+
+  async setWorldDetailFieldVisibility(
+    visibility: WorldDetailFieldVisibility,
+  ): Promise<Result<null, string>> {
+    return runVoid(
+      Effect.gen(function* () {
+        const svc = yield* PreferencesService
+        yield* svc.setWorldDetailFieldVisibility(visibility)
       }),
     )
   },
@@ -1090,6 +1113,7 @@ export type {
   UserGroup,
   WorldBlacklist,
   WorldCardFieldVisibility,
+  WorldDetailFieldVisibility,
   WorldDetails,
   WorldDisplayData,
 } from '@/lib/types'
