@@ -591,5 +591,7 @@
   "settings-page:google-drive-step-applying": "Applying it on this device",
   "settings-page:google-drive-do-not-reload": "Syncing happens entirely on this device. Please do not reload the page until it finishes -- reloading stops this sync. Nothing is damaged by that; pressing the button again starts over.",
   "settings-page:google-drive-dismissed": "The Google window was closed, so the sync was stopped.",
-  "settings-page:google-drive-unanswered": "The Google window never answered. If you opened this from an app added to your home screen, opening it in the browser instead may get through."
+  "settings-page:google-drive-unanswered": "The Google window never answered. If you opened this from an app added to your home screen, opening it in the browser instead may get through.",
+  "settings-page:google-drive-installed-warning": "Opened from the home screen, the app may not be able to get back from Google's sign-in window. If connecting does not work, open the site in a browser and try again there.",
+  "settings-page:google-drive-state-unreadable": "Could not read whether this device is connected. Please reload the page."
 }

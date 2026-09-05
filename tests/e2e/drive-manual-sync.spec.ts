@@ -294,6 +294,57 @@ test.describe('syncing with Google Drive by hand', () => {
   })
 })
 
+test.describe('opened from the home screen', () => {
+  /**
+   * There is no way to ask Playwright for an installed app, so the one signal
+   * the code reads is answered directly. `display-mode: standalone` is what a
+   * browser reports for a page launched from the home screen.
+   */
+  async function pretendInstalled(page: Page) {
+    await page.addInitScript(() => {
+      const real = window.matchMedia.bind(window)
+      window.matchMedia = (query: string) =>
+        query.includes('display-mode: standalone')
+          ? ({
+              matches: true,
+              media: query,
+              addEventListener: () => {},
+              removeEventListener: () => {},
+              addListener: () => {},
+              removeListener: () => {},
+              onchange: null,
+              dispatchEvent: () => false,
+            } as MediaQueryList)
+          : real(query)
+    })
+  }
+
+  test('warns before the button rather than after the wait', async ({
+    page,
+  }) => {
+    await pretendInstalled(page)
+    await stubGoogleIdentityServices(page, { token: 'test-access-token' })
+    await stubGoogleDrive(page)
+    await page.goto(LIST_VIEW)
+    await openSyncTab(page)
+
+    await expect(
+      page.getByText(jaJP['settings-page:google-drive-installed-warning']),
+    ).toBeVisible()
+  })
+
+  test('says nothing of the sort in an ordinary tab', async ({ page }) => {
+    await stubGoogleIdentityServices(page, { token: 'test-access-token' })
+    await stubGoogleDrive(page)
+    await page.goto(LIST_VIEW)
+    await openSyncTab(page)
+
+    await expect(
+      page.getByText(jaJP['settings-page:google-drive-installed-warning']),
+    ).toBeHidden()
+  })
+})
+
 test.describe('when Google never grants the token', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(LIST_VIEW)

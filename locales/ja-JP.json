@@ -591,5 +591,7 @@
   "settings-page:google-drive-step-applying": "この端末に反映しています",
   "settings-page:google-drive-do-not-reload": "同期はこの端末の中だけで行われます。終わるまでページを再読み込みしないでください。再読み込みすると、この同期は中断されます（データが壊れることはありません。もう一度押せば最初からやり直せます）。",
   "settings-page:google-drive-dismissed": "Google の画面が閉じられたため、同期を中止しました。",
-  "settings-page:google-drive-unanswered": "Google の画面から応答がありませんでした。ホーム画面に追加したアプリから開いている場合は、ブラウザで開き直すと通ることがあります。"
+  "settings-page:google-drive-unanswered": "Google の画面から応答がありませんでした。ホーム画面に追加したアプリから開いている場合は、ブラウザで開き直すと通ることがあります。",
+  "settings-page:google-drive-installed-warning": "ホーム画面から起動したアプリでは、Google のログイン画面から戻ってこられないことがあります。接続できない場合は、ブラウザで開き直してから試してください。",
+  "settings-page:google-drive-state-unreadable": "接続の状態を読み取れませんでした。ページを再読み込みしてください。"
 }

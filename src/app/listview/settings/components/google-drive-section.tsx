@@ -15,6 +15,27 @@ import {
 } from '@/lib/services/drive-sync-service'
 
 /**
+ * Whether the app was opened from the home screen rather than in a browser tab.
+ *
+ * It matters because Google's consent window is then a Chrome Custom Tab, a
+ * separate process that may not be able to hand its answer back -- see #104.
+ * Until that is fixed by not using a second window at all, the honest thing is
+ * to say so before someone presses the button and waits.
+ */
+function isRunningInstalled(): boolean {
+  if (typeof window === 'undefined') {
+    return false
+  }
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: fullscreen)').matches ||
+    window.matchMedia('(display-mode: minimal-ui)').matches ||
+    // Safari on iOS predates `display-mode` and reports it here instead.
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  )
+}
+
+/**
  * Connect, disconnect, and one button that syncs. Everything that decides
  * *when* to sync on its own -- startup, edits, coming back to the tab -- is a
  * later PR; this screen only ever syncs because someone asked it to.
@@ -26,15 +47,25 @@ export const GoogleDriveSection: FC = () => {
   const [busy, setBusy] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [step, setStep] = useState<SyncStep | null>(null)
+  const [unreadable, setUnreadable] = useState<string | null>(null)
+  const [installed, setInstalled] = useState(false)
 
   useEffect(() => {
     // Loaded ahead of the click that needs it: Google requires the token
     // request to happen synchronously within a user gesture, which an await
     // on the script tag's own load would break.
     preloadGoogleIdentityScript()
+    setInstalled(isRunningInstalled())
 
     commands.isGoogleDriveConnected().then((result) => {
-      setConnected(result.status === 'ok' ? result.data : false)
+      // Not `false`: "we could not read it" is a different thing to say than
+      // "you are not connected", and showing the second for the first invites
+      // reconnecting something that was never disconnected.
+      if (result.status === 'error') {
+        setUnreadable(result.error)
+        return
+      }
+      setConnected(result.data)
     })
     commands.googleDriveLastSyncedAt().then((result) => {
       setLastSyncedAt(result.status === 'ok' ? result.data : null)
@@ -112,15 +143,25 @@ export const GoogleDriveSection: FC = () => {
 
   return (
     <Card className="flex flex-col gap-4 rounded-lg border p-4">
+      {installed && (
+        // Said before the button rather than after the wait: from the home
+        // screen, pressing it can end on a blank page that never comes back.
+        // #104 removes the second window that causes this.
+        <div className="rounded-md border border-amber-500/50 p-3 text-sm">
+          {t('settings-page:google-drive-installed-warning')}
+        </div>
+      )}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col space-y-1.5">
           <Label className="text-base font-medium">
             {t('settings-page:google-drive-title')}
           </Label>
           <div className="text-sm text-muted-foreground">
-            {connected === true
-              ? t('settings-page:google-drive-connected')
-              : t('settings-page:google-drive-description')}
+            {unreadable !== null
+              ? t('settings-page:google-drive-state-unreadable')
+              : connected === true
+                ? t('settings-page:google-drive-connected')
+                : t('settings-page:google-drive-description')}
           </div>
         </div>
         {connected === true ? (
