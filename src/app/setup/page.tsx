@@ -86,7 +86,6 @@ const WelcomePage: React.FC = () => {
     false,
   ])
   const [_isLoading, setIsLoading] = useState<boolean>(false)
-  const [alreadyMigrated, setAlreadyMigrated] = useState<boolean>(false)
   const [hasExistingData, setHasExistingData] = useState<[boolean, boolean]>([
     false,
     false,
@@ -132,7 +131,6 @@ const WelcomePage: React.FC = () => {
    */
   const chooseRestoreSource = (source: RestoreSource) => {
     if (source === 'fresh') {
-      setAlreadyMigrated(false)
       setPage(4)
       return
     }
@@ -161,12 +159,18 @@ const WelcomePage: React.FC = () => {
       }
     }
     if (page === 3) {
-      // Drive and backup do their work from a button of their own, so there is
-      // nothing left for Next to do but move on. Only the v2 files are read at
-      // this point, because that is the one the old screen was built around.
-      if (restoreSource !== null && restoreSource !== 'v2') {
-        setAlreadyMigrated(false)
-        setPage(page + 1)
+      // Drive and backup bring the appearance settings with them, so the two
+      // screens that ask about appearance are skipped rather than asked and
+      // then written over the top of what was just restored. Which of those
+      // settings actually travel is the user's to change -- the classification
+      // in `sync/settings.ts` is only a default -- so this does not try to
+      // work out which ones did; it stops asking, and says where to change
+      // them.
+      if (restoreSource === 'drive' || restoreSource === 'backup') {
+        // Language is the exception: it was chosen two screens ago, in this
+        // session, and getting it wrong is immediately visible.
+        await commands.setLanguage(preferences.language)
+        await finishSetup()
         return
       }
 
@@ -175,7 +179,6 @@ const WelcomePage: React.FC = () => {
 
       if (!canMigrate) {
         // No files selected (or the selected files are invalid): skip migration.
-        setAlreadyMigrated(false)
         setPage(page + 1)
         return
       }
@@ -228,16 +231,24 @@ const WelcomePage: React.FC = () => {
         return
       }
 
-      await commands.createEmptyAuth()
-
-      if (!alreadyMigrated) {
-        await commands.createEmptyFiles()
-      }
-
-      router.push('/login')
+      await finishSetup()
       return
     }
     setPage(page + 1)
+  }
+
+  /**
+   * The last thing the setup does, wherever it is reached from.
+   *
+   * `createEmptyFiles` is the only thing that writes `setupComplete`, and it
+   * used to be skipped whenever a v2 migration had run -- which left the app
+   * asking to be set up again on every load for exactly the people who had
+   * just brought their data over.
+   */
+  const finishSetup = async (): Promise<void> => {
+    await commands.createEmptyAuth()
+    await commands.createEmptyFiles()
+    router.push('/login')
   }
 
   const runMigration = async (): Promise<void> => {
@@ -248,7 +259,6 @@ const WelcomePage: React.FC = () => {
         setPage(3)
         return
       }
-      setAlreadyMigrated(true)
       setPage(4)
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e)
@@ -351,7 +361,6 @@ const WelcomePage: React.FC = () => {
 
   const handleMigrationCancel = () => {
     setShowMigrationConfirm(false)
-    setAlreadyMigrated(true)
     setPage(4)
   }
 
@@ -504,6 +513,9 @@ const WelcomePage: React.FC = () => {
             // Only the v2 files make Next mean "migrate"; the other sources
             // have a button of their own, so Next just carries on.
             isMigrationPage={restoreSource === null || restoreSource === 'v2'}
+            // Restoring ends the setup here: the screens after this one only
+            // ask about appearance, which came along with the restore.
+            isLastPage={restoreSource === 'drive' || restoreSource === 'backup'}
             isValid={
               pathValidation[0] &&
               pathValidation[1] &&
@@ -529,6 +541,15 @@ const WelcomePage: React.FC = () => {
 
               {restoreSource === 'drive' && <GoogleDriveSection />}
               {restoreSource === 'backup' && <BackupRestoreStep />}
+
+              {(restoreSource === 'drive' || restoreSource === 'backup') && (
+                // Said here rather than as a toast on the way out: it explains
+                // why the next screens do not appear, and it has to be read
+                // before pressing the button, not after.
+                <p className="rounded-md border p-3 text-sm text-muted-foreground">
+                  {t('setup-page:restore-skips-appearance')}
+                </p>
+              )}
 
               {restoreSource === 'v2' && (
                 <div>

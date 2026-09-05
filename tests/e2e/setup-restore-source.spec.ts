@@ -152,6 +152,48 @@ test.describe('where the setup gets its data from', () => {
     ).toBeVisible()
   })
 
+  // Appearance settings travel with a restore -- and which ones travel is the
+  // user's to change, so the setup stops asking rather than asking and then
+  // writing over what was just brought in.
+  test('ends the setup rather than asking about appearance again', async ({
+    page,
+  }) => {
+    await stubGoogleIdentityServices(page, { token: 'test-access-token' })
+    await stubGoogleDrive(page)
+
+    await openTheRestoreStep(page)
+    await choice(page, 'setup-page:restore-source-drive-title').click()
+
+    await expect(
+      page.getByText(jaJP['setup-page:restore-skips-appearance']),
+    ).toBeVisible()
+
+    await page
+      .getByRole('button', { name: jaJP['setup-layout:finish'] })
+      .click()
+
+    await expect(page).toHaveURL(/\/login$/)
+    // The setup has to count as done, or the app sends them straight back to
+    // it on the next load.
+    expect(
+      await page.evaluate(() => localStorage.getItem('setupComplete')),
+    ).toBe('true')
+  })
+
+  test('starting fresh still walks through the appearance screens', async ({
+    page,
+  }) => {
+    await openTheRestoreStep(page)
+    await choice(page, 'setup-page:restore-source-fresh-title').click()
+
+    await expect(
+      page.getByText(jaJP['setup-page:ui-customization-title']),
+    ).toBeVisible()
+    await expect(
+      page.getByText(jaJP['setup-page:restore-skips-appearance']),
+    ).toBeHidden()
+  })
+
   test('brings a backup file in, without a way to destroy anything', async ({
     page,
   }) => {

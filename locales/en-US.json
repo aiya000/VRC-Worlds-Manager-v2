@@ -609,5 +609,6 @@
   "setup-page:restore-backup-placeholder": "Choose a file",
   "setup-page:restore-backup-button": "Bring it in",
   "setup-page:restore-backup-done": "Brought in",
-  "setup-page:restore-source-title": "Bringing your data over"
+  "setup-page:restore-source-title": "Bringing your data over",
+  "setup-page:restore-skips-appearance": "What you brought in includes your appearance settings, so the screens that ask about those are skipped and the setup ends here. You can change any of them later from the settings screen."
 }
