@@ -1,4 +1,7 @@
 import { Effect } from 'effect'
+// Shadows TypeScript's built-in `InstanceType<T>` utility on purpose: within
+// this file the app's own instance type is the one that is meant.
+import type { InstanceType } from '@/types/instances'
 import { AppLayer } from '@/lib/services/layers'
 import { PreferencesService } from '@/lib/services/preferences'
 import { FolderService } from '@/lib/services/folder-service'
@@ -446,6 +449,26 @@ export const commands = {
       Effect.gen(function* () {
         const svc = yield* PreferencesService
         yield* svc.setRegion(region)
+      }),
+    )
+  },
+
+  async getInstanceType(): Promise<Result<InstanceType, string>> {
+    return run(
+      Effect.gen(function* () {
+        const svc = yield* PreferencesService
+        return yield* svc.getInstanceType()
+      }),
+    )
+  },
+
+  async setInstanceType(
+    instanceType: InstanceType,
+  ): Promise<Result<null, string>> {
+    return runVoid(
+      Effect.gen(function* () {
+        const svc = yield* PreferencesService
+        yield* svc.setInstanceType(instanceType)
       }),
     )
   },
