@@ -14,10 +14,16 @@ import {
 import { Label } from '@/components/ui/label'
 import { WorldCardPreview } from '@/components/world-card'
 import { WorldCardFieldToggles } from '@/components/world-card-field-toggles'
+import { WorldDetailFieldToggles } from '@/components/world-detail-field-toggles'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Loader2, Globe } from 'lucide-react'
-import { commands, CardSize, WorldCardFieldVisibility } from '@/lib/commands'
+import {
+  commands,
+  CardSize,
+  WorldCardFieldVisibility,
+  WorldDetailFieldVisibility,
+} from '@/lib/commands'
 import { SetupLayout } from '@/app/setup/components/setup-layout'
 import { useLocalization } from '@/hooks/use-localization'
 import { LocalizationContext } from '@/components/localization-context'
@@ -46,6 +52,14 @@ const WelcomePage: React.FC = () => {
       visits: true,
       lastUpdated: true,
       favorites: true,
+    })
+  const [detailFieldVisibility, setDetailFieldVisibility] =
+    useState<WorldDetailFieldVisibility>({
+      visits: true,
+      favorites: true,
+      capacity: true,
+      published: true,
+      lastUpdated: true,
     })
   const [preferences, setPreferences] = useState({
     theme: 'system',
@@ -144,11 +158,13 @@ const WelcomePage: React.FC = () => {
         result_language,
         result_card_size,
         result_field_visibility,
+        result_detail_field_visibility,
       ] = await Promise.all([
         commands.setTheme(preferences.theme),
         commands.setLanguage(preferences.language),
         commands.setCardSize(preferences.card_size),
         commands.setWorldCardFieldVisibility(fieldVisibility),
+        commands.setWorldDetailFieldVisibility(detailFieldVisibility),
       ])
 
       const errorResult =
@@ -160,7 +176,9 @@ const WelcomePage: React.FC = () => {
               ? result_card_size
               : result_field_visibility.status === 'error'
                 ? result_field_visibility
-                : null
+                : result_detail_field_visibility.status === 'error'
+                  ? result_detail_field_visibility
+                  : null
 
       if (errorResult) {
         toast(t('general:error-title'), {
@@ -621,6 +639,16 @@ const WelcomePage: React.FC = () => {
                   <WorldCardFieldToggles
                     value={fieldVisibility}
                     onChange={setFieldVisibility}
+                  />
+                  <div className="flex flex-col space-y-1 pt-4">
+                    <Label>{t('settings-page:world-detail-fields')}</Label>
+                    <div className="text-sm text-gray-500">
+                      {t('settings-page:world-detail-fields-description')}
+                    </div>
+                  </div>
+                  <WorldDetailFieldToggles
+                    value={detailFieldVisibility}
+                    onChange={setDetailFieldVisibility}
                   />
                 </div>
                 <div className="w-full sm:max-w-[300px]">

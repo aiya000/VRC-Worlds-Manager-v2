@@ -4,6 +4,7 @@ import {
   commands,
   FolderRemovalPreference,
   WorldCardFieldVisibility,
+  WorldDetailFieldVisibility,
 } from '@/lib/commands'
 import { useContext, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -40,6 +41,14 @@ export const useSettingsPage = () => {
       visits: true,
       lastUpdated: true,
       favorites: true,
+    })
+  const [detailFieldVisibility, setDetailFieldVisibility] =
+    useState<WorldDetailFieldVisibility>({
+      visits: true,
+      favorites: true,
+      capacity: true,
+      published: true,
+      lastUpdated: true,
     })
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -113,6 +122,8 @@ export const useSettingsPage = () => {
           await commands.getFolderRemovalPreference()
         const fieldVisibilityResult =
           await commands.getWorldCardFieldVisibility()
+        const detailFieldVisibilityResult =
+          await commands.getWorldDetailFieldVisibility()
         const theme =
           themeResult.status === 'ok'
             ? normalizeThemeValue(themeResult.data)
@@ -136,18 +147,30 @@ export const useSettingsPage = () => {
                 lastUpdated: true,
                 favorites: true,
               }
+        const detailFieldVisibility =
+          detailFieldVisibilityResult.status === 'ok'
+            ? detailFieldVisibilityResult.data
+            : {
+                visits: true,
+                favorites: true,
+                capacity: true,
+                published: true,
+                lastUpdated: true,
+              }
         setTheme(theme)
         setLanguage(language)
         setCardSize(cardSize)
         setFolderRemovalPreference(folderRemovalPreference)
         setFieldVisibility(fieldVisibility)
+        setDetailFieldVisibility(detailFieldVisibility)
         // put a toast if commands fail
         if (
           themeResult.status === 'error' ||
           languageResult.status === 'error' ||
           cardSizeResult.status === 'error' ||
           folderRemovalPreferenceResult.status === 'error' ||
-          fieldVisibilityResult.status === 'error'
+          fieldVisibilityResult.status === 'error' ||
+          detailFieldVisibilityResult.status === 'error'
         ) {
           toast(t('general:error-title'), {
             description:
@@ -161,6 +184,9 @@ export const useSettingsPage = () => {
                 : '') +
               (fieldVisibilityResult.status === 'error'
                 ? fieldVisibilityResult.error
+                : '') +
+              (detailFieldVisibilityResult.status === 'error'
+                ? detailFieldVisibilityResult.error
                 : ''),
           })
         }
@@ -405,6 +431,32 @@ export const useSettingsPage = () => {
     }
   }
 
+  const handleDetailFieldVisibilityChange = async (
+    value: WorldDetailFieldVisibility,
+  ) => {
+    try {
+      console.info(
+        `Setting world detail field visibility to: ${JSON.stringify(value)}`,
+      )
+      const result = await commands.setWorldDetailFieldVisibility(value)
+      if (result.status === 'ok') {
+        setDetailFieldVisibility(value)
+        console.info('World detail field visibility saved')
+      } else {
+        console.error(`Failed to set detail field visibility: ${result.error}`)
+        toast(t('general:error-title'), {
+          description:
+            t('settings-page:error-save-preferences') + ': ' + result.error,
+        })
+      }
+    } catch (e) {
+      console.error(`Failed to save detail field visibility: ${e}`)
+      toast(t('general:error-title'), {
+        description: t('settings-page:error-save-preferences'),
+      })
+    }
+  }
+
   const handleFolderRemovalPreferenceChange = async (
     value: FolderRemovalPreference,
   ) => {
@@ -440,6 +492,7 @@ export const useSettingsPage = () => {
     language,
     folderRemovalPreference,
     fieldVisibility,
+    detailFieldVisibility,
     showDeleteConfirm,
     setShowDeleteConfirm,
     showMigrateDialog,
@@ -460,6 +513,7 @@ export const useSettingsPage = () => {
     handleLanguageChange,
     handleCardSizeChange,
     handleFieldVisibilityChange,
+    handleDetailFieldVisibilityChange,
     handleFolderRemovalPreferenceChange,
     openHiddenFolder,
     t,
