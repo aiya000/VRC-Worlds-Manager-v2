@@ -6,11 +6,20 @@ import {
 } from '@/lib/sync/legacy-backup'
 import { emptySnapshot } from '@/lib/sync/merge'
 import {
+  selectSettingsToApply,
+  selectSyncedSettings,
+} from '@/lib/sync/settings'
+import {
   SNAPSHOT_FORMAT_VERSION,
   type Snapshot,
   type WorldSyncRecord,
 } from '@/lib/sync/types'
 import { db, FOLDER_ORDER_KEY, type WorldRecord } from './db'
+import {
+  readSettingEntries,
+  readSettingSyncOverrides,
+  writeSettingEntries,
+} from './setting-sync'
 import { deviceId } from './sync-meta'
 
 /**
@@ -68,7 +77,10 @@ export async function readSnapshot(): Promise<Snapshot> {
     hiddenWorlds,
     memos,
     customTags,
-    settings: {},
+    settings: selectSyncedSettings(
+      readSettingEntries(),
+      readSettingSyncOverrides(),
+    ),
   }
 }
 
@@ -153,6 +165,17 @@ export async function applySnapshot(snapshot: Snapshot): Promise<void> {
         await db.customTags.put(record)
       }
     },
+  )
+
+  // Settings live in local storage rather than in Dexie, so they are written
+  // after the transaction commits: there is nothing to roll them back with,
+  // and writing them first would leave them describing data that never landed.
+  writeSettingEntries(
+    selectSettingsToApply(
+      snapshot.settings,
+      readSettingEntries(),
+      readSettingSyncOverrides(),
+    ),
   )
 }
 
