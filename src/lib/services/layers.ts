@@ -14,6 +14,7 @@ import { TaskServiceLive } from './task-service'
 import { VRChatApiServiceLive } from './vrchat-api'
 import { QuotaServiceLive } from './quota-manager'
 import { LaunchedInstanceServiceLive } from './launched-instance-service'
+import { GoogleAuthServiceLive } from './google-auth-service'
 
 export const AppLayer = Layer.mergeAll(
   PreferencesServiceLive,
@@ -31,4 +32,5 @@ export const AppLayer = Layer.mergeAll(
   VRChatApiServiceLive,
   QuotaServiceLive,
   LaunchedInstanceServiceLive,
+  GoogleAuthServiceLive,
 )

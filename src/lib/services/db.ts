@@ -147,7 +147,7 @@ export function isMember(ref: SetRef): boolean {
  * store at a version below the one on disk. `StaleBundleNotice` checks for that
  * and asks for a reload rather than letting every query fail.
  */
-export const APP_DB_VERSION = 4
+export const APP_DB_VERSION = 5
 
 export const APP_DB_NAME = 'VRChatWorldsManager'
 
@@ -266,6 +266,10 @@ export class AppDatabase extends Dexie {
   launchedInstances!: EntityTable<LaunchedInstanceRecord, 'id'>
   authState!: EntityTable<AuthStateRecord, 'key'>
   syncState!: EntityTable<SyncStateRecord, 'key'>
+  // A separate table from `authState` on purpose: VRChat's own logout clears
+  // `authState` wholesale (`clearAuth`), and signing out of VRChat has nothing
+  // to do with a Google Drive connection made on the same device.
+  googleAuthState!: EntityTable<AuthStateRecord, 'key'>
 
   constructor() {
     super(APP_DB_NAME)
@@ -296,9 +300,11 @@ export class AppDatabase extends Dexie {
     this.version(3).stores({ folders: null })
     // Purely additive, so there is nothing to upgrade: a database that has
     // never held an instance simply gains an empty store.
-    this.version(APP_DB_VERSION).stores({
+    this.version(4).stores({
       launchedInstances: 'id, worldId, launchedAt, updatedAt, deletedAt',
     })
+    // Purely additive, same as version 4.
+    this.version(APP_DB_VERSION).stores({ googleAuthState: 'key' })
   }
 }
 
