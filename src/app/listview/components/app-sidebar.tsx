@@ -2,7 +2,7 @@
 
 import { SaturnIcon } from '../../../components/icons/saturn-icon'
 import { GearIcon } from '../../../components/icons/gear-icon'
-import { Info, FileQuestion, History, Plus } from 'lucide-react'
+import { Info, FileQuestion, History, Plus, ArrowUpDown } from 'lucide-react'
 import {
   DragDropContext,
   Droppable,
@@ -277,10 +277,23 @@ export function AppSidebar() {
           </SidebarGroup>
           <Separator className="my-2" />
           <SidebarGroup>
-            <div className="px-3 py-2 text-xs font-medium text-muted-foreground">
+            <div className="flex items-center justify-between px-3 py-2 text-xs font-medium text-muted-foreground">
               <span className="text-sm font-medium">
                 {t('general:folders')}
               </span>
+              {folders.length > 1 && (
+                <button
+                  type="button"
+                  title={t('app-sidebar:reorder-folders')}
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
+                  onClick={() => navigate('/listview/folders/reorder')}
+                >
+                  <ArrowUpDown className="h-4 w-4" />
+                  <span className="sr-only">
+                    {t('app-sidebar:reorder-folders')}
+                  </span>
+                </button>
+              )}
             </div>
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="folders">
@@ -288,7 +301,7 @@ export function AppSidebar() {
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="h-[calc(100vh-417px)] overflow-x-clip overflow-y-scroll no-webview-scroll-bar pl-8"
+                    className="min-h-24 flex-1 overflow-x-clip overflow-y-auto no-webview-scroll-bar pl-8"
                   >
                     {localFolders.map((folder, index) => (
                       <Draggable
