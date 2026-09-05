@@ -172,6 +172,16 @@ export default config
 - Always prefer fixing the code to comply with ESLint rules rather than disabling them
 - If a rule consistently causes issues, discuss removing it from the ESLint configuration instead of adding inline disables
 
+#### The one that traps people: setting state from an effect
+
+`react-hooks/set-state-in-effect` fires when an effect calls a function defined
+outside it that sets state. Wrapping that function in `useCallback` does not fix it
+— React Compiler's `preserve-manual-memoization` then fires instead.
+
+What works is moving the definition **inside** the effect, or adding a revision
+counter to state and depending on it. Reach for one of those rather than a disable
+comment.
+
 ## Project Context
 
 ### Technology Stack
@@ -193,6 +203,44 @@ export default config
 - This is a static site (Static Generation)
 - All metadata should be optimized for static export
 - Use `export const dynamic = "force-static"` for route handlers when using `output: "export"`
+
+### The local database
+
+Everything the user owns lives in IndexedDB, through Dexie, in `src/lib/services/db.ts`.
+Three things about it are not guessable from the code and are expensive to learn twice:
+
+- **Deletion is logical, never physical.** Rows carry `deletedAt: number | null`, and
+  **every read has to filter `deletedAt === null`**. A query that forgets to is how
+  deleted worlds come back. `isActive()` exists to be used
+- **Dexie cannot change a primary key.** Trying raises
+  `UpgradeError Not yet support for changing primary key`. Renaming the store and
+  copying the rows across is the way round it
+- **Dexie multiplies its own version by ten on disk.** `version(5)` is `50` in
+  IndexedDB. Read that number in DevTools, or in a test, and it will not match
+  `APP_DB_VERSION` unless you expect the factor
+
+Raising the schema version means a bundle older than the change can no longer open
+the database. `StaleBundleNotice` is what catches that and asks for a reload, rather
+than letting every query fail.
+
+### The dev server port is fixed at 3456
+
+`bun run dev` and `bun run test:e2e` use the same port on purpose, and Google's
+OAuth client has `http://localhost:3456` registered as an authorised JavaScript
+origin. Signing in to Google locally stops working if it moves.
+
+**Keep the `dev` script in `package.json` and `PORT` in `playwright.config.ts` on the
+same value.**
+
+### The service worker forwards anything cross-origin
+
+`public/sw.js` must let requests to other origins go straight to the network. It used
+to fall through to the "static assets are cache-first" branch for every origin it did
+not recognise, and so fetched third-party scripts on the page's behalf.
+
+That is worth remembering when adding anything that loads an external script: it
+defeated Playwright's `page.route()` mocks, because the request the mock was waiting
+for was being made by the service worker instead, and the test hung with no clue why.
 
 ## UI Target Environments
 
@@ -257,6 +305,20 @@ Without it, `bun run test:e2e` fails with `Executable doesn't exist at
 conflict in `package.json`. (CI does the same thing in its own step.)
 
 `bun run test:e2e` starts the dev server itself; nothing needs to be running first.
+
+### Writing E2E Tests
+
+Things that have cost real time here before:
+
+- **The app opens Dexie as soon as it loads.** To plant an older schema, serve a blank
+  page on the app's own origin with `page.route()` and set the database up there,
+  rather than racing the app for the first open
+- **`indexedDB.databases()` reports the new version before the stores exist.** Wait for
+  the object store itself, not for the version number
+- **A button whose description sits inside it has that description in its accessible
+  name.** Target those by `aria-pressed` or another attribute instead of by name
+- **Delete throwaway debug specs** (`tests/e2e/__debug.spec.ts` and friends) as soon as
+  the thing they were written to answer is answered
 
 ### When Implementing Features
 
@@ -342,6 +404,23 @@ Always write commit messages in English.
   - The `main` branch represents production releases (e.g. deployed to https://vrchat-worlds-manager-web.pages.dev/ ).
   - **Only merge `develop` into `main` (via PR) when explicitly instructed by the user** (i.e. when a production release is specifically desired).
 - **Do not pass `--delete-branch` when merging a release PR** — the head branch is `develop`, and deleting it would remove the primary working branch.
+
+### Both branches are deployed, to different URLs
+
+`.github/workflows/deploy-frontend.yml` deploys on a push to either branch:
+
+| Branch    | URL                                                 |
+| --------- | --------------------------------------------------- |
+| `main`    | https://vrchat-worlds-manager-web.pages.dev         |
+| `develop` | https://develop.vrchat-worlds-manager-web.pages.dev |
+
+The `develop` URL is a stable Cloudflare branch alias, not a per-build preview, so it
+can be registered with third parties (it is one of the authorised JavaScript origins on
+the Google OAuth client).
+
+**Anything that has to be true of "the site" as the outside world sees it — a link an
+external verifier fetches, a file at a known path — is only true once it reaches
+`main`.** Merging to `develop` does not put it on the production URL.
 
 ### Releases are announced through GitHub Releases
 
