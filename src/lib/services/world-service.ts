@@ -1,6 +1,18 @@
 import { Context, Effect, Layer } from 'effect'
 import type { WorldDisplayData, WorldDetails } from '@/lib/types'
-import { db } from './db'
+import { db, isActive, isMember, type WorldRecord } from './db'
+import {
+  activeFolderByName,
+  activeFolders,
+  folderNamesById,
+  folderNamesOf,
+  folderRefFor,
+  memberFolderIds,
+  tombstoned,
+  touched,
+  withMember,
+  withoutMember,
+} from './sync-meta'
 
 export class WorldService extends Context.Tag('WorldService')<
   WorldService,
@@ -41,7 +53,10 @@ export class WorldService extends Context.Tag('WorldService')<
   }
 >() {}
 
-function toDisplayData(record: WorldDisplayData): WorldDisplayData {
+function toDisplayData(
+  record: WorldRecord,
+  folderNameById: Map<string, string>,
+): WorldDisplayData {
   return {
     worldId: record.worldId,
     name: record.name,
@@ -52,21 +67,34 @@ function toDisplayData(record: WorldDisplayData): WorldDisplayData {
     visits: record.visits,
     dateAdded: record.dateAdded,
     platform: record.platform,
-    folders: record.folders,
+    folders: folderNamesOf(record, folderNameById),
     tags: record.tags,
     capacity: record.capacity,
   }
+}
+
+async function hiddenWorldIds(): Promise<Set<string>> {
+  const rows = await db.hiddenWorlds.toArray()
+  return new Set(rows.filter(isActive).map((row) => row.worldId))
+}
+
+async function readWorlds(
+  keep: (world: WorldRecord, folderNameById: Map<string, string>) => boolean,
+): Promise<WorldDisplayData[]> {
+  const folderNameById = folderNamesById(await activeFolders())
+  const worlds = await db.worlds.toArray()
+  return worlds
+    .filter(isActive)
+    .filter((world) => keep(world, folderNameById))
+    .map((world) => toDisplayData(world, folderNameById))
 }
 
 export const WorldServiceLive = Layer.succeed(WorldService, {
   getAllWorlds: () =>
     Effect.tryPromise({
       try: async () => {
-        const hidden = new Set(
-          (await db.hiddenWorlds.toArray()).map((h) => h.worldId),
-        )
-        const worlds = await db.worlds.toArray()
-        return worlds.filter((w) => !hidden.has(w.worldId)).map(toDisplayData)
+        const hidden = await hiddenWorldIds()
+        return readWorlds((world) => !hidden.has(world.worldId))
       },
       catch: (e) => new Error(`Failed to get all worlds: ${e}`),
     }),
@@ -74,15 +102,16 @@ export const WorldServiceLive = Layer.succeed(WorldService, {
   getWorlds: (folderName) =>
     Effect.tryPromise({
       try: async () => {
-        const hidden = new Set(
-          (await db.hiddenWorlds.toArray()).map((h) => h.worldId),
+        const folder = await activeFolderByName(folderName)
+        if (folder === undefined) {
+          return []
+        }
+        const hidden = await hiddenWorldIds()
+        return readWorlds(
+          (world) =>
+            !hidden.has(world.worldId) &&
+            memberFolderIds(world).includes(folder.id),
         )
-        const worlds = await db.worlds
-          .filter(
-            (w) => w.folders.includes(folderName) && !hidden.has(w.worldId),
-          )
-          .toArray()
-        return worlds.map(toDisplayData)
       },
       catch: (e) => new Error(`Failed to get worlds: ${e}`),
     }),
@@ -90,13 +119,14 @@ export const WorldServiceLive = Layer.succeed(WorldService, {
   getUnclassifiedWorlds: () =>
     Effect.tryPromise({
       try: async () => {
-        const hidden = new Set(
-          (await db.hiddenWorlds.toArray()).map((h) => h.worldId),
+        const hidden = await hiddenWorldIds()
+        // A world whose only folders have been deleted is unclassified again,
+        // so ask which memberships still name a folder that exists.
+        return readWorlds(
+          (world, folderNameById) =>
+            !hidden.has(world.worldId) &&
+            folderNamesOf(world, folderNameById).length === 0,
         )
-        const worlds = await db.worlds
-          .filter((w) => w.folders.length === 0 && !hidden.has(w.worldId))
-          .toArray()
-        return worlds.map(toDisplayData)
       },
       catch: (e) => new Error(`Failed to get unclassified worlds: ${e}`),
     }),
@@ -104,13 +134,8 @@ export const WorldServiceLive = Layer.succeed(WorldService, {
   getHiddenWorlds: () =>
     Effect.tryPromise({
       try: async () => {
-        const hiddenIds = (await db.hiddenWorlds.toArray()).map(
-          (h) => h.worldId,
-        )
-        const worlds = await db.worlds
-          .filter((w) => hiddenIds.includes(w.worldId))
-          .toArray()
-        return worlds.map(toDisplayData)
+        const hidden = await hiddenWorldIds()
+        return readWorlds((world) => hidden.has(world.worldId))
       },
       catch: (e) => new Error(`Failed to get hidden worlds: ${e}`),
     }),
@@ -118,11 +143,32 @@ export const WorldServiceLive = Layer.succeed(WorldService, {
   deleteWorld: (worldId) =>
     Effect.tryPromise({
       try: async () => {
-        await db.worlds.delete(worldId)
-        await db.worldDetails.delete(worldId)
-        await db.memos.delete(worldId)
-        await db.customTags.delete(worldId)
-        await db.hiddenWorlds.delete(worldId)
+        const gone = await tombstoned()
+        await db.transaction(
+          'rw',
+          [
+            db.worlds,
+            db.worldDetails,
+            db.memos,
+            db.customTags,
+            db.hiddenWorlds,
+          ],
+          async () => {
+            await db.worlds.update(worldId, { ...gone })
+            // Details are a cache of what VRChat says, not the user's data, so
+            // there is nothing here another device needs to be told about.
+            await db.worldDetails.delete(worldId)
+            if ((await db.memos.get(worldId)) !== undefined) {
+              await db.memos.update(worldId, { ...gone })
+            }
+            if ((await db.customTags.get(worldId)) !== undefined) {
+              await db.customTags.update(worldId, { ...gone })
+            }
+            if ((await db.hiddenWorlds.get(worldId)) !== undefined) {
+              await db.hiddenWorlds.update(worldId, { ...gone })
+            }
+          },
+        )
       },
       catch: (e) => new Error(`Failed to delete world: ${e}`),
     }),
@@ -130,7 +176,7 @@ export const WorldServiceLive = Layer.succeed(WorldService, {
   hideWorld: (worldId) =>
     Effect.tryPromise({
       try: async () => {
-        await db.hiddenWorlds.put({ worldId })
+        await db.hiddenWorlds.put({ worldId, ...(await touched()) })
       },
       catch: (e) => new Error(`Failed to hide world: ${e}`),
     }),
@@ -138,7 +184,11 @@ export const WorldServiceLive = Layer.succeed(WorldService, {
   unhideWorld: (worldId) =>
     Effect.tryPromise({
       try: async () => {
-        await db.hiddenWorlds.delete(worldId)
+        const existing = await db.hiddenWorlds.get(worldId)
+        if (existing === undefined) {
+          return
+        }
+        await db.hiddenWorlds.update(worldId, { ...(await tombstoned()) })
       },
       catch: (e) => new Error(`Failed to unhide world: ${e}`),
     }),
@@ -146,12 +196,24 @@ export const WorldServiceLive = Layer.succeed(WorldService, {
   addWorldToFolder: (folderName, worldId) =>
     Effect.tryPromise({
       try: async () => {
-        const world = await db.worlds.get(worldId)
-        if (world && !world.folders.includes(folderName)) {
-          await db.worlds.update(worldId, {
-            folders: [...world.folders, folderName],
-          })
+        const folder = await activeFolderByName(folderName)
+        if (folder === undefined) {
+          throw new Error(`Folder "${folderName}" not found`)
         }
+        const world = await db.worlds.get(worldId)
+        if (world === undefined) {
+          return
+        }
+        const now = Date.now()
+        await db.worlds.update(worldId, {
+          ...(await touched()),
+          folderRefs: withMember(
+            world.folderRefs,
+            (ref) => ref.folderId === folder.id,
+            (addedAt) => folderRefFor(folder.id, addedAt),
+            now,
+          ),
+        })
       },
       catch: (e) => new Error(`Failed to add world to folder: ${e}`),
     }),
@@ -159,12 +221,22 @@ export const WorldServiceLive = Layer.succeed(WorldService, {
   removeWorldFromFolder: (folderName, worldId) =>
     Effect.tryPromise({
       try: async () => {
-        const world = await db.worlds.get(worldId)
-        if (world) {
-          await db.worlds.update(worldId, {
-            folders: world.folders.filter((f) => f !== folderName),
-          })
+        const folder = await activeFolderByName(folderName)
+        if (folder === undefined) {
+          return
         }
+        const world = await db.worlds.get(worldId)
+        if (world === undefined) {
+          return
+        }
+        await db.worlds.update(worldId, {
+          ...(await touched()),
+          folderRefs: withoutMember(
+            world.folderRefs,
+            (ref) => ref.folderId === folder.id,
+            Date.now(),
+          ),
+        })
       },
       catch: (e) => new Error(`Failed to remove world from folder: ${e}`),
     }),
@@ -184,7 +256,39 @@ export const WorldServiceLive = Layer.succeed(WorldService, {
   putWorld: (world) =>
     Effect.tryPromise({
       try: async () => {
+        const existing = await db.worlds.get(world.worldId)
+        const folders = await activeFolders()
+        const idByName = new Map(
+          folders.map((folder) => [folder.name, folder.id]),
+        )
+        const now = Date.now()
+
+        // Refreshing from VRChat must not decide folder membership. A name the
+        // caller passes that is not a member yet is added; memberships it does
+        // not mention are left exactly as they are, because taking one away is
+        // `removeWorldFromFolder`'s job and nothing else's.
+        let folderRefs = existing?.folderRefs ?? []
+        for (const name of world.folders) {
+          const folderId = idByName.get(name)
+          if (folderId === undefined) {
+            continue
+          }
+          const alreadyAMember = folderRefs.some(
+            (ref) => ref.folderId === folderId && isMember(ref),
+          )
+          if (alreadyAMember) {
+            continue
+          }
+          folderRefs = withMember(
+            folderRefs,
+            (ref) => ref.folderId === folderId,
+            (addedAt) => folderRefFor(folderId, addedAt),
+            now,
+          )
+        }
+
         await db.worlds.put({
+          ...(await touched()),
           worldId: world.worldId,
           name: world.name,
           thumbnailUrl: world.thumbnailUrl,
@@ -194,7 +298,7 @@ export const WorldServiceLive = Layer.succeed(WorldService, {
           visits: world.visits,
           dateAdded: world.dateAdded,
           platform: world.platform,
-          folders: world.folders,
+          folderRefs,
           tags: world.tags,
           capacity: world.capacity,
         })
@@ -255,3 +359,5 @@ export const WorldServiceLive = Layer.succeed(WorldService, {
       }),
     ),
 })
+
+export { isMember }

@@ -1,6 +1,7 @@
 import { Context, Effect, Layer } from 'effect'
 import type { Platform, PreviousMetadata } from '@/lib/types'
-import { db, type FolderRecord, type WorldRecord } from './db'
+import { db, FOLDER_ORDER_KEY, isActive } from './db'
+import { deviceId, tagRefFor, touched } from './sync-meta'
 
 /**
  * Entry of the desktop VRC Worlds Manager v2 `worlds.json`.
@@ -29,8 +30,27 @@ interface V2Folder {
   worlds: string[]
 }
 
+/**
+ * What the desktop export contains, still described in folder names. Turning
+ * those into folder ids is the service's job, not the parser's.
+ */
+export interface MigratedWorld {
+  worldId: string
+  name: string
+  thumbnailUrl: string
+  authorName: string
+  favorites: number
+  lastUpdated: string
+  visits: number
+  dateAdded: string
+  platform: Platform[]
+  folders: string[]
+  tags: string[]
+  capacity: number
+}
+
 export interface V2MigrationData {
-  worlds: WorldRecord[]
+  worlds: MigratedWorld[]
   folders: string[]
   memos: Array<{ worldId: string; memo: string }>
   hiddenWorldIds: string[]
@@ -193,7 +213,7 @@ export function parseV2MigrationData(
     }
   }
 
-  const worlds: WorldRecord[] = []
+  const worlds: MigratedWorld[] = []
   const memos: Array<{ worldId: string; memo: string }> = []
   const hiddenWorldIds: string[] = []
   const customTags: Array<{ worldId: string; tags: string[] }> = []
@@ -274,35 +294,86 @@ export const MigrationServiceLive = Layer.succeed(MigrationService, {
           await foldersFile.text(),
         )
 
+        const meta = await touched()
+        const now = Date.now()
+        const origin = await deviceId()
+
         await db.transaction(
           'rw',
-          [db.worlds, db.folders, db.hiddenWorlds, db.memos, db.customTags],
+          [
+            db.worlds,
+            db.foldersById,
+            db.folderOrder,
+            db.hiddenWorlds,
+            db.memos,
+            db.customTags,
+          ],
           async () => {
-            const existingFolders = await db.folders.toArray()
-            const existingOrders = new Map(
-              existingFolders.map((folder) => [folder.name, folder.order]),
-            )
-            let nextOrder = existingFolders.reduce(
-              (max, folder) => Math.max(max, folder.order + 1),
-              0,
+            const folderIdByName = new Map(
+              (await db.foldersById.toArray())
+                .filter(isActive)
+                .map((folder) => [folder.name, folder.id] as const),
             )
 
-            const folderRecords: FolderRecord[] = data.folders.map((name) => {
-              const existingOrder = existingOrders.get(name)
-              return {
-                name,
-                order:
-                  existingOrder === undefined ? nextOrder++ : existingOrder,
+            for (const name of data.folders) {
+              if (folderIdByName.has(name)) {
+                continue
               }
+              const id = crypto.randomUUID()
+              folderIdByName.set(name, id)
+              await db.foldersById.put({ id, name, ...meta })
+            }
+
+            const order = await db.folderOrder.get(FOLDER_ORDER_KEY)
+            const ids = [...(order?.ids ?? [])]
+            for (const name of data.folders) {
+              const id = folderIdByName.get(name) as string
+              if (!ids.includes(id)) {
+                ids.push(id)
+              }
+            }
+            await db.folderOrder.put({
+              key: FOLDER_ORDER_KEY,
+              ids,
+              updatedAt: now,
+              origin,
             })
 
-            await db.folders.bulkPut(folderRecords)
-            await db.worlds.bulkPut(data.worlds)
-            await db.memos.bulkPut(data.memos)
-            await db.customTags.bulkPut(data.customTags)
-            await db.hiddenWorlds.bulkPut(
-              data.hiddenWorldIds.map((worldId) => ({ worldId })),
-            )
+            for (const world of data.worlds) {
+              await db.worlds.put({
+                worldId: world.worldId,
+                name: world.name,
+                thumbnailUrl: world.thumbnailUrl,
+                authorName: world.authorName,
+                favorites: world.favorites,
+                lastUpdated: world.lastUpdated,
+                visits: world.visits,
+                dateAdded: world.dateAdded,
+                platform: world.platform,
+                folderRefs: world.folders.map((name) => ({
+                  folderId: folderIdByName.get(name) as string,
+                  addedAt: now,
+                  removedAt: null,
+                })),
+                tags: world.tags,
+                capacity: world.capacity,
+                ...meta,
+              })
+            }
+
+            for (const memo of data.memos) {
+              await db.memos.put({ ...memo, conflictBackup: null, ...meta })
+            }
+            for (const record of data.customTags) {
+              await db.customTags.put({
+                worldId: record.worldId,
+                tagRefs: record.tags.map((name) => tagRefFor(name, now)),
+                ...meta,
+              })
+            }
+            for (const worldId of data.hiddenWorldIds) {
+              await db.hiddenWorlds.put({ worldId, ...meta })
+            }
           },
         )
       },

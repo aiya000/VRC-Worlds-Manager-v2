@@ -1,5 +1,6 @@
 import { Context, Effect, Layer } from 'effect'
-import { db } from './db'
+import { db, isActive } from './db'
+import { touched } from './sync-meta'
 
 export class MemoService extends Context.Tag('MemoService')<
   MemoService,
@@ -20,7 +21,10 @@ export const MemoServiceLive = Layer.succeed(MemoService, {
     Effect.tryPromise({
       try: async () => {
         const record = await db.memos.get(worldId)
-        return record?.memo ?? ''
+        if (record === undefined || !isActive(record)) {
+          return ''
+        }
+        return record.memo
       },
       catch: (e) => new Error(`Failed to get memo: ${e}`),
     }),
@@ -28,7 +32,15 @@ export const MemoServiceLive = Layer.succeed(MemoService, {
   setMemoAndSave: (worldId, memo) =>
     Effect.tryPromise({
       try: async () => {
-        await db.memos.put({ worldId, memo })
+        const existing = await db.memos.get(worldId)
+        await db.memos.put({
+          worldId,
+          memo,
+          // Whatever the user just typed wins over anything a merge had set
+          // aside, so the note they are looking at is the one that is kept.
+          conflictBackup: existing?.conflictBackup ?? null,
+          ...(await touched()),
+        })
       },
       catch: (e) => new Error(`Failed to save memo: ${e}`),
     }),
@@ -38,7 +50,7 @@ export const MemoServiceLive = Layer.succeed(MemoService, {
       try: async () => {
         const lower = searchText.toLowerCase()
         const matching = await db.memos
-          .filter((m) => m.memo.toLowerCase().includes(lower))
+          .filter((m) => isActive(m) && m.memo.toLowerCase().includes(lower))
           .toArray()
         return matching.map((m) => m.worldId)
       },

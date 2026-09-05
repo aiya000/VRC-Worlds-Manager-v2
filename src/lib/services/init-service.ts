@@ -1,5 +1,5 @@
 import { Context, Effect, Layer } from 'effect'
-import { db } from './db'
+import { db, isActive } from './db'
 
 export class InitService extends Context.Tag('InitService')<
   InitService,
@@ -38,8 +38,12 @@ export const InitServiceLive = Layer.succeed(InitService, {
   checkExistingData: () =>
     Effect.tryPromise({
       try: async () => {
-        const worldCount = await db.worlds.count()
-        const folderCount = await db.folders.count()
+        // Deleted rows are kept as tombstones, so counting them would report
+        // data the user cannot see any more.
+        const worldCount = (await db.worlds.toArray()).filter(isActive).length
+        const folderCount = (await db.foldersById.toArray()).filter(
+          isActive,
+        ).length
         return [worldCount > 0, folderCount > 0] as [boolean, boolean]
       },
       catch: (e) => new Error(`Failed to check existing data: ${e}`),
@@ -68,10 +72,13 @@ export const InitServiceLive = Layer.succeed(InitService, {
       try: async () => {
         await db.worlds.clear()
         await db.worldDetails.clear()
-        await db.folders.clear()
+        await db.foldersById.clear()
+        await db.folderOrder.clear()
         await db.hiddenWorlds.clear()
         await db.memos.clear()
         await db.customTags.clear()
+        // `syncState` is left alone: this device keeps the id it is known by,
+        // so a later sync is not mistaken for a new device.
       },
       catch: (e) => new Error(`Failed to delete data: ${e}`),
     }),
