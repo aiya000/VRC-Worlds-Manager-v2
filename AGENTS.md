@@ -298,7 +298,17 @@ When the work you are doing resolves a GitHub Issue, do not commit it straight t
 
 1. Branch (`feature/`, `fix/`, `chore/`, … as the change warrants)
 2. Open a PR targeting `develop`, referencing the Issue it closes
-3. Merge it yourself once the checks pass
+3. Merge it yourself once the checks pass:
+
+   ```sh
+   gh pr merge <number> --merge --delete-branch
+   ```
+
+**Merge with `--merge`, not `--squash`.** Keeping the merge commit is what this
+repository does. It also avoids a practical snag: Claude Code's permission
+classifier refused `gh pr merge --squash` in a session where the `--merge` form
+of the same command went through, so an agent that reaches for squash may find
+itself stuck partway through a task for no reason it can act on.
 
 The Issue tracker is how requests are kept; a PR is how each one is answered, so the
 two stay tied together and the history shows which Issue a change came from.
