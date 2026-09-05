@@ -13,13 +13,13 @@ describe('basicAuthCredential', () => {
   })
 
   it('survives a username outside Latin-1', () => {
-    // `btoa` throws `InvalidCharacterError` on this name unencoded, which is
-    // what stopped a Japanese account from signing in at all.
-    const credential = basicAuthCredential('千夏あい（清楚）', 'hunter2')
+    // `btoa` throws `InvalidCharacterError` on such a name unencoded, which is
+    // what stopped a Japanese account from signing in at all. The parentheses
+    // are the full-width ones a VRChat display name can hold.
+    const name = 'やまだ たろう（ふたつめ）'
+    const credential = basicAuthCredential(name, 'hunter2')
 
-    expect(decode(credential)).toBe(
-      `${encodeURIComponent('千夏あい（清楚）')}:hunter2`,
-    )
+    expect(decode(credential)).toBe(`${encodeURIComponent(name)}:hunter2`)
   })
 
   it('survives a password outside Latin-1', () => {
