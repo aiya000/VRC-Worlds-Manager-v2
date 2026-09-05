@@ -1,9 +1,11 @@
 name: Deploy Backend
 on:
   push:
+    # `main` only, deliberately. Unlike Pages, `wrangler deploy` has no
+    # per-branch preview: adding `develop` here would overwrite the
+    # production Worker with whatever is on it.
     branches:
       - main
-      - feature/web
 
 permissions:
   contents: read
