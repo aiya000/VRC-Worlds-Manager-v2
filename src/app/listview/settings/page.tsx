@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { DeviceOnlySettingToggle } from '@/components/device-only-setting-toggle'
 import { WorldCardPreview } from '@/components/world-card'
 import { WorldCardFieldToggles } from '@/components/world-card-field-toggles'
 import { WorldDetailFieldToggles } from '@/components/world-detail-field-toggles'
@@ -68,6 +69,8 @@ export default function SettingsPage() {
     handleFieldVisibilityChange,
     handleDetailFieldVisibilityChange,
     handleFolderRemovalPreferenceChange,
+    isDeviceOnly,
+    handleDeviceOnlyChange,
     openHiddenFolder,
     t,
   } = useSettingsPage()
@@ -95,51 +98,73 @@ export default function SettingsPage() {
         </div>
 
         <TabsContent value="preferences" className="space-y-4">
-          <Card className="flex flex-row items-center justify-between p-4 rounded-lg border">
-            <div className="flex flex-col space-y-1.5">
-              <Label className="text-base font-medium">
-                {t('general:theme-label')}
-              </Label>
-              <div className="text-sm text-muted-foreground">
-                {t('general:theme-description')}
+          <Card className="flex flex-col gap-3 p-4 rounded-lg border">
+            <div className="flex w-full flex-row items-center justify-between gap-4">
+              <div className="flex flex-col space-y-1.5">
+                <Label className="text-base font-medium">
+                  {t('general:theme-label')}
+                </Label>
+                <div className="text-sm text-muted-foreground">
+                  {t('general:theme-description')}
+                </div>
               </div>
+              <Select
+                value={useTheme().theme || 'system'}
+                onValueChange={(value) => handleThemeChange(value)}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Theme" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="light">{t('general:light')}</SelectItem>
+                  <SelectItem value="dark">{t('general:dark')}</SelectItem>
+                  <SelectItem value="system">{t('general:system')}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Select
-              value={useTheme().theme || 'system'}
-              onValueChange={(value) => handleThemeChange(value)}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Theme" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="light">{t('general:light')}</SelectItem>
-                <SelectItem value="dark">{t('general:dark')}</SelectItem>
-                <SelectItem value="system">{t('general:system')}</SelectItem>
-              </SelectContent>
-            </Select>
+            <DeviceOnlySettingToggle
+              settingKey="theme"
+              label={t('settings-page:device-only-label')}
+              description={t('settings-page:device-only-description')}
+              checked={isDeviceOnly('theme')}
+              onCheckedChange={(deviceOnly) =>
+                handleDeviceOnlyChange('theme', deviceOnly)
+              }
+            />
           </Card>
 
-          <Card className="flex flex-row items-center justify-between p-4 rounded-lg border">
-            <div className="flex flex-col space-y-1.5">
-              <Label className="text-base font-medium">
-                {t('general:language-label')}
-              </Label>
-              <div className="text-sm text-muted-foreground">
-                {t('general:language-description')}
+          <Card className="flex flex-col gap-3 p-4 rounded-lg border">
+            <div className="flex w-full flex-row items-center justify-between gap-4">
+              <div className="flex flex-col space-y-1.5">
+                <Label className="text-base font-medium">
+                  {t('general:language-label')}
+                </Label>
+                <div className="text-sm text-muted-foreground">
+                  {t('general:language-description')}
+                </div>
               </div>
+              <Select
+                value={language || 'en-US'}
+                onValueChange={(value) => handleLanguageChange(value)}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ja-JP">日本語</SelectItem>
+                  <SelectItem value="en-US">English</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Select
-              value={language || 'en-US'}
-              onValueChange={(value) => handleLanguageChange(value)}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Language" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ja-JP">日本語</SelectItem>
-                <SelectItem value="en-US">English</SelectItem>
-              </SelectContent>
-            </Select>
+            <DeviceOnlySettingToggle
+              settingKey="language"
+              label={t('settings-page:device-only-label')}
+              description={t('settings-page:device-only-description')}
+              checked={isDeviceOnly('language')}
+              onCheckedChange={(deviceOnly) =>
+                handleDeviceOnlyChange('language', deviceOnly)
+              }
+            />
           </Card>
 
           <Card className="flex flex-col items-start justify-between space-y-3 p-4 rounded-lg border">
@@ -191,6 +216,15 @@ export default function SettingsPage() {
                 capacity: 16,
               }}
             />
+            <DeviceOnlySettingToggle
+              settingKey="cardSize"
+              label={t('settings-page:device-only-label')}
+              description={t('settings-page:device-only-description')}
+              checked={isDeviceOnly('cardSize')}
+              onCheckedChange={(deviceOnly) =>
+                handleDeviceOnlyChange('cardSize', deviceOnly)
+              }
+            />
           </Card>
 
           <Card className="flex flex-col items-start justify-between space-y-3 p-4 rounded-lg border">
@@ -208,6 +242,15 @@ export default function SettingsPage() {
                 onChange={handleFieldVisibilityChange}
               />
             </div>
+            <DeviceOnlySettingToggle
+              settingKey="worldCardFieldVisibility"
+              label={t('settings-page:device-only-label')}
+              description={t('settings-page:device-only-description')}
+              checked={isDeviceOnly('worldCardFieldVisibility')}
+              onCheckedChange={(deviceOnly) =>
+                handleDeviceOnlyChange('worldCardFieldVisibility', deviceOnly)
+              }
+            />
           </Card>
 
           <Card className="flex flex-col items-start justify-between space-y-3 p-4 rounded-lg border">
@@ -226,6 +269,15 @@ export default function SettingsPage() {
               />
             </div>
             <WorldDetailPreview fieldVisibility={detailFieldVisibility} />
+            <DeviceOnlySettingToggle
+              settingKey="worldDetailFieldVisibility"
+              label={t('settings-page:device-only-label')}
+              description={t('settings-page:device-only-description')}
+              checked={isDeviceOnly('worldDetailFieldVisibility')}
+              onCheckedChange={(deviceOnly) =>
+                handleDeviceOnlyChange('worldDetailFieldVisibility', deviceOnly)
+              }
+            />
           </Card>
         </TabsContent>
 
@@ -383,38 +435,49 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="others" className="space-y-4">
-          <Card className="flex flex-row items-center justify-between p-4 rounded-lg border">
-            <div className="flex flex-col space-y-1.5">
-              <Label className="text-base font-medium">
-                {t('settings-page:folder-removal-title')}
-              </Label>
-              <div className="text-sm text-muted-foreground">
-                {t('settings-page:folder-removal-description')}
+          <Card className="flex flex-col gap-3 p-4 rounded-lg border">
+            <div className="flex w-full flex-row items-center justify-between gap-4">
+              <div className="flex flex-col space-y-1.5">
+                <Label className="text-base font-medium">
+                  {t('settings-page:folder-removal-title')}
+                </Label>
+                <div className="text-sm text-muted-foreground">
+                  {t('settings-page:folder-removal-description')}
+                </div>
               </div>
+              <Select
+                value={folderRemovalPreference ?? 'ask'}
+                onValueChange={(value) =>
+                  handleFolderRemovalPreferenceChange(
+                    value as FolderRemovalPreference,
+                  )
+                }
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Folder Removal Preference" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ask">
+                    {t('settings-page:folder-removal-ask')}
+                  </SelectItem>
+                  <SelectItem value="neverRemove">
+                    {t('settings-page:folder-removal-keep')}
+                  </SelectItem>
+                  <SelectItem value="alwaysRemove">
+                    {t('settings-page:folder-removal-remove')}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Select
-              value={folderRemovalPreference ?? 'ask'}
-              onValueChange={(value) =>
-                handleFolderRemovalPreferenceChange(
-                  value as FolderRemovalPreference,
-                )
+            <DeviceOnlySettingToggle
+              settingKey="folderRemovalPreference"
+              label={t('settings-page:device-only-label')}
+              description={t('settings-page:device-only-description')}
+              checked={isDeviceOnly('folderRemovalPreference')}
+              onCheckedChange={(deviceOnly) =>
+                handleDeviceOnlyChange('folderRemovalPreference', deviceOnly)
               }
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Folder Removal Preference" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ask">
-                  {t('settings-page:folder-removal-ask')}
-                </SelectItem>
-                <SelectItem value="neverRemove">
-                  {t('settings-page:folder-removal-keep')}
-                </SelectItem>
-                <SelectItem value="alwaysRemove">
-                  {t('settings-page:folder-removal-remove')}
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            />
           </Card>
 
           <Card className="flex flex-row items-center justify-between p-4 rounded-lg border">

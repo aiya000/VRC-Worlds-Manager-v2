@@ -282,6 +282,8 @@
   "settings-page:world-card-fields-description": "ワールドカードに表示する項目を選択してください",
   "settings-page:world-detail-fields": "ワールド詳細の表示項目",
   "settings-page:world-detail-fields-description": "ワールド詳細の「詳細」に表示する項目を選択してください",
+  "settings-page:device-only-label": "この端末だけ",
+  "settings-page:device-only-description": "オンにすると、この設定はバックアップや他の端末との同期に含まれなくなります",
   "settings-page:preview-world": "プレビューワールド",
   "settings-page:section-data-management": "データ管理",
   "settings-page:hidden-folder": "非表示フォルダ",

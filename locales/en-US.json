@@ -282,6 +282,8 @@
   "settings-page:world-card-fields-description": "Choose which fields to display on world cards",
   "settings-page:world-detail-fields": "World Detail Fields",
   "settings-page:world-detail-fields-description": "Choose which fields to display in the world detail panel",
+  "settings-page:device-only-label": "Only on this device",
+  "settings-page:device-only-description": "When on, this setting is left out of backups and of syncing with your other devices",
   "settings-page:preview-world": "Preview World",
   "settings-page:section-data-management": "Data Management",
   "settings-page:hidden-folder": "Hidden Folder",

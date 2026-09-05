@@ -14,6 +14,15 @@ import { useRouter } from 'next/navigation'
 import { LocalizationContext } from '../../../components/localization-context'
 import { useFolders } from '../hook/use-folders'
 import { useTheme } from 'next-themes'
+import {
+  readSettingSyncOverrides,
+  setSettingSyncOverride,
+} from '@/lib/services/setting-sync'
+import {
+  isDeviceOnlySetting,
+  type SettingSyncOverrides,
+  type SyncableSettingKey,
+} from '@/lib/sync/settings'
 
 const normalizeThemeValue = (theme: string): 'light' | 'dark' | 'system' => {
   const unwrappedTheme =
@@ -51,6 +60,12 @@ export const useSettingsPage = () => {
       published: true,
       lastUpdated: true,
     })
+
+  const [syncOverrides, setSyncOverrides] = useState<SettingSyncOverrides>({})
+  // Bumped when something outside the settings screen changes what is
+  // stored -- taking in a backup -- so the screen reads the preferences
+  // again instead of going on showing the ones the file replaced.
+  const [preferencesRevision, setPreferencesRevision] = useState(0)
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showMigrateDialog, setShowMigrateDialog] = useState(false)
@@ -160,7 +175,9 @@ export const useSettingsPage = () => {
               }
         setTheme(theme)
         setLanguage(language)
+        changeLanguage(language)
         setCardSize(cardSize)
+        setSyncOverrides(readSettingSyncOverrides())
         setFolderRemovalPreference(folderRemovalPreference)
         setFieldVisibility(fieldVisibility)
         setDetailFieldVisibility(detailFieldVisibility)
@@ -200,7 +217,7 @@ export const useSettingsPage = () => {
     }
 
     loadPreferences()
-  }, [setTheme]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [setTheme, preferencesRevision]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBackup = async () => {
     try {
@@ -247,6 +264,7 @@ export const useSettingsPage = () => {
             ? t('settings-page:merge-success-description')
             : t('settings-page:restore-success-description'),
       })
+      setPreferencesRevision((revision) => revision + 1)
       onDataChange()
     } catch (e) {
       console.error(`Restore error: ${e}`)
@@ -487,6 +505,17 @@ export const useSettingsPage = () => {
     }
   }
 
+  const isDeviceOnly = (key: SyncableSettingKey): boolean =>
+    isDeviceOnlySetting(key, syncOverrides)
+
+  const handleDeviceOnlyChange = (
+    key: SyncableSettingKey,
+    deviceOnly: boolean,
+  ) => {
+    setSettingSyncOverride(key, deviceOnly)
+    setSyncOverrides(readSettingSyncOverrides())
+  }
+
   const openHiddenFolder = () => {
     router.push('/listview/folders/hidden')
   }
@@ -519,6 +548,8 @@ export const useSettingsPage = () => {
     handleFieldVisibilityChange,
     handleDetailFieldVisibilityChange,
     handleFolderRemovalPreferenceChange,
+    isDeviceOnly,
+    handleDeviceOnlyChange,
     openHiddenFolder,
     t,
   }
