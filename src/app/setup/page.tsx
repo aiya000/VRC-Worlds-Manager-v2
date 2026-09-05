@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label'
 import { WorldCardPreview } from '@/components/world-card'
 import { WorldCardFieldToggles } from '@/components/world-card-field-toggles'
 import { WorldDetailFieldToggles } from '@/components/world-detail-field-toggles'
+import { WorldDetailPreview } from '@/components/world-detail-preview'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Loader2, Globe } from 'lucide-react'
@@ -597,82 +598,96 @@ const WelcomePage: React.FC = () => {
               <p className="text-sm text-muted-foreground text-center mb-4">
                 {t('setup-page:ui-description')}
               </p>
-              <div className="flex flex-col gap-6 sm:flex-row sm:justify-between">
-                <div className="flex flex-col items-left space-y-4">
-                  <div className="flex flex-col space-y-1">
-                    <Label>{t('setup-page:worlds-label')}</Label>
-                    <div className="text-sm text-gray-500">
-                      {t('setup-page:worlds-design')}
-                    </div>
+
+              {/* One block per setting, each showing what it changes, so the
+                  preview is not stranded at the bottom of the step. */}
+              <div className="flex flex-col items-start space-y-3 rounded-lg border p-4">
+                <div className="flex flex-col space-y-1.5">
+                  <Label className="text-base font-medium">
+                    {t('setup-page:worlds-label')}
+                  </Label>
+                  <div className="text-sm text-muted-foreground">
+                    {t('setup-page:worlds-design')}
                   </div>
-                  <Select
-                    defaultValue={preferences.card_size}
-                    onValueChange={(value: CardSize) => {
-                      setSelectedSize(value)
-                      setPreferences({ ...preferences, card_size: value })
-                    }}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Theme" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Compact">
-                        {t('general:compact')}
-                      </SelectItem>
-                      <SelectItem value="Normal">
-                        {t('general:normal')}
-                      </SelectItem>
-                      <SelectItem value="Expanded">
-                        {t('general:expanded')}
-                      </SelectItem>
-                      <SelectItem value="Original">
-                        {t('general:original')}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <div className="flex flex-col space-y-1 pt-4">
-                    <Label>{t('settings-page:world-card-fields')}</Label>
-                    <div className="text-sm text-gray-500">
-                      {t('settings-page:world-card-fields-description')}
-                    </div>
+                </div>
+                <Select
+                  defaultValue={preferences.card_size}
+                  onValueChange={(value: CardSize) => {
+                    setSelectedSize(value)
+                    setPreferences({ ...preferences, card_size: value })
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Compact">
+                      {t('general:compact')}
+                    </SelectItem>
+                    <SelectItem value="Normal">
+                      {t('general:normal')}
+                    </SelectItem>
+                    <SelectItem value="Expanded">
+                      {t('general:expanded')}
+                    </SelectItem>
+                    <SelectItem value="Original">
+                      {t('general:original')}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <WorldCardPreview
+                  size={selectedSize}
+                  fieldVisibility={fieldVisibility}
+                  world={{
+                    worldId: '1',
+                    name: t('settings-page:preview-world'),
+                    thumbnailUrl: '/icons/1.png',
+                    authorName: t('general:author'),
+                    lastUpdated: '2017-03-09',
+                    visits: 616,
+                    dateAdded: '2025-01-01',
+                    favorites: 59,
+                    platform: ['standalonewindows', 'android', 'ios'],
+                    folders: [],
+                    tags: [],
+                    capacity: 16,
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col items-start space-y-3 rounded-lg border p-4">
+                <div className="flex flex-col space-y-1.5">
+                  <Label className="text-base font-medium">
+                    {t('settings-page:world-card-fields')}
+                  </Label>
+                  <div className="text-sm text-muted-foreground">
+                    {t('settings-page:world-card-fields-description')}
                   </div>
+                </div>
+                <div className="w-full">
                   <WorldCardFieldToggles
                     value={fieldVisibility}
                     onChange={setFieldVisibility}
                   />
-                  <div className="flex flex-col space-y-1 pt-4">
-                    <Label>{t('settings-page:world-detail-fields')}</Label>
-                    <div className="text-sm text-gray-500">
-                      {t('settings-page:world-detail-fields-description')}
-                    </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-start space-y-3 rounded-lg border p-4">
+                <div className="flex flex-col space-y-1.5">
+                  <Label className="text-base font-medium">
+                    {t('settings-page:world-detail-fields')}
+                  </Label>
+                  <div className="text-sm text-muted-foreground">
+                    {t('settings-page:world-detail-fields-description')}
                   </div>
+                </div>
+                <div className="w-full">
                   <WorldDetailFieldToggles
                     value={detailFieldVisibility}
                     onChange={setDetailFieldVisibility}
                   />
                 </div>
-                <div className="w-full sm:max-w-[300px]">
-                  <div className="flex justify-center">
-                    <WorldCardPreview
-                      size={selectedSize}
-                      fieldVisibility={fieldVisibility}
-                      world={{
-                        worldId: '1',
-                        name: t('settings-page:preview-world'),
-                        thumbnailUrl: '/icons/1.png',
-                        authorName: t('general:author'),
-                        lastUpdated: '2017-03-09',
-                        visits: 616,
-                        dateAdded: '2025-01-01',
-                        favorites: 59,
-                        platform: ['standalonewindows', 'android', 'ios'],
-                        folders: [],
-                        tags: [],
-                        capacity: 16,
-                      }}
-                    />
-                  </div>
-                </div>
+                <WorldDetailPreview fieldVisibility={detailFieldVisibility} />
               </div>
             </div>
           </SetupLayout>
