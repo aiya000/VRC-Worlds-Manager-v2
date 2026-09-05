@@ -45,6 +45,11 @@ test('the sidebar reaches the privacy policy from anywhere in the app', async ({
   page,
 }) => {
   await page.goto('/listview/folders/special/all')
+  // The dev overlay sits over the whole page and swallows the click. Every
+  // other spec that clicks something hides it the same way.
+  await page.addStyleTag({
+    content: 'nextjs-portal { display: none !important; }',
+  })
 
   await page
     .getByText(jaJP['privacy-policy:link-label'], { exact: true })
