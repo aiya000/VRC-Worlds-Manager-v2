@@ -64,7 +64,10 @@ const WelcomePage: React.FC = () => {
     })
   const [preferences, setPreferences] = useState({
     theme: 'system',
-    language: 'en-US',
+    // Japanese, matching the app's default language and the order the two
+    // buttons are in: the first one being the one already chosen is what
+    // someone reading down the screen expects.
+    language: 'ja-JP',
     card_size: 'Normal' as CardSize,
   })
   const [migrationFiles, setMigrationFiles] = useState<
@@ -357,6 +360,7 @@ const WelcomePage: React.FC = () => {
                   variant={
                     preferences.language === 'ja-JP' ? 'default' : 'outline'
                   }
+                  aria-pressed={preferences.language === 'ja-JP'}
                   className="w-full"
                   onClick={() => {
                     setLanguage('ja-JP')
@@ -369,6 +373,7 @@ const WelcomePage: React.FC = () => {
                   variant={
                     preferences.language === 'en-US' ? 'default' : 'outline'
                   }
+                  aria-pressed={preferences.language === 'en-US'}
                   className="w-full"
                   onClick={() => {
                     setLanguage('en-US')
