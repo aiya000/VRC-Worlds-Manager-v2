@@ -15,6 +15,7 @@ import { VRChatApiServiceLive } from './vrchat-api'
 import { QuotaServiceLive } from './quota-manager'
 import { LaunchedInstanceServiceLive } from './launched-instance-service'
 import { GoogleAuthServiceLive } from './google-auth-service'
+import { DriveSyncServiceLive } from './drive-sync-service'
 
 export const AppLayer = Layer.mergeAll(
   PreferencesServiceLive,
@@ -33,4 +34,5 @@ export const AppLayer = Layer.mergeAll(
   QuotaServiceLive,
   LaunchedInstanceServiceLive,
   GoogleAuthServiceLive,
+  DriveSyncServiceLive,
 )

@@ -574,5 +574,12 @@
   "privacy-policy:deletion-item-drive": "Google Drive 上のデータは、Google Drive から該当のファイルを削除することで消去できます。",
   "privacy-policy:deletion-item-revoke": "本アプリに与えた Google のアクセス権は、次のページから取り消せます。",
   "privacy-policy:contact-title": "お問い合わせ",
-  "privacy-policy:contact-body": "本ポリシーに関するお問い合わせは、GitHub のイシューにてお願いします。"
+  "privacy-policy:contact-body": "本ポリシーに関するお問い合わせは、GitHub のイシューにてお願いします。",
+  "settings-page:google-drive-sync-now": "今すぐ同期",
+  "settings-page:google-drive-syncing": "同期中...",
+  "settings-page:google-drive-last-synced": "最終同期: {0}",
+  "settings-page:google-drive-never-synced": "まだ同期していません",
+  "settings-page:google-drive-sync-success": "Google Drive と同期しました。",
+  "settings-page:google-drive-sync-conflicts": "同期しました。{0} 件のメモが端末どうしで食い違ったため、片方を退避しました。",
+  "settings-page:google-drive-reauth-needed": "Google の接続の期限が切れました。もう一度「今すぐ同期」を押してください。"
 }

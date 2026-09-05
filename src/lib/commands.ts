@@ -7,7 +7,14 @@ import {
   type LaunchedInstanceInput,
 } from './services/launched-instance-service'
 import type { LaunchedInstanceRecord } from './services/db'
-import { GoogleAuthService } from './services/google-auth-service'
+import {
+  GoogleAuthExpiredError,
+  GoogleAuthService,
+} from './services/google-auth-service'
+import {
+  DriveSyncService,
+  type DriveSyncResult,
+} from './services/drive-sync-service'
 import { AppLayer } from '@/lib/services/layers'
 import { PreferencesService } from '@/lib/services/preferences'
 import { FolderService } from '@/lib/services/folder-service'
@@ -879,6 +886,37 @@ export const commands = {
         const svc = yield* GoogleAuthService
         yield* svc.disconnect()
         return null
+      }),
+    )
+  },
+
+  /** Must be called from inside a click handler -- see `GoogleAuthService`. */
+  async syncGoogleDriveNow(): Promise<Result<DriveSyncResult, string>> {
+    return run(
+      Effect.gen(function* () {
+        const auth = yield* GoogleAuthService
+        const sync = yield* DriveSyncService
+        const token = yield* auth.getAccessToken()
+
+        return yield* sync.syncNow(token).pipe(
+          Effect.map(
+            (outcome): DriveSyncResult => ({ kind: 'synced', ...outcome }),
+          ),
+          Effect.catchAll((e) =>
+            e instanceof GoogleAuthExpiredError
+              ? Effect.succeed<DriveSyncResult>({ kind: 'reauth-needed' })
+              : Effect.fail(e),
+          ),
+        )
+      }),
+    )
+  },
+
+  async googleDriveLastSyncedAt(): Promise<Result<number | null, string>> {
+    return run(
+      Effect.gen(function* () {
+        const svc = yield* DriveSyncService
+        return yield* svc.lastSyncedAt()
       }),
     )
   },

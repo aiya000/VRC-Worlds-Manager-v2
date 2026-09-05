@@ -96,12 +96,63 @@ export function preloadGoogleIdentityScript(): void {
   })
 }
 
+/**
+ * Asks Google for a token, straight away.
+ *
+ * Nothing may be awaited before `requestAccessToken()`: Google only honours it
+ * inside the user gesture that led here, and an await hands the tick back.
+ * `preloadGoogleIdentityScript` is what makes that possible, so a caller that
+ * reaches this without the script already loaded gets an error rather than a
+ * popup Google would block.
+ */
+function requestAccessToken(): Promise<string> {
+  if (window.google?.accounts.oauth2 === undefined) {
+    return Promise.reject(
+      new Error('Google Identity Services has not finished loading'),
+    )
+  }
+
+  return new Promise<string>((resolve, reject) => {
+    const client = window.google!.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: DRIVE_FILE_SCOPE,
+      callback: (response) => {
+        if (
+          response.error !== undefined ||
+          response.access_token === undefined
+        ) {
+          reject(new Error(response.error ?? 'No access token was returned'))
+          return
+        }
+        resolve(response.access_token)
+      },
+    })
+    client.requestAccessToken()
+  })
+}
+
+/**
+ * Thrown when the token in hand turned out to be too old to use.
+ *
+ * A new one cannot be fetched on the spot: the gesture that would have
+ * authorised it is long over by the time Drive answers. The caller's job is to
+ * say so plainly and let the next press succeed, which is the one tap #63
+ * decided to accept rather than putting a refresh token on a server.
+ */
+export class GoogleAuthExpiredError extends Error {}
+
+export function forgetAccessToken(): void {
+  currentAccessToken = null
+}
+
 export class GoogleAuthService extends Context.Tag('GoogleAuthService')<
   GoogleAuthService,
   {
     readonly isConnected: () => Effect.Effect<boolean, Error>
     readonly connect: () => Effect.Effect<void, Error>
     readonly disconnect: () => Effect.Effect<void, Error>
+    /** Must be reached from inside a click, for the same reason `connect` must. */
+    readonly getAccessToken: () => Effect.Effect<string, Error>
   }
 >() {}
 
@@ -119,33 +170,23 @@ export const GoogleAuthServiceLive = Layer.succeed(GoogleAuthService, {
     Effect.tryPromise({
       try: async () => {
         await loadGisScript()
-
-        const accessToken = await new Promise<string>((resolve, reject) => {
-          const client = window.google!.accounts.oauth2.initTokenClient({
-            client_id: GOOGLE_CLIENT_ID,
-            scope: DRIVE_FILE_SCOPE,
-            callback: (response) => {
-              if (
-                response.error !== undefined ||
-                response.access_token === undefined
-              ) {
-                reject(
-                  new Error(response.error ?? 'No access token was returned'),
-                )
-                return
-              }
-              resolve(response.access_token)
-            },
-          })
-          // Must run in the same tick as the click that led here -- see
-          // `preloadGoogleIdentityScript`.
-          client.requestAccessToken()
-        })
-
-        currentAccessToken = accessToken
+        currentAccessToken = await requestAccessToken()
         await db.googleAuthState.put({ key: CONNECTED_KEY, value: 'true' })
       },
       catch: (e) => new Error(`Failed to connect to Google Drive: ${e}`),
+    }),
+
+  getAccessToken: () =>
+    Effect.tryPromise({
+      try: async () => {
+        if (currentAccessToken !== null) {
+          return currentAccessToken
+        }
+        await loadGisScript()
+        currentAccessToken = await requestAccessToken()
+        return currentAccessToken
+      },
+      catch: (e) => new Error(`Failed to obtain a Google access token: ${e}`),
     }),
 
   /**
