@@ -11,12 +11,23 @@ import type { Page } from '@playwright/test'
  */
 export async function stubGoogleIdentityServices(
   page: Page,
-  outcome: { token: string } | { error: string },
+  outcome:
+    | { token: string }
+    | { error: string }
+    // Closing the window is reported on `error_callback`, never on `callback`.
+    // Not answering at all is reported on neither, which is what the request's
+    // own timeout is for.
+    | { dismissed: string }
+    | { unanswered: true },
 ) {
   const call =
     'token' in outcome
       ? `config.callback({ access_token: ${JSON.stringify(outcome.token)} })`
-      : `config.callback({ error: ${JSON.stringify(outcome.error)} })`
+      : 'error' in outcome
+        ? `config.callback({ error: ${JSON.stringify(outcome.error)} })`
+        : 'dismissed' in outcome
+          ? `config.error_callback({ type: ${JSON.stringify(outcome.dismissed)} })`
+          : '/* neither callback is ever reached */'
 
   await page.route('https://accounts.google.com/gsi/client', async (route) => {
     await route.fulfill({

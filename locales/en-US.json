@@ -581,5 +581,15 @@
   "settings-page:google-drive-never-synced": "Not synced yet",
   "settings-page:google-drive-sync-success": "Synced with Google Drive.",
   "settings-page:google-drive-sync-conflicts": "Synced. {0} memo(s) differed between devices, so one version was set aside.",
-  "settings-page:google-drive-reauth-needed": "The Google connection expired. Press \"Sync now\" once more."
+  "settings-page:google-drive-reauth-needed": "The Google connection expired. Press \"Sync now\" once more.",
+  "settings-page:google-drive-step-authorizing": "Signing in to Google",
+  "settings-page:google-drive-step-locating": "Looking for the file on Drive",
+  "settings-page:google-drive-step-downloading": "Reading from Drive",
+  "settings-page:google-drive-step-merging": "Comparing the two sets of data",
+  "settings-page:google-drive-step-backingUp": "Keeping the previous contents",
+  "settings-page:google-drive-step-uploading": "Writing to Drive",
+  "settings-page:google-drive-step-applying": "Applying it on this device",
+  "settings-page:google-drive-do-not-reload": "Syncing happens entirely on this device. Please do not reload the page until it finishes -- reloading stops this sync. Nothing is damaged by that; pressing the button again starts over.",
+  "settings-page:google-drive-dismissed": "The Google window was closed, so the sync was stopped.",
+  "settings-page:google-drive-unanswered": "The Google window never answered. If you opened this from an app added to your home screen, opening it in the browser instead may get through."
 }

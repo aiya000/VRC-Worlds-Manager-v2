@@ -257,4 +257,79 @@ test.describe('syncing with Google Drive by hand', () => {
       page.getByText(jaJP['settings-page:google-drive-never-synced']),
     ).toBeHidden()
   })
+
+  test('shows how far along it is, and says not to reload', async ({
+    page,
+  }) => {
+    const drive = await stubGoogleDrive(page)
+
+    // Held open on the first Drive call so the in-progress state can be read.
+    // Without this the whole sync is over before an assertion can run.
+    let release = () => {}
+    const held = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    let firstCall = true
+    await page.route('https://www.googleapis.com/**', async (route) => {
+      if (firstCall) {
+        firstCall = false
+        await held
+      }
+      await route.fallback()
+    })
+
+    await connect(page)
+    await syncNow(page)
+
+    await expect(page.getByText(/^\d+% — /)).toBeVisible()
+    await expect(
+      page.getByText(jaJP['settings-page:google-drive-do-not-reload']),
+    ).toBeVisible()
+
+    release()
+    await expect(
+      page.getByText(jaJP['settings-page:google-drive-sync-success']),
+    ).toBeVisible()
+    expect(drive.named(SYNC_FILE)).toBeDefined()
+  })
+})
+
+test.describe('when Google never grants the token', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(LIST_VIEW)
+    await seedFolders(page, [LOCAL_ONLY_FOLDER])
+  })
+
+  // The failure that started all of this: with no `error_callback` and no
+  // timeout, a window that closed left the screen on "syncing" forever.
+  test('says the window was closed rather than syncing forever', async ({
+    page,
+  }) => {
+    await stubGoogleIdentityServices(page, { token: 'test-access-token' })
+    await stubGoogleDrive(page)
+    await connect(page)
+
+    // Connecting spent the token the stub hands out; the sync asks for another
+    // one, and this time the window closes instead of answering.
+    await stubGoogleIdentityServices(page, { dismissed: 'popup_closed' })
+    await page.reload()
+    // The dev server's overlay comes back with the reload, and it swallows
+    // clicks meant for the tab underneath it.
+    await page.addStyleTag({
+      content: 'nextjs-portal { display: none !important; }',
+    })
+    await page
+      .getByRole('tab', { name: jaJP['settings-page:section-sync'] })
+      .click()
+    await syncNow(page)
+
+    await expect(
+      page.getByText(jaJP['settings-page:google-drive-dismissed']),
+    ).toBeVisible()
+    await expect(
+      page.getByRole('button', {
+        name: jaJP['settings-page:google-drive-sync-now'],
+      }),
+    ).toBeEnabled()
+  })
 })

@@ -581,5 +581,15 @@
   "settings-page:google-drive-never-synced": "まだ同期していません",
   "settings-page:google-drive-sync-success": "Google Drive と同期しました。",
   "settings-page:google-drive-sync-conflicts": "同期しました。{0} 件のメモが端末どうしで食い違ったため、片方を退避しました。",
-  "settings-page:google-drive-reauth-needed": "Google の接続の期限が切れました。もう一度「今すぐ同期」を押してください。"
+  "settings-page:google-drive-reauth-needed": "Google の接続の期限が切れました。もう一度「今すぐ同期」を押してください。",
+  "settings-page:google-drive-step-authorizing": "Google に接続しています",
+  "settings-page:google-drive-step-locating": "Drive 上のファイルを探しています",
+  "settings-page:google-drive-step-downloading": "Drive から読み込んでいます",
+  "settings-page:google-drive-step-merging": "データを突き合わせています",
+  "settings-page:google-drive-step-backingUp": "1つ前の内容を控えています",
+  "settings-page:google-drive-step-uploading": "Drive に書き込んでいます",
+  "settings-page:google-drive-step-applying": "この端末に反映しています",
+  "settings-page:google-drive-do-not-reload": "同期はこの端末の中だけで行われます。終わるまでページを再読み込みしないでください。再読み込みすると、この同期は中断されます（データが壊れることはありません。もう一度押せば最初からやり直せます）。",
+  "settings-page:google-drive-dismissed": "Google の画面が閉じられたため、同期を中止しました。",
+  "settings-page:google-drive-unanswered": "Google の画面から応答がありませんでした。ホーム画面に追加したアプリから開いている場合は、ブラウザで開き直すと通ることがあります。"
 }

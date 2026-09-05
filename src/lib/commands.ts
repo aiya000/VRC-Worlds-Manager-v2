@@ -8,12 +8,15 @@ import {
 } from './services/launched-instance-service'
 import type { LaunchedInstanceRecord } from './services/db'
 import {
+  GoogleAuthDismissedError,
   GoogleAuthExpiredError,
   GoogleAuthService,
+  GoogleAuthUnansweredError,
 } from './services/google-auth-service'
 import {
   DriveSyncService,
   type DriveSyncResult,
+  type SyncProgress,
 } from './services/drive-sync-service'
 import { AppLayer } from '@/lib/services/layers'
 import { PreferencesService } from '@/lib/services/preferences'
@@ -891,24 +894,41 @@ export const commands = {
   },
 
   /** Must be called from inside a click handler -- see `GoogleAuthService`. */
-  async syncGoogleDriveNow(): Promise<Result<DriveSyncResult, string>> {
+  async syncGoogleDriveNow(
+    onProgress: SyncProgress = () => {},
+  ): Promise<Result<DriveSyncResult, string>> {
     return run(
       Effect.gen(function* () {
         const auth = yield* GoogleAuthService
         const sync = yield* DriveSyncService
+
+        onProgress('authorizing')
         const token = yield* auth.getAccessToken()
 
-        return yield* sync.syncNow(token).pipe(
-          Effect.map(
-            (outcome): DriveSyncResult => ({ kind: 'synced', ...outcome }),
-          ),
-          Effect.catchAll((e) =>
-            e instanceof GoogleAuthExpiredError
-              ? Effect.succeed<DriveSyncResult>({ kind: 'reauth-needed' })
-              : Effect.fail(e),
-          ),
-        )
-      }),
+        return yield* sync
+          .syncNow(token, onProgress)
+          .pipe(
+            Effect.map(
+              (outcome): DriveSyncResult => ({ kind: 'synced', ...outcome }),
+            ),
+          )
+      }).pipe(
+        // Three ways of not getting a token that are worth telling apart on
+        // screen: the hour ran out, the window was closed, and the window
+        // never answered.
+        Effect.catchAll((e) => {
+          if (e instanceof GoogleAuthExpiredError) {
+            return Effect.succeed<DriveSyncResult>({ kind: 'reauth-needed' })
+          }
+          if (e instanceof GoogleAuthDismissedError) {
+            return Effect.succeed<DriveSyncResult>({ kind: 'dismissed' })
+          }
+          if (e instanceof GoogleAuthUnansweredError) {
+            return Effect.succeed<DriveSyncResult>({ kind: 'unanswered' })
+          }
+          return Effect.fail(e)
+        }),
+      ),
     )
   },
 

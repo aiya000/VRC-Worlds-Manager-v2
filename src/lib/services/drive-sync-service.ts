@@ -32,6 +32,33 @@ const LAST_SYNCED_AT_KEY = 'driveLastSyncedAt'
  */
 const MAX_ATTEMPTS = 3
 
+/**
+ * The steps a sync goes through, in the order it goes through them.
+ *
+ * They are reported so the screen can show which one it is on and how far
+ * along that is. A sync that has stopped is otherwise indistinguishable from a
+ * slow one, and the first time this went wrong it sat on "syncing" with
+ * nothing to say whether anything was happening at all.
+ */
+export const SYNC_STEPS = [
+  'authorizing',
+  'locating',
+  'downloading',
+  'merging',
+  'backingUp',
+  'uploading',
+  'applying',
+] as const
+
+export type SyncStep = (typeof SYNC_STEPS)[number]
+
+export type SyncProgress = (step: SyncStep) => void
+
+/** How far through `SYNC_STEPS` a step is, as a whole percentage. */
+export function syncStepPercentage(step: SyncStep): number {
+  return Math.round(((SYNC_STEPS.indexOf(step) + 1) / SYNC_STEPS.length) * 100)
+}
+
 export interface SyncOutcome {
   syncedAt: number
   /**
@@ -50,13 +77,20 @@ export interface SyncOutcome {
 export type DriveSyncResult =
   | ({ kind: 'synced' } & SyncOutcome)
   | { kind: 'reauth-needed' }
+  /** The Google window was closed, or the browser refused to open it. */
+  | { kind: 'dismissed' }
+  /** It opened and never came back. See `GoogleAuthUnansweredError`. */
+  | { kind: 'unanswered' }
 
 export class SyncRaceLostError extends Error {}
 
 export class DriveSyncService extends Context.Tag('DriveSyncService')<
   DriveSyncService,
   {
-    readonly syncNow: (accessToken: string) => Effect.Effect<SyncOutcome, Error>
+    readonly syncNow: (
+      accessToken: string,
+      onProgress: SyncProgress,
+    ) => Effect.Effect<SyncOutcome, Error>
     readonly lastSyncedAt: () => Effect.Effect<number | null, Error>
   }
 >() {}
@@ -80,12 +114,15 @@ async function attemptSync(
   token: string,
   folderId: string,
   origin: string,
+  onProgress: SyncProgress,
 ): Promise<SyncOutcome | null> {
+  onProgress('locating')
   const remote = await findFile(token, folderId, SYNC_FILE_NAME)
 
   // Nothing up there yet: this device seeds the file, and there is nothing to
   // merge against or to keep a previous generation of.
   if (remote === null) {
+    onProgress('uploading')
     await createFile(
       token,
       folderId,
@@ -97,7 +134,10 @@ async function attemptSync(
     return { syncedAt, memoConflicts: 0 }
   }
 
+  onProgress('downloading')
   const remoteText = await readFile(token, remote.id)
+
+  onProgress('merging')
   const { snapshot, memoConflicts } = mergeSnapshot(
     await readSnapshot(),
     parseBackupFile(remoteText, origin),
@@ -110,8 +150,13 @@ async function attemptSync(
   // The last thing anyone agreed on, kept one generation back. If a bug in the
   // merge ever eats something, this is what it can be recovered from -- and
   // `drive.file` means the user can open and download it themselves.
+  onProgress('backingUp')
   await writeFile(token, folderId, SYNC_BACKUP_FILE_NAME, remoteText)
+
+  onProgress('uploading')
   await updateFile(token, remote.id, serialize(snapshot))
+
+  onProgress('applying')
   await applySnapshot(snapshot)
 
   const syncedAt = Date.now()
@@ -120,14 +165,20 @@ async function attemptSync(
 }
 
 export const DriveSyncServiceLive = Layer.succeed(DriveSyncService, {
-  syncNow: (accessToken) =>
+  syncNow: (accessToken, onProgress) =>
     Effect.tryPromise({
       try: async () => {
+        onProgress('locating')
         const folderId = await findOrCreateFolder(accessToken, SYNC_FOLDER_NAME)
         const origin = await deviceId()
 
         for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-          const outcome = await attemptSync(accessToken, folderId, origin)
+          const outcome = await attemptSync(
+            accessToken,
+            folderId,
+            origin,
+            onProgress,
+          )
           if (outcome !== null) {
             return outcome
           }

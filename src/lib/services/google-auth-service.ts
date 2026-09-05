@@ -29,6 +29,16 @@ interface TokenResponse {
   error?: string
 }
 
+/**
+ * What Google reports when the token was not granted -- the popup was closed,
+ * or could not be opened at all. It arrives on a channel of its own:
+ * `callback` above is only ever called on success.
+ */
+interface TokenError {
+  type?: string
+  message?: string
+}
+
 declare global {
   interface Window {
     google?: {
@@ -38,6 +48,7 @@ declare global {
             client_id: string
             scope: string
             callback: (response: TokenResponse) => void
+            error_callback?: (error: TokenError) => void
           }) => TokenClient
           revoke: (token: string, callback: () => void) => void
         }
@@ -45,6 +56,18 @@ declare global {
     }
   }
 }
+
+/**
+ * How long to wait for Google before giving up on it.
+ *
+ * Not a guess at how slow Google is -- it is fast -- but a bound on the case
+ * where the answer never comes back at all. Installed as a PWA, the consent
+ * screen opens in a Chrome Custom Tab, a separate process that cannot always
+ * reach back into the page that opened it; when that happens neither callback
+ * ever fires, and without this the screen sits on "syncing" for as long as
+ * someone is willing to watch it.
+ */
+const TOKEN_REQUEST_TIMEOUT_MS = 120_000
 
 /**
  * The access token itself, kept only in memory. It is good for about an hour
@@ -96,6 +119,18 @@ export function preloadGoogleIdentityScript(): void {
   })
 }
 
+/** The consent window was closed, or the browser would not open it. */
+export class GoogleAuthDismissedError extends Error {}
+
+/**
+ * The consent window opened but nothing ever came back from it.
+ *
+ * The case this exists for is being installed as a PWA, where the window is a
+ * Chrome Custom Tab that may not be able to hand its answer back to the page.
+ * Retrying in the browser rather than the installed app is what gets past it.
+ */
+export class GoogleAuthUnansweredError extends Error {}
+
 /**
  * Asks Google for a token, straight away.
  *
@@ -113,18 +148,51 @@ function requestAccessToken(): Promise<string> {
   }
 
   return new Promise<string>((resolve, reject) => {
+    let settled = false
+    const finish = (outcome: () => void) => {
+      if (settled) {
+        return
+      }
+      settled = true
+      clearTimeout(timer)
+      outcome()
+    }
+
+    const timer = setTimeout(() => {
+      finish(() =>
+        reject(
+          new GoogleAuthUnansweredError(
+            'Google never answered the request for an access token',
+          ),
+        ),
+      )
+    }, TOKEN_REQUEST_TIMEOUT_MS)
+
     const client = window.google!.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
       scope: DRIVE_FILE_SCOPE,
       callback: (response) => {
-        if (
-          response.error !== undefined ||
-          response.access_token === undefined
-        ) {
-          reject(new Error(response.error ?? 'No access token was returned'))
-          return
-        }
-        resolve(response.access_token)
+        finish(() => {
+          if (
+            response.error !== undefined ||
+            response.access_token === undefined
+          ) {
+            reject(new Error(response.error ?? 'No access token was returned'))
+            return
+          }
+          resolve(response.access_token)
+        })
+      },
+      // Without this, a closed or blocked popup is silent: `callback` is not
+      // called, and the promise above would never settle.
+      error_callback: (error) => {
+        finish(() =>
+          reject(
+            new GoogleAuthDismissedError(
+              error.message ?? error.type ?? 'The Google window was closed',
+            ),
+          ),
+        )
       },
     })
     client.requestAccessToken()
@@ -186,7 +254,14 @@ export const GoogleAuthServiceLive = Layer.succeed(GoogleAuthService, {
         currentAccessToken = await requestAccessToken()
         return currentAccessToken
       },
-      catch: (e) => new Error(`Failed to obtain a Google access token: ${e}`),
+      // Wrapping these would throw away the distinction the caller needs: the
+      // screen says something different for a window that was closed than for
+      // one that never answered.
+      catch: (e) =>
+        e instanceof GoogleAuthDismissedError ||
+        e instanceof GoogleAuthUnansweredError
+          ? e
+          : new Error(`Failed to obtain a Google access token: ${e}`),
     }),
 
   /**

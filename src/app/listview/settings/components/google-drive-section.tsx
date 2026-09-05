@@ -9,6 +9,10 @@ import { Label } from '@/components/ui/label'
 import { useLocalization } from '@/hooks/use-localization'
 import { commands } from '@/lib/commands'
 import { preloadGoogleIdentityScript } from '@/lib/services/google-auth-service'
+import {
+  syncStepPercentage,
+  type SyncStep,
+} from '@/lib/services/drive-sync-service'
 
 /**
  * Connect, disconnect, and one button that syncs. Everything that decides
@@ -21,6 +25,7 @@ export const GoogleDriveSection: FC = () => {
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
   const [syncing, setSyncing] = useState(false)
+  const [step, setStep] = useState<SyncStep | null>(null)
 
   useEffect(() => {
     // Loaded ahead of the click that needs it: Google requires the token
@@ -66,8 +71,9 @@ export const GoogleDriveSection: FC = () => {
 
   const syncNow = async () => {
     setSyncing(true)
+    setStep('authorizing')
     try {
-      const result = await commands.syncGoogleDriveNow()
+      const result = await commands.syncGoogleDriveNow(setStep)
       if (result.status === 'error') {
         toast(t('general:error-title'), { description: result.error })
         return
@@ -75,6 +81,16 @@ export const GoogleDriveSection: FC = () => {
 
       if (result.data.kind === 'reauth-needed') {
         toast(t('settings-page:google-drive-reauth-needed'))
+        return
+      }
+      if (result.data.kind === 'dismissed') {
+        toast(t('settings-page:google-drive-dismissed'))
+        return
+      }
+      if (result.data.kind === 'unanswered') {
+        toast(t('general:error-title'), {
+          description: t('settings-page:google-drive-unanswered'),
+        })
         return
       }
 
@@ -90,6 +106,7 @@ export const GoogleDriveSection: FC = () => {
       })
     } finally {
       setSyncing(false)
+      setStep(null)
     }
   }
 
@@ -159,6 +176,24 @@ export const GoogleDriveSection: FC = () => {
               ? t('settings-page:google-drive-syncing')
               : t('settings-page:google-drive-sync-now')}
           </Button>
+          {syncing && (
+            <div className="space-y-1 text-sm text-muted-foreground">
+              {/* A percentage rather than a spinner alone: a sync that has
+                  stopped and a sync that is slow look identical otherwise,
+                  and the first one that went wrong sat on "syncing" with
+                  nothing to say whether anything was still happening. */}
+              <div>
+                {step === null
+                  ? t('settings-page:google-drive-syncing')
+                  : `${syncStepPercentage(step)}% — ${t(
+                      `settings-page:google-drive-step-${step}`,
+                    )}`}
+              </div>
+              <div className="text-xs">
+                {t('settings-page:google-drive-do-not-reload')}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </Card>
