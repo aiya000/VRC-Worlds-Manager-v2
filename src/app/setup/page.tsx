@@ -35,7 +35,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { SaturnIcon } from '@/components/icons/saturn-icon'
-import { FolderOpen, Info } from 'lucide-react'
+import { GoogleDriveSection } from '@/app/listview/settings/components/google-drive-section'
+import { BackupRestoreStep } from '@/app/setup/components/backup-restore-step'
+import {
+  RestoreSourceChoice,
+  type RestoreSource,
+} from '@/app/setup/components/restore-source-choice'
+import { ArrowLeft, FolderOpen, Info } from 'lucide-react'
 import { MigrationConfirmationPopup } from '@/app/listview/settings/components/popups/migration-confirmation-popup'
 import { SiGithub } from '@icons-pack/react-simple-icons'
 
@@ -46,6 +52,8 @@ const WelcomePage: React.FC = () => {
   const { setLanguage } = useContext(LocalizationContext)
   const [selectedSize, setSelectedSize] = useState<CardSize>('Normal')
   const [page, setPage] = useState(1)
+  /** `null` while the migration step is still asking which of the four it is. */
+  const [restoreSource, setRestoreSource] = useState<RestoreSource | null>(null)
   const [fieldVisibility, setFieldVisibility] =
     useState<WorldCardFieldVisibility>({
       name: true,
@@ -117,6 +125,20 @@ const WelcomePage: React.FC = () => {
     return true
   }
 
+  /**
+   * "Start fresh" is not a screen to fill in, so it is the same as pressing
+   * Next -- taking someone to a page that says "nothing to do here" would be a
+   * step that exists only to be dismissed.
+   */
+  const chooseRestoreSource = (source: RestoreSource) => {
+    if (source === 'fresh') {
+      setAlreadyMigrated(false)
+      setPage(4)
+      return
+    }
+    setRestoreSource(source)
+  }
+
   const handleNext = async () => {
     if (page === 1) {
       setLanguage(preferences.language)
@@ -139,6 +161,15 @@ const WelcomePage: React.FC = () => {
       }
     }
     if (page === 3) {
+      // Drive and backup do their work from a button of their own, so there is
+      // nothing left for Next to do but move on. Only the v2 files are read at
+      // this point, because that is the one the old screen was built around.
+      if (restoreSource !== null && restoreSource !== 'v2') {
+        setAlreadyMigrated(false)
+        setPage(page + 1)
+        return
+      }
+
       const canMigrate =
         pathValidation[0] && pathValidation[1] && migrationMetaError === null
 
@@ -460,135 +491,164 @@ const WelcomePage: React.FC = () => {
         )}
         {page === 3 && (
           <SetupLayout
-            title={t('setup-page:migration-title')}
+            // "Migration" is only what this step is once someone has said they
+            // came from the desktop app. Until then it is a wider question.
+            title={
+              restoreSource === 'v2'
+                ? t('setup-page:migration-title')
+                : t('setup-page:restore-source-title')
+            }
             currentPage={3}
             onBack={handleBack}
             onNext={handleNext}
-            isMigrationPage={true}
+            // Only the v2 files make Next mean "migrate"; the other sources
+            // have a button of their own, so Next just carries on.
+            isMigrationPage={restoreSource === null || restoreSource === 'v2'}
             isValid={
               pathValidation[0] &&
               pathValidation[1] &&
               migrationMetaError === null
             }
           >
-            <div className="flex flex-col flex-1 space-y-6 justify-between h-full min-h-[400px]">
-              <div>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground text-center">
-                    {t('setup-page:migration-description')}
-                  </p>
-                </div>
+            <div className="flex flex-col flex-1 space-y-6 h-full min-h-[400px]">
+              {restoreSource === null && (
+                <RestoreSourceChoice onChoose={chooseRestoreSource} />
+              )}
 
-                <div className="space-y-4 mt-4">
-                  {/* Worlds file selection */}
+              {restoreSource !== null && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="-ml-2 self-start gap-2"
+                  onClick={() => setRestoreSource(null)}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  {t('setup-page:restore-source-change')}
+                </Button>
+              )}
+
+              {restoreSource === 'drive' && <GoogleDriveSection />}
+              {restoreSource === 'backup' && <BackupRestoreStep />}
+
+              {restoreSource === 'v2' && (
+                <div>
                   <div className="space-y-2">
-                    <Label>{t('general:worlds-data')}</Label>
-                    <div className="flex space-x-2 items-center">
-                      <Input
-                        value={migrationFiles[0]?.name ?? ''}
-                        readOnly
-                        placeholder={t(
-                          'settings-page:select-worlds-file-placeholder',
-                        )}
-                        className={
-                          pathValidation[0]
-                            ? 'text-foreground'
-                            : 'text-muted-foreground'
-                        }
-                      />
-                      <Button
-                        variant="outline"
-                        onClick={() => handleFilePick(0)}
-                      >
-                        {t('general:select-button')}
-                      </Button>
-                    </div>
-                    <div className="h-3">
-                      {!pathValidation[0] && (
-                        <p className="text-sm text-red-500">
-                          {t('setup-page:worlds-file-error')}
-                        </p>
-                      )}
-                    </div>
+                    <p className="text-sm text-muted-foreground text-center">
+                      {t('setup-page:migration-description')}
+                    </p>
                   </div>
 
-                  {/* Folders file selection */}
-                  <div className="space-y-2">
-                    <Label>{t('general:folders-data')}</Label>
-                    <div className="flex space-x-2 items-center">
-                      <Input
-                        value={migrationFiles[1]?.name ?? ''}
-                        readOnly
-                        placeholder={t(
-                          'settings-page:select-folders-file-placeholder',
+                  <div className="space-y-4 mt-4">
+                    {/* Worlds file selection */}
+                    <div className="space-y-2">
+                      <Label>{t('general:worlds-data')}</Label>
+                      <div className="flex space-x-2 items-center">
+                        <Input
+                          value={migrationFiles[0]?.name ?? ''}
+                          readOnly
+                          placeholder={t(
+                            'settings-page:select-worlds-file-placeholder',
+                          )}
+                          className={
+                            pathValidation[0]
+                              ? 'text-foreground'
+                              : 'text-muted-foreground'
+                          }
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={() => handleFilePick(0)}
+                        >
+                          {t('general:select-button')}
+                        </Button>
+                      </div>
+                      <div className="h-3">
+                        {!pathValidation[0] && (
+                          <p className="text-sm text-red-500">
+                            {t('setup-page:worlds-file-error')}
+                          </p>
                         )}
-                        className={
-                          pathValidation[1]
-                            ? 'text-foreground'
-                            : 'text-muted-foreground'
-                        }
-                      />
-                      <Button
-                        variant="outline"
-                        onClick={() => handleFilePick(1)}
-                      >
-                        {t('general:select-button')}
-                      </Button>
+                      </div>
                     </div>
-                    <div className="h-3">
-                      {!pathValidation[1] && (
-                        <p className="text-sm text-red-500">
-                          {t('setup-page:folders-file-error')}
-                        </p>
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Migration metadata preview */}
-                  {(migrationMetaLoading ||
-                    migrationMetaError ||
-                    migrationMeta) && (
-                    <div className="mt-4">
-                      {migrationMetaLoading && (
-                        <div className="flex items-center justify-center p-4">
-                          <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                          <span>
-                            {t('settings-page:loading-migration-data')}
-                          </span>
-                        </div>
-                      )}
-                      {migrationMetaError && (
-                        <div className="bg-destructive/10 text-destructive rounded p-3 flex items-start">
-                          <Info className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
-                          <span>{migrationMetaError}</span>
-                        </div>
-                      )}
-                      {migrationMeta && (
-                        <div className="bg-muted rounded-md p-4 space-y-3">
-                          <div className="flex items-center gap-2">
-                            <SaturnIcon className="h-4 w-4" />
-                            <span className="text-sm font-medium">
-                              {t('settings-page:worlds-count')}:
-                            </span>
-                            <span className="text-sm">
-                              {migrationMeta.number_of_worlds}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <FolderOpen className="h-4 w-4" />
-                            <span className="text-sm font-medium">
-                              {t('settings-page:folders-count')}:
-                            </span>
-                            <span className="text-sm">
-                              {migrationMeta.number_of_folders}
-                            </span>
-                          </div>
-                        </div>
-                      )}
+                    {/* Folders file selection */}
+                    <div className="space-y-2">
+                      <Label>{t('general:folders-data')}</Label>
+                      <div className="flex space-x-2 items-center">
+                        <Input
+                          value={migrationFiles[1]?.name ?? ''}
+                          readOnly
+                          placeholder={t(
+                            'settings-page:select-folders-file-placeholder',
+                          )}
+                          className={
+                            pathValidation[1]
+                              ? 'text-foreground'
+                              : 'text-muted-foreground'
+                          }
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={() => handleFilePick(1)}
+                        >
+                          {t('general:select-button')}
+                        </Button>
+                      </div>
+                      <div className="h-3">
+                        {!pathValidation[1] && (
+                          <p className="text-sm text-red-500">
+                            {t('setup-page:folders-file-error')}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  )}
+
+                    {/* Migration metadata preview */}
+                    {(migrationMetaLoading ||
+                      migrationMetaError ||
+                      migrationMeta) && (
+                      <div className="mt-4">
+                        {migrationMetaLoading && (
+                          <div className="flex items-center justify-center p-4">
+                            <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                            <span>
+                              {t('settings-page:loading-migration-data')}
+                            </span>
+                          </div>
+                        )}
+                        {migrationMetaError && (
+                          <div className="bg-destructive/10 text-destructive rounded p-3 flex items-start">
+                            <Info className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                            <span>{migrationMetaError}</span>
+                          </div>
+                        )}
+                        {migrationMeta && (
+                          <div className="bg-muted rounded-md p-4 space-y-3">
+                            <div className="flex items-center gap-2">
+                              <SaturnIcon className="h-4 w-4" />
+                              <span className="text-sm font-medium">
+                                {t('settings-page:worlds-count')}:
+                              </span>
+                              <span className="text-sm">
+                                {migrationMeta.number_of_worlds}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <FolderOpen className="h-4 w-4" />
+                              <span className="text-sm font-medium">
+                                {t('settings-page:folders-count')}:
+                              </span>
+                              <span className="text-sm">
+                                {migrationMeta.number_of_folders}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </SetupLayout>
         )}
