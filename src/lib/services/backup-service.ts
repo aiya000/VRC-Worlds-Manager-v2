@@ -76,6 +76,10 @@ function restamped(snapshot: Snapshot, at: number, origin: string): Snapshot {
     })),
     memos: snapshot.memos.map((row) => ({ ...row, ...meta(row) })),
     customTags: snapshot.customTags.map((row) => ({ ...row, ...meta(row) })),
+    launchedInstances: snapshot.launchedInstances.map((row) => ({
+      ...row,
+      ...meta(row),
+    })),
     // Settings are restamped too, or "replace with this file" would quietly
     // keep the settings already here whenever they happened to be newer.
     settings: Object.fromEntries(

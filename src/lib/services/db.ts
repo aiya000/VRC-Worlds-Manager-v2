@@ -106,6 +106,22 @@ export interface CustomTagRecord extends SyncMeta {
   tagRefs: TagRef[]
 }
 
+/**
+ * An instance the user made for a world, kept so it can be entered again.
+ *
+ * A launch URL is built from `worldId:instanceId` and nothing else, so this row
+ * is enough on its own.
+ */
+export interface LaunchedInstanceRecord extends SyncMeta {
+  id: string
+  worldId: string
+  instanceId: string
+  shortName: string | null
+  instanceType: string
+  region: string
+  launchedAt: number
+}
+
 export interface AuthStateRecord {
   key: string
   value: string
@@ -131,7 +147,7 @@ export function isMember(ref: SetRef): boolean {
  * store at a version below the one on disk. `StaleBundleNotice` checks for that
  * and asks for a reload rather than letting every query fail.
  */
-export const APP_DB_VERSION = 3
+export const APP_DB_VERSION = 4
 
 export const APP_DB_NAME = 'VRChatWorldsManager'
 
@@ -247,6 +263,7 @@ export class AppDatabase extends Dexie {
   hiddenWorlds!: EntityTable<HiddenWorldRecord, 'worldId'>
   memos!: EntityTable<MemoRecord, 'worldId'>
   customTags!: EntityTable<CustomTagRecord, 'worldId'>
+  launchedInstances!: EntityTable<LaunchedInstanceRecord, 'id'>
   authState!: EntityTable<AuthStateRecord, 'key'>
   syncState!: EntityTable<SyncStateRecord, 'key'>
 
@@ -276,7 +293,12 @@ export class AppDatabase extends Dexie {
       .upgrade(upgradeToVersion2)
     // Dropped in its own version: the upgrade above still has to read it, and
     // a store deleted by version 2's schema would already be gone by then.
-    this.version(APP_DB_VERSION).stores({ folders: null })
+    this.version(3).stores({ folders: null })
+    // Purely additive, so there is nothing to upgrade: a database that has
+    // never held an instance simply gains an empty store.
+    this.version(APP_DB_VERSION).stores({
+      launchedInstances: 'id, worldId, launchedAt, updatedAt, deletedAt',
+    })
   }
 }
 

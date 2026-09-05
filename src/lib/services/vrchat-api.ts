@@ -1,4 +1,5 @@
 import { Context, Effect, Layer } from 'effect'
+import { launchUrlFor } from '@/lib/sync/launched-instances'
 import { db } from './db'
 import { parseVRChatWorld, toWorldDisplayData } from './vrchat-world'
 import type {
@@ -549,7 +550,7 @@ export const VRChatApiServiceLive = Layer.succeed(VRChatApiService, {
   openInstanceInClient: (worldId, instanceId) =>
     Effect.tryPromise({
       try: async () => {
-        const launchUrl = `vrchat://launch?ref=vrchat.com&id=${worldId}:${instanceId}`
+        const launchUrl = launchUrlFor(worldId, instanceId)
         window.open(launchUrl, '_blank')
         return launchUrl
       },
